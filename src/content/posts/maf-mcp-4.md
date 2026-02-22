@@ -1,7 +1,7 @@
 ---
-title: "Building a Full-Stack AI Agent Server: Extending as_mcp_server() with agent_runner Principles"
+title: "Building a Full-Stack AI Agent Server: Three Interfaces from One Tools List"
 published: 2026-02-22
-description: "How to combine MAF's agent.as_mcp_server() with the agent_runner pattern to give a single agent three simultaneous interfaces — MCP, REST, and a service registry — all from one tools list."
+description: "How to give a single MAF agent three simultaneous interfaces — MCP for AI clients, REST for traditional services, and a registry for service discovery — all derived from one tools list with zero duplication."
 tags: [MAF, MCP, REST, Agentic AI, Multi-Agent, Microsoft, Python]
 category: Agentic AI
 draft: false
@@ -9,37 +9,35 @@ draft: false
 
 ## The Problem with Single-Interface Agents
 
-Previous posts in this series showed how to expose a MAF `ChatAgent` as an MCP server using `agent.as_mcp_server()`. That works well for AI clients — another agent, VS Code Copilot, or Claude Desktop can connect and send natural language queries. But in a real enterprise environment, not every consumer of your agent is an AI client.
+The previous posts in this series showed how to expose a MAF `ChatAgent` as an MCP server using `agent.as_mcp_server()`. That works well for AI clients — another agent, VS Code Copilot, or Claude Desktop can connect and send natural language queries. But in a real enterprise environment, not every consumer of your agent is an AI client.
 
-A traditional monitoring dashboard wants to call `search_incident` over HTTP. A CI pipeline wants to call `create_incident` via a REST POST. An orchestration layer wants to discover what agents exist and what they can do. None of these consumers speak MCP, and none of them want to reason through natural language — they want structured, predictable HTTP endpoints.
+A traditional monitoring dashboard wants to call `search_incident` over HTTP. A CI pipeline wants to call `create_incident` via a REST POST. An operations team wants to discover what agents exist and what they can do. None of these consumers speak MCP, and none of them want to reason through natural language — they want structured, predictable HTTP endpoints.
 
-The `agent_runner.py` pattern in the MAF samples solves this by spinning up three things simultaneously: a `ChatAgent` for AI-to-AI orchestration, a REST API for direct HTTP access, and a registry for service discovery. But `agent_runner.py` uses `FastMCP` for its MCP surface, which exposes each tool individually rather than wrapping the agent as a single intelligent entity.
+The natural response is to run separate services for separate audiences. But that means duplicating your tool definitions, maintaining multiple codebases, and keeping schemas in sync across services. There is a better way.
 
-The question is: can you extend `agent.as_mcp_server()` with the `agent_runner` principles — getting REST, MCP, and registry all at once, while keeping the agent-as-single-tool MCP behaviour?
-
-The answer is yes, and this post shows exactly how.
+This post shows how to build a single server that, from one tools list and one startup command, gives your agent three simultaneous interfaces — MCP for AI clients, REST for traditional services, and a registry for service discovery.
 
 ---
 
 ## The Architecture
 
-The goal is a single `server.py` that, on startup, builds and runs three surfaces simultaneously from the same tools list:
+The goal is a single `server.py` that on startup builds and runs three surfaces simultaneously:
 
 ```
 python server.py
     │
-    ├── Registry  (port 8002) — service catalogue, self-registers on boot
-    ├── REST API  (port 8000) — each tool as its own HTTP endpoint
+    ├── Registry   (port 8002) — service catalogue, self-registers on boot
+    ├── REST API   (port 8000) — each tool as its own HTTP endpoint
     └── MCP Server (port 8001) — agent as a single opaque tool via as_mcp_server()
 ```
 
-All three are derived from the same `tools` list. The `ChatAgent` is created once and handed to `build_mcp_app()`. The REST API and registry payload are built directly from the tool function signatures using Python's `inspect` module and the `Annotated` type hints — the same approach as `agent_runner.py`.
+All three are derived from the same `tools` list. The `ChatAgent` is created once. The REST API and registry are built by inspecting the tool function signatures and `Annotated` type hints directly — no schema is ever written twice.
 
 ---
 
 ## The Tools
 
-The same `tools.py` from the rest of this series powers everything. The `@ai_function` decorator and `Annotated` type hints serve triple duty here — they define the REST request schemas, the registry tool entries, and the ChatAgent's internal tool set all at once:
+The same `tools.py` from the rest of this series powers everything. The `@ai_function` decorator and `Annotated` type hints serve triple duty — they define the REST request schemas, the registry tool entries, and the `ChatAgent`'s internal tool set all at once:
 
 ```python
 # tools.py
@@ -91,7 +89,7 @@ def search_incident(
 
 ## The Agent Config
 
-Rather than hardcoding values, the agent is described in a single config dict that mirrors the structure of `agent_config.yaml`. This makes it easy to later drive the whole server from a YAML file if needed:
+Rather than hardcoding values throughout the file, the agent is described in a single config dict. This makes it straightforward to later drive the whole server from a YAML file or environment variables:
 
 ```python
 AGENT_CONFIG = {
@@ -112,7 +110,7 @@ AGENT_CONFIG = {
 
 ### Surface 1: REST API
 
-`build_rest_api()` is taken directly from `agent_runner.py`. It inspects each tool function's signature and type hints to auto-generate FastAPI routes. Write operations — anything with `create`, `update`, `delete`, or `set` in the name — become `POST` endpoints with an auto-generated Pydantic request body. Read operations become `GET` endpoints with query parameters. Swagger UI at `/docs` is free.
+`build_rest_api()` uses Python's `inspect` module to read each tool function's signature and type hints and auto-generate FastAPI routes from them. No route is written by hand. Write operations — anything with `create`, `update`, `delete`, or `set` in the name — become `POST` endpoints with an auto-generated Pydantic request body. Read operations become `GET` endpoints with query parameters. Swagger UI at `/docs` is included automatically by FastAPI.
 
 ```python
 def build_rest_api(tools: list, display_name: str) -> FastAPI:
@@ -155,11 +153,11 @@ def build_rest_api(tools: list, display_name: str) -> FastAPI:
     return app
 ```
 
-The `_unwrap()` helper peels back the `@ai_function` decorator to get at the plain Python function underneath, since `inspect` needs the raw function to read its signature correctly.
+The `_unwrap()` helper peels back the `@ai_function` decorator to expose the plain Python function underneath, since `inspect` needs the raw function to read its signature correctly.
 
 ### Surface 2: MCP Server
 
-`build_mcp_app()` is where `as_mcp_server()` comes in. It wraps the `ChatAgent` in an HTTP/SSE Starlette application — the same transport pattern from Part 2 of this series. The key point is that this surface exposes the **agent as a single entity**, not the individual tool functions:
+`build_mcp_app()` is where `as_mcp_server()` comes in. It wraps the `ChatAgent` in an HTTP/SSE Starlette application using the same transport pattern covered in Part 2 of this series. The critical point is that this surface exposes the **agent as a single entity** — not the individual tool functions:
 
 ```python
 def build_mcp_app(agent: ChatAgent) -> Starlette:
@@ -182,7 +180,7 @@ def build_mcp_app(agent: ChatAgent) -> Starlette:
     ])
 ```
 
-An AI client connecting to port 8001 and calling `list_tools()` will see exactly one entry:
+An AI client connecting to port 8001 and calling `list_tools()` will see exactly one entry — the agent itself:
 
 ```json
 [
@@ -199,11 +197,11 @@ An AI client connecting to port 8001 and calling `list_tools()` will see exactly
 ]
 ```
 
-The individual functions are invisible from this interface — they are internal implementation details of the agent.
+The individual functions are invisible from this interface. They are internal implementation details of the agent, as covered in depth in Part 3.
 
 ### Surface 3: Registry
 
-The registry is a lightweight FastAPI service that acts as a service catalogue. It supports registering, listing, looking up, and deregistering agents via simple HTTP endpoints:
+The registry is a lightweight FastAPI service that acts as a service catalogue. It supports registering, listing, looking up, and deregistering agents via simple HTTP endpoints. The server self-registers on startup and deregisters cleanly on shutdown:
 
 ```python
 registry_app = FastAPI(title="Registry", version="1.0")
@@ -247,7 +245,7 @@ This is the most important subtlety in the whole approach. When the server self-
 
 It could register the single opaque `ServiceNowAgent(query)` entry — the same thing `list_tools()` on the MCP server returns. But that would make the registry useless for anyone trying to understand what the agent can actually do.
 
-Instead, `build_registration()` registers the **individual tool schemas** derived from the `@ai_function` type hints:
+Instead, `build_registration()` registers the **individual tool schemas** derived from the `@ai_function` type hints — the full parameter names, types, descriptions, and required fields for each function:
 
 ```python
 def build_registration(cfg: dict, tools: list) -> dict:
@@ -265,21 +263,21 @@ def build_registration(cfg: dict, tools: list) -> dict:
     }
 ```
 
-This means `GET /registry/ServiceNowAgent/tools` returns the full, human-readable schema for `create_incident`, `update_incident`, and `search_incident` — complete with parameter types, descriptions, defaults, and required fields. The registry is for **discovery and documentation**. The MCP server's opaqueness is a runtime concern; the registry should reflect what the agent can actually do.
+This means `GET /registry/ServiceNowAgent/tools` returns the full, human-readable schema for `create_incident`, `update_incident`, and `search_incident`. The registry is for **discovery and documentation**. The MCP server's opaqueness is a runtime concern; the registry should always reflect what the agent can actually do at the function level.
 
-The two views of the same agent are intentionally different:
+The three interfaces intentionally present different views of the same agent:
 
 ```
-Registry  (port 8002) → individual tools, full schemas, for discovery
-MCP Server (port 8001) → single agent entry, for AI client delegation
-REST API  (port 8000) → individual endpoints, for direct HTTP calls
+Registry   (port 8002) → individual tools, full schemas  — for discovery
+MCP Server (port 8001) → single agent entry              — for AI delegation
+REST API   (port 8000) → individual endpoints            — for direct HTTP calls
 ```
 
 ---
 
 ## Putting It All Together: main()
 
-The `main()` function loads the tools once and passes them to all three builders. Three uvicorn servers are started concurrently with `asyncio.create_task()`, a brief sleep gives them time to initialise, and then the agent self-registers. On shutdown — whether from Ctrl+C or a crash — the `finally` block deregisters cleanly:
+The `main()` function loads the tools once and passes them to all three builders. Three uvicorn servers start concurrently with `asyncio.create_task()`, a brief sleep gives them time to initialise, and then the agent self-registers. On shutdown — whether from Ctrl+C or a crash — the `finally` block deregisters cleanly:
 
 ```python
 async def main():
@@ -362,13 +360,13 @@ curl "http://localhost:8000/search_incident?query=VPN"
 # List all registered agents
 curl http://localhost:8002/registry
 
-# Get tool schemas for ServiceNowAgent
+# Get full tool schemas for ServiceNowAgent
 curl http://localhost:8002/registry/ServiceNowAgent/tools
 ```
 
 ### Using the MCP Server
 
-Any MCP client can connect to `http://localhost:8001/sse`. From a MAF client:
+Any MCP-compatible client can connect to `http://localhost:8001/sse`. From a MAF client:
 
 ```python
 async with (
@@ -399,36 +397,28 @@ async with (
 
 ---
 
-## How This Compares to `agent_runner.py`
+## The Key Trade-off: Two LLM Calls for MCP
 
-The original `agent_runner.py` already ran REST + MCP + registry simultaneously, so it's worth being precise about what this approach changes.
+Every MCP request through this server involves two LLM calls — one on the client side to decide to delegate to the agent, and one on the server side where the agent reasons about which function to call. This is inherent to the `as_mcp_server()` design and is discussed in detail in Part 3.
 
-`agent_runner.py` uses `FastMCP` for its MCP surface, which registers each tool function individually. A client calling `list_tools()` sees `create_incident`, `update_incident`, and `search_incident` as separate callable tools. The client's LLM must reason about which to call.
+The trade-off is worth it when you need the server to handle compound or ambiguous requests that a single tool call cannot fulfil in one step. For example:
 
-This approach uses `agent.as_mcp_server()` instead, which exposes the whole `ChatAgent` as one tool. The client sees only `ServiceNowAgent(query)`. The agent's internal LLM handles all the reasoning, including multi-step and compound requests that would require client-side orchestration in the `agent_runner` model.
+```
+"Find any open VPN incidents and if there are any, resolve them all
+ with note 'Fixed by network team'."
+```
 
-| | `agent_runner.py` (FastMCP) | This approach (as_mcp_server) |
-|---|---|---|
-| **MCP tools exposed** | Each function individually | Single agent entry |
-| **Client `list_tools()` sees** | `create_incident`, `update_incident`, `search_incident` | `ServiceNowAgent` |
-| **Reasoning for MCP** | Client's LLM | Server's ChatAgent |
-| **Compound requests via MCP** | Client must orchestrate | Server handles |
-| **LLM calls per MCP request** | One (client) | Two (client + server) |
-| **REST API** | ✅ Same | ✅ Same |
-| **Registry** | ✅ Same | ✅ Same |
-| **Registry tool schemas** | Individual functions | Individual functions |
+A client calling individual REST or MCP tools directly would need to orchestrate two sequential calls — `search_incident` first, then `update_incident` for each result. The agent server handles this in a single request because its internal LLM can reason across multiple tool calls in one turn before returning the final answer.
 
-The registry tool schemas are identical in both approaches — both store the individual function schemas for discovery purposes. The difference is purely in what the MCP surface exposes at runtime.
+If your MCP clients are capable enough to pick the right low-level function directly and your requests are always simple and unambiguous, exposing individual tools via MCP (rather than wrapping them in an agent) would avoid the extra server-side LLM call. The REST API surface in this server already provides exactly that for non-AI consumers.
 
 ---
 
 ## When to Use This Approach
 
-This pattern is the right choice when your agent needs to serve a mixed audience — AI clients that want to delegate via natural language, traditional services that want predictable REST endpoints, and an operations team that needs service discovery. It gives you all three without running three separate processes or maintaining three separate codebases.
+This pattern is the right choice when your agent needs to serve a mixed audience — AI clients that want to delegate via natural language, traditional services that want predictable REST endpoints, and an operations team that needs service discovery. It gives you all three without running separate processes or maintaining separate codebases.
 
-It is particularly well-suited to enterprise deployments where AI agents sit alongside existing HTTP-based infrastructure. The REST API means your agent can be called from a Jira webhook, a ServiceNow business rule, or a CI pipeline without any AI client on the calling side. The MCP server means it can also be called by other agents in a multi-agent MAF system. The registry means both types of consumers can find it automatically.
-
-The trade-off compared to plain `agent_runner.py` is the extra LLM call on the server side for every MCP request. If your MCP clients are capable enough to pick the right tool directly, `agent_runner.py`'s `FastMCP` approach avoids that cost. If you want the server to handle compound and ambiguous requests autonomously, this approach is the better fit.
+It is particularly well-suited to enterprise deployments where AI agents sit alongside existing HTTP-based infrastructure. The REST API means your agent can be called from a Jira webhook, a ServiceNow business rule, or a CI pipeline with no AI client on the calling side. The MCP server means it can also be called by other agents in a multi-agent MAF system. The registry means both types of consumers can find it automatically.
 
 ---
 
