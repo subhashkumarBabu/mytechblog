@@ -233,11 +233,72 @@ User: "Create a high urgency           User: "Create a high urgency
 
 ---
 
+## What a Client Actually Sees: `list_tools()`
+
+This is a practical consequence of the architectural difference that is easy to overlook. When any MCP client connects to a server, the first thing it does is call `list_tools()` to discover what the server can do. The two approaches return very different things.
+
+With the raw MCP server, the client sees all three functions as individual, inspectable tools with their full schemas:
+
+```json
+[
+  {
+    "name": "create_incident",
+    "description": "Creates a new incident in ServiceNow.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "short_description": { "type": "string", "description": "Brief summary of the issue (5–160 chars)." },
+        "urgency":           { "type": "string", "description": "Urgency: 1=High, 2=Medium, 3=Low.", "default": "2" }
+      },
+      "required": ["short_description"]
+    }
+  },
+  {
+    "name": "update_incident",
+    "description": "Updates the state and notes of an existing ServiceNow incident.",
+    "inputSchema": { ... }
+  },
+  {
+    "name": "search_incident",
+    "description": "Searches ServiceNow incidents by keyword or number.",
+    "inputSchema": { ... }
+  }
+]
+```
+
+With the MAF agent server, the client sees exactly one entry — the agent itself:
+
+```json
+[
+  {
+    "name": "ServiceNowAgent",
+    "description": "Manages ServiceNow incidents — create, update, search.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string" }
+      },
+      "required": ["query"]
+    }
+  }
+]
+```
+
+The individual tools — `create_incident`, `update_incident`, `search_incident` — are **invisible to the client**. They are internal to the agent and never exposed over MCP at all. A client has no way to call them directly, inspect their schemas, or even know they exist. This is by design: the agent is the boundary, and everything inside it is an implementation detail.
+
+This has a real consequence for client-side reasoning. When a raw MCP client's LLM sees `create_incident` with its `short_description` and `urgency` parameters, it knows exactly what to pass and can construct a precise, structured call. When an MAF client's LLM sees `ServiceNowAgent` with a single `query` parameter, it simply passes the user's natural language request verbatim and lets the server figure out the rest.
+
+Neither is wrong — but it is important to understand this before choosing an approach. If you want clients to be able to discover, inspect, and call individual functions with full schema awareness, use the raw MCP SDK. If you want the server to encapsulate all of that and present a single high-level interface, use MAF's `as_mcp_server()`.
+
+---
+
 ## Side-by-Side Comparison
 
 | | Raw MCP SDK | MAF `as_mcp_server()` |
 |---|---|---|
 | **Tools exposed** | Each function = one MCP tool | Entire agent = one MCP tool |
+| **What `list_tools()` returns** | All functions with full schemas | One entry — the agent itself |
+| **Inner tools visible to client?** | Yes — fully inspectable | No — hidden inside the agent |
 | **Who reasons about the request?** | The client's LLM | The server agent's LLM |
 | **Input to the MCP tool** | Structured JSON arguments | Natural language string |
 | **Schema definition** | Manual JSON schema per tool | Auto-derived from `Annotated` type hints |
