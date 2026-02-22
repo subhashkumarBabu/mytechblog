@@ -1,5 +1,5 @@
 ---
-title: "Driving AI Agents from YAML: Config-First Agent Servers in MAF"
+title: "Exposing an AI Agent as an MCP Server with MAF — Part 5 : Driving AI Agents from YAML: Config-First Agent Servers in MAF"
 published: 2026-02-22
 description: "How to externalise agent configuration into YAML files with Pydantic validation, and load multiple agents at startup without touching Python code."
 tags: [MAF, MCP, REST, Agentic AI, Multi-Agent, Microsoft, Python, YAML]
