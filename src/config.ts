@@ -46,7 +46,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "assets/images/demo-avatar.png",
+	avatar: "assets/images/avatar.jpg",
 	name: "Subhash Kumar",
 	bio: "SRE practitioner sharing learnings on Site Reliability Engineering, AI, ServiceNow and Cloud.",
 	links: [
