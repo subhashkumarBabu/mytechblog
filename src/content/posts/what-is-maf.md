@@ -4,7 +4,7 @@ published: 2026-02-22
 description: "A technical introduction to the Microsoft Agent Framework — what it is, why it exists, and the core ideas behind building multi-agent AI systems."
 tags: [MAF, Agentic AI, Multi-Agent, Microsoft, AI]
 category: Agentic AI
-draft: false
+draft: true
 ---
 
 ## The Problem: AI Systems in Isolation
