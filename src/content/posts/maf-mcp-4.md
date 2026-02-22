@@ -1,5 +1,5 @@
 ---
-title: "Building a Full-Stack AI Agent Server: Three Interfaces from One Tools List"
+title: "Exposing an AI Agent as an MCP Server with MAF — Part 4 : Building a Full-Stack AI Agent Server: Three Interfaces from One Tools List"
 published: 2026-02-22
 description: "How to give a single MAF agent three simultaneous interfaces — MCP for AI clients, REST for traditional services, and a registry for service discovery — all derived from one tools list with zero duplication."
 tags: [MAF, MCP, REST, Agentic AI, Multi-Agent, Microsoft, Python]
