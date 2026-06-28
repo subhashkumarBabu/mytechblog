@@ -9,9 +9,24 @@ import WidgetLayout from "./WidgetLayout.astro";
 
 const tags = await getTagList();
 
-const COLLAPSED_HEIGHT = "7.5rem";
+const env = Astro.locals.runtime?.env;
+let savedTags: { tag: string; count: number }[] = [];
+if (env?.DB) {
+  try {
+    const res = await env.DB.prepare(
+      `SELECT value as tag, COUNT(*) as count
+       FROM links, json_each(links.tags)
+       WHERE json_valid(links.tags)
+       GROUP BY value
+       ORDER BY count DESC
+       LIMIT 40`
+    ).all<{ tag: string; count: number }>();
+    savedTags = res.results;
+  } catch { /* D1 unavailable locally */ }
+}
 
-const isCollapsed = tags.length >= 20;
+const COLLAPSED_HEIGHT = "7.5rem";
+const isCollapsed = (tags.length + savedTags.length) >= 20;
 
 interface Props {
 	class?: string;
@@ -21,11 +36,30 @@ const className = Astro.props.class;
 const style = Astro.props.style;
 ---
 <WidgetLayout name={i18n(I18nKey.tags)} id="tags" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT} class={className} style={style}>
+  {tags.length > 0 && (
     <div class="flex gap-2 flex-wrap">
-        {tags.map(t => (
-            <ButtonTag href={getTagUrl(t.name)} label={`View all posts with the ${t.name.trim()} tag`}>
-                {t.name.trim()}
-            </ButtonTag>
-        ))}
+      {tags.map(t => (
+        <ButtonTag href={getTagUrl(t.name)} label={`View all posts with the ${t.name.trim()} tag`}>
+          {t.name.trim()}
+        </ButtonTag>
+      ))}
     </div>
+  )}
+  {savedTags.length > 0 && (
+    <>
+      {tags.length > 0 && <div class="text-[10px] text-75 font-medium uppercase tracking-wide mt-3 mb-2 px-1">Saves</div>}
+      <div class="flex gap-2 flex-wrap">
+        {savedTags.map(t => (
+          <a
+            href={`/saves/?tag=${encodeURIComponent(t.tag)}`}
+            aria-label={`Browse ${t.count} saves tagged ${t.tag}`}
+            class="btn-regular h-8 text-sm px-3 rounded-lg flex items-center gap-1"
+          >
+            {t.tag}
+            <span class="text-[10px] opacity-50">{t.count}</span>
+          </a>
+        ))}
+      </div>
+    </>
+  )}
 </WidgetLayout>

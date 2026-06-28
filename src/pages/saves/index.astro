@@ -122,9 +122,25 @@ const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
   const shownCount = document.getElementById('shown-count');
   const loadMoreBtn = document.getElementById('load-more-btn');
 
-  let activeType = 'all';
-  let searchQuery = '';
+  const urlParams = new URLSearchParams(window.location.search);
+  let activeType = urlParams.get('type') ?? 'all';
+  let searchQuery = urlParams.get('tag') ?? '';
   let allCards = Array.from(document.querySelectorAll('.save-card'));
+
+  // Apply initial state from URL params
+  if (searchQuery && searchInput) searchInput.value = searchQuery;
+  if (activeType !== 'all') {
+    document.querySelectorAll('.type-filter').forEach(b => {
+      const btn = b as HTMLElement;
+      if (btn.dataset.type === activeType) {
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+      } else {
+        btn.style.background = 'var(--btn-regular-bg)';
+        btn.style.color = 'var(--btn-content)';
+      }
+    });
+  }
 
   function filterCards() {
     let shown = 0;
@@ -219,4 +235,7 @@ const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
       filterCards();
     } catch { loadMoreBtn.textContent = 'Error'; loadMoreBtn.disabled = false; }
   });
+
+  // Apply URL param filters on initial load
+  if (searchQuery || activeType !== 'all') filterCards();
 </script>

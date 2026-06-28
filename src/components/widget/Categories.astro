@@ -7,10 +7,20 @@ import WidgetLayout from "./WidgetLayout.astro";
 
 const categories = await getCategoryList();
 
+const env = Astro.locals.runtime?.env;
+let linkTypes: { type: string; count: number }[] = [];
+if (env?.DB) {
+  try {
+    const res = await env.DB.prepare(
+      "SELECT type, COUNT(*) as count FROM links GROUP BY type ORDER BY count DESC"
+    ).all<{ type: string; count: number }>();
+    linkTypes = res.results;
+  } catch { /* D1 unavailable locally */ }
+}
+
 const COLLAPSED_HEIGHT = "7.5rem";
 const COLLAPSE_THRESHOLD = 5;
-
-const isCollapsed = categories.length >= COLLAPSE_THRESHOLD;
+const isCollapsed = (categories.length + linkTypes.length) >= COLLAPSE_THRESHOLD;
 
 interface Props {
 	class?: string;
@@ -23,13 +33,27 @@ const style = Astro.props.style;
 <WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
                 class={className} style={style}
 >
-    {categories.map((c) =>
+  {categories.map((c) =>
+    <ButtonLink
+      url={c.url}
+      badge={String(c.count)}
+      label={`View all posts in the ${c.name.trim()} category`}
+    >
+      {c.name.trim()}
+    </ButtonLink>
+  )}
+  {linkTypes.length > 0 && (
+    <>
+      {categories.length > 0 && <div class="text-[10px] text-75 font-medium uppercase tracking-wide mt-3 mb-1 px-2">Saves</div>}
+      {linkTypes.map((t) =>
         <ButtonLink
-            url={c.url}
-            badge={String(c.count)}
-            label={`View all posts in the ${c.name.trim()} category`}
+          url={`/saves/?type=${t.type.toLowerCase()}`}
+          badge={String(t.count)}
+          label={`Browse ${t.type} saves`}
         >
-            {c.name.trim()}
+          {t.type}
         </ButtonLink>
-    )}
+      )}
+    </>
+  )}
 </WidgetLayout>
