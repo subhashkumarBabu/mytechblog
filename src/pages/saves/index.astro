@@ -131,13 +131,12 @@ const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
   if (searchQuery && searchInput) searchInput.value = searchQuery;
   if (activeType !== 'all') {
     document.querySelectorAll('.type-filter').forEach(b => {
-      const btn = b as HTMLElement;
-      if (btn.dataset.type === activeType) {
-        btn.style.background = 'var(--primary)';
-        btn.style.color = 'white';
+      if (b.dataset.type === activeType) {
+        b.style.background = 'var(--primary)';
+        b.style.color = 'white';
       } else {
-        btn.style.background = 'var(--btn-regular-bg)';
-        btn.style.color = 'var(--btn-content)';
+        b.style.background = 'var(--btn-regular-bg)';
+        b.style.color = 'var(--btn-content)';
       }
     });
   }
