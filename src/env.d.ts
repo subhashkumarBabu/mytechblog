@@ -14,6 +14,7 @@ type CloudflareEnv = {
 	R2: R2Bucket;
 	ENRICHMENT_QUEUE: Queue;
 	ENVIRONMENT: string;
+	SAVE_TOKEN: string;
 };
 
 declare namespace App {

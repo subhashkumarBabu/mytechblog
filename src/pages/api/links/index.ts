@@ -42,7 +42,12 @@ export async function GET({ request, locals }: APIContext) {
 }
 
 export async function POST({ request, locals }: APIContext) {
-	const { DB, AI, VECTORIZE } = locals.runtime.env;
+	const { DB, AI, VECTORIZE, SAVE_TOKEN } = locals.runtime.env;
+
+	const auth = request.headers.get("Authorization");
+	if (!SAVE_TOKEN || auth !== `Bearer ${SAVE_TOKEN}`) {
+		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
 	let body: { url?: string; title?: string; note?: string; type?: string; tags?: string[] };
 	try {

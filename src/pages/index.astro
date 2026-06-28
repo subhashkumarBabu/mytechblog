@@ -42,21 +42,9 @@ const TYPE_HUE: Record<string, string> = {
 
 <MainGridLayout title="DevOps Mantra" description="SRE, AI, and Cloud learnings">
 
-  <!-- Quick save + stats -->
+  <!-- Stats bar -->
   <div class="card-base p-5 mb-6 onload-animation">
-    <form id="quick-save-form" class="flex gap-2 mb-4">
-      <input
-        id="quick-save-url"
-        type="url"
-        placeholder="Paste a URL to save…"
-        required
-        class="flex-1 rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
-      />
-      <button type="submit" class="btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
-        Save
-      </button>
-    </form>
-    <div class="flex flex-wrap gap-4 text-sm text-[var(--meta-divider)]">
+    <div class="flex flex-wrap gap-4 text-sm">
       <span>🔥 <strong class="text-[var(--deep-text)]">{stats.streak}</strong> day streak</span>
       <span>📚 <strong class="text-[var(--deep-text)]">{stats.total}</strong> saved</span>
       <span>✅ <strong class="text-[var(--deep-text)]">{stats.read}</strong> read</span>
@@ -163,36 +151,3 @@ const TYPE_HUE: Record<string, string> = {
 
 </MainGridLayout>
 
-<script>
-const form = document.getElementById('quick-save-form') as HTMLFormElement;
-const input = document.getElementById('quick-save-url') as HTMLInputElement;
-
-form?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const url = input.value.trim();
-  if (!url) return;
-
-  const btn = form.querySelector('button') as HTMLButtonElement;
-  btn.textContent = 'Saving…';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/links', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
-    if (res.ok) {
-      input.value = '';
-      btn.textContent = 'Saved ✓';
-      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; window.location.reload(); }, 1500);
-    } else {
-      btn.textContent = 'Failed';
-      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 2000);
-    }
-  } catch {
-    btn.textContent = 'Error';
-    setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 2000);
-  }
-});
-</script>

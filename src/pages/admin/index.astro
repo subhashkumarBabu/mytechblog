@@ -1,0 +1,238 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="Admin — DevOps Mantra">
+
+  <!-- Login screen -->
+  <div id="login-screen" class="card-base p-8 max-w-sm mx-auto onload-animation">
+    <h2 class="font-bold text-lg text-[var(--deep-text)] mb-1">Admin</h2>
+    <p class="text-sm text-75 mb-5">Enter your save token to continue.</p>
+    <form id="login-form" class="flex flex-col gap-3">
+      <input
+        id="token-input"
+        type="password"
+        placeholder="Token"
+        autocomplete="current-password"
+        class="rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+      />
+      <button
+        type="submit"
+        class="rounded-lg px-4 py-2 text-sm font-medium text-white transition"
+        style="background:var(--primary)"
+      >
+        Sign in
+      </button>
+      <p id="login-error" class="text-xs text-red-500 hidden">Wrong token — try again.</p>
+    </form>
+  </div>
+
+  <!-- Admin interface (shown after login) -->
+  <div id="admin-screen" class="hidden onload-animation">
+
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="font-bold text-lg text-[var(--deep-text)]">Admin</h2>
+      <button id="logout-btn" class="text-xs text-75 hover:text-[var(--primary)] transition">Sign out</button>
+    </div>
+
+    <!-- Save a link -->
+    <div class="card-base p-5 mb-5">
+      <h3 class="font-semibold text-sm text-[var(--deep-text)] mb-4">Save a link</h3>
+      <form id="save-form" class="flex flex-col gap-3">
+        <input
+          id="save-url"
+          type="url"
+          placeholder="URL *"
+          required
+          class="rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+        />
+        <input
+          id="save-title"
+          type="text"
+          placeholder="Title (optional — AI will generate one)"
+          class="rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+        />
+        <textarea
+          id="save-note"
+          placeholder="Your note (optional)"
+          rows="2"
+          class="rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)] resize-none"
+        ></textarea>
+        <div class="flex gap-3">
+          <select
+            id="save-type"
+            class="rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+          >
+            <option value="WebPage">WebPage</option>
+            <option value="Article">Article</option>
+            <option value="Repository">Repository</option>
+            <option value="Document">Document</option>
+            <option value="Note">Note</option>
+          </select>
+          <input
+            id="save-tags"
+            type="text"
+            placeholder="Tags, comma-separated"
+            class="flex-1 rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+          />
+        </div>
+        <button
+          type="submit"
+          id="save-btn"
+          class="rounded-lg px-4 py-2 text-sm font-medium text-white transition self-start"
+          style="background:var(--primary)"
+        >
+          Save link
+        </button>
+      </form>
+      <div id="save-result" class="mt-3 text-sm hidden"></div>
+    </div>
+
+    <!-- Recent saves -->
+    <div class="card-base p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-sm text-[var(--deep-text)]">Recently saved</h3>
+        <a href="/saves/" class="text-xs text-[var(--primary)] hover:underline">Browse all →</a>
+      </div>
+      <div id="recent-list" class="flex flex-col divide-y divide-[var(--line-divider)]">
+        <p class="text-sm text-75 py-2">Loading…</p>
+      </div>
+    </div>
+
+  </div>
+
+</MainGridLayout>
+
+<script>
+const TOKEN_KEY = 'save_token';
+
+const loginScreen  = document.getElementById('login-screen')!;
+const adminScreen  = document.getElementById('admin-screen')!;
+const loginForm    = document.getElementById('login-form') as HTMLFormElement;
+const tokenInput   = document.getElementById('token-input') as HTMLInputElement;
+const loginError   = document.getElementById('login-error')!;
+const logoutBtn    = document.getElementById('logout-btn')!;
+const saveForm     = document.getElementById('save-form') as HTMLFormElement;
+const saveBtn      = document.getElementById('save-btn') as HTMLButtonElement;
+const saveResult   = document.getElementById('save-result')!;
+const recentList   = document.getElementById('recent-list')!;
+
+function getToken() { return localStorage.getItem(TOKEN_KEY) ?? ''; }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+
+function showLogin() {
+  loginScreen.classList.remove('hidden');
+  adminScreen.classList.add('hidden');
+}
+
+function showAdmin() {
+  loginScreen.classList.add('hidden');
+  adminScreen.classList.remove('hidden');
+  loadRecent();
+}
+
+// Check stored token on load
+if (getToken()) showAdmin(); else showLogin();
+
+// Login form
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = tokenInput.value.trim();
+  if (!token) return;
+
+  // Validate token by attempting a save-dry-run (check against a known-invalid URL returns 400 not 401 if token valid)
+  const res = await fetch('/api/links', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ url: '' }),
+  });
+
+  if (res.status === 401) {
+    loginError.classList.remove('hidden');
+    tokenInput.value = '';
+    return;
+  }
+
+  // 400 = bad request (no url) but token was accepted
+  localStorage.setItem(TOKEN_KEY, token);
+  loginError.classList.add('hidden');
+  tokenInput.value = '';
+  showAdmin();
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => { clearToken(); showLogin(); });
+
+// Save form
+saveForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const url   = (document.getElementById('save-url') as HTMLInputElement).value.trim();
+  const title = (document.getElementById('save-title') as HTMLInputElement).value.trim();
+  const note  = (document.getElementById('save-note') as HTMLTextAreaElement).value.trim();
+  const type  = (document.getElementById('save-type') as HTMLSelectElement).value;
+  const tagsRaw = (document.getElementById('save-tags') as HTMLInputElement).value.trim();
+  const tags  = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+  saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+  saveResult.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+      body: JSON.stringify({ url, title: title || undefined, note: note || undefined, type, tags }),
+    });
+
+    if (res.status === 401) { clearToken(); showLogin(); return; }
+
+    const data = await res.json();
+    if (res.ok) {
+      saveResult.textContent = `Saved: ${data.title ?? url}${data.summary ? ' — AI summary generated.' : ''}`;
+      saveResult.className = 'mt-3 text-sm text-[var(--primary)]';
+      saveForm.reset();
+      loadRecent();
+    } else {
+      saveResult.textContent = `Error: ${data.error ?? 'Unknown error'}`;
+      saveResult.className = 'mt-3 text-sm text-red-500';
+    }
+    saveResult.classList.remove('hidden');
+  } catch {
+    saveResult.textContent = 'Network error';
+    saveResult.className = 'mt-3 text-sm text-red-500';
+    saveResult.classList.remove('hidden');
+  }
+
+  saveBtn.textContent = 'Save link'; saveBtn.disabled = false;
+});
+
+// Load recent saves
+async function loadRecent() {
+  try {
+    const res = await fetch('/api/links?limit=10');
+    const { links } = await res.json();
+    if (!links?.length) { recentList.innerHTML = '<p class="text-sm text-75 py-2">No saves yet.</p>'; return; }
+
+    const TYPE_HUE: Record<string, string> = {
+      Article: '240', Repository: '150', WebPage: '300',
+      Document: '60', Note: '350', Tweet: '200',
+    };
+
+    recentList.innerHTML = links.map((link: any) => {
+      const hue = TYPE_HUE[link.type] ?? '250';
+      const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.',''); } catch { return ''; } })() : '';
+      return `
+        <div class="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
+            style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${link.type}</span>
+          <a href="${link.url ?? '#'}" target="_blank" rel="noopener noreferrer"
+            class="flex-1 text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition truncate">
+            ${link.title ?? link.url ?? 'Untitled'}
+          </a>
+          <span class="text-[10px] text-75 shrink-0">${domain}</span>
+        </div>`;
+    }).join('');
+  } catch {
+    recentList.innerHTML = '<p class="text-sm text-75 py-2">Failed to load.</p>';
+  }
+}
+</script>
