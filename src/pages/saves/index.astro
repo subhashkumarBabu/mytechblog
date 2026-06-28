@@ -1,0 +1,273 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+const env = Astro.locals.runtime?.env;
+
+type Link = {
+  id: string; type: string; title: string | null; url: string | null;
+  summary: string | null; tags: string; created_at: string; is_read: number;
+};
+
+let initialLinks: Link[] = [];
+let total = 0;
+
+if (env?.DB) {
+  const [res, countRes] = await Promise.all([
+    env.DB.prepare("SELECT id, type, title, url, summary, tags, created_at, is_read FROM links ORDER BY created_at DESC LIMIT 50").all(),
+    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{n:number}>(),
+  ]);
+  initialLinks = res.results as Link[];
+  total = countRes?.n ?? 0;
+}
+
+const TYPE_HUE: Record<string, string> = {
+  Article: "240", Repository: "150", WebPage: "300",
+  Document: "60", Note: "350", Tweet: "200",
+};
+
+const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
+---
+
+<MainGridLayout title="Saves — DevOps Mantra" description="My saved links and resources">
+
+  <!-- Header + add link -->
+  <div class="card-base p-5 mb-5 onload-animation">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Search titles, tags, summaries…"
+        class="flex-1 rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+      />
+      <button
+        id="add-btn"
+        class="btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition shrink-0"
+      >
+        + Add link
+      </button>
+    </div>
+
+    <!-- Add link panel (hidden) -->
+    <form id="add-form" class="hidden mt-3 flex gap-2">
+      <input
+        id="add-url"
+        type="url"
+        placeholder="https://…"
+        required
+        class="flex-1 rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+      />
+      <button type="submit" class="btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
+        Save
+      </button>
+      <button type="button" id="cancel-btn" class="btn-regular rounded-lg px-3 py-2 text-sm text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
+        ✕
+      </button>
+    </form>
+
+    <!-- Type filters -->
+    <div class="flex flex-wrap gap-2 mt-3">
+      {TYPES.map((t) => (
+        <button
+          class="type-filter text-xs px-3 py-1 rounded-full transition font-medium"
+          data-type={t.toLowerCase()}
+          style={t === "All" ? "background:var(--primary);color:white" : "background:var(--btn-regular-bg);color:var(--btn-content)"}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <p id="count-label" class="text-sm text-75 mb-3 onload-animation" style="animation-delay:50ms">
+    Showing <strong id="shown-count">{initialLinks.length}</strong> of <strong>{total}</strong> saves
+  </p>
+
+  <!-- Grid -->
+  <div id="saves-grid" class="flex flex-col gap-3 onload-animation" style="animation-delay:100ms">
+    {initialLinks.map((link) => {
+      const hue = TYPE_HUE[link.type] ?? "250";
+      const tags = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
+      const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace("www.", ""); } catch { return ""; } })() : "";
+      return (
+        <div
+          class="save-card card-base p-4 transition"
+          data-type={link.type.toLowerCase()}
+          data-title={(link.title ?? "").toLowerCase()}
+          data-tags={link.tags.toLowerCase()}
+          data-summary={(link.summary ?? "").toLowerCase()}
+        >
+          <div class="flex items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
+                  style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
+                  {link.type}
+                </span>
+                {link.is_read === 1 && <span class="text-[10px] text-75">✓ read</span>}
+              </div>
+              <a
+                href={link.url ?? "#"}
+                target={link.url ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1"
+              >
+                {link.title ?? link.url ?? "Untitled"}
+              </a>
+              {link.summary && <p class="text-xs text-75 line-clamp-2 mb-2">{link.summary}</p>}
+              <div class="flex items-center gap-3 flex-wrap">
+                {tags.slice(0, 5).map((t: string) => (
+                  <span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag={t}>{t}</span>
+                ))}
+                {domain && <span class="text-[10px] text-75 ml-auto">{domain}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Load more -->
+  <div class="text-center mt-6">
+    <button
+      id="load-more-btn"
+      class="btn-regular rounded-lg px-6 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition"
+      data-offset="50"
+    >
+      Load more
+    </button>
+  </div>
+
+</MainGridLayout>
+
+<script define:vars={{ TYPE_HUE, initialTotal: total }}>
+  const searchInput = document.getElementById('search-input');
+  const grid = document.getElementById('saves-grid');
+  const shownCount = document.getElementById('shown-count');
+  const addBtn = document.getElementById('add-btn');
+  const addForm = document.getElementById('add-form');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+
+  let activeType = 'all';
+  let searchQuery = '';
+  let allCards = Array.from(document.querySelectorAll('.save-card'));
+
+  function filterCards() {
+    let shown = 0;
+    allCards.forEach(card => {
+      const matchType = activeType === 'all' || card.dataset.type === activeType;
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q ||
+        (card.dataset.title ?? '').includes(q) ||
+        (card.dataset.tags ?? '').includes(q) ||
+        (card.dataset.summary ?? '').includes(q);
+      const visible = matchType && matchSearch;
+      card.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+    if (shownCount) shownCount.textContent = String(shown);
+  }
+
+  // Type filter buttons
+  document.querySelectorAll('.type-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.type-filter').forEach(b => {
+        b.style.background = 'var(--btn-regular-bg)';
+        b.style.color = 'var(--btn-content)';
+      });
+      btn.style.background = 'var(--primary)';
+      btn.style.color = 'white';
+      activeType = btn.dataset.type;
+      filterCards();
+    });
+  });
+
+  // Tag pills
+  document.addEventListener('click', (e) => {
+    const pill = e.target.closest('.tag-pill');
+    if (!pill) return;
+    searchInput.value = pill.dataset.tag ?? '';
+    searchQuery = searchInput.value.toLowerCase();
+    filterCards();
+  });
+
+  // Search
+  searchInput?.addEventListener('input', () => {
+    searchQuery = searchInput.value.toLowerCase();
+    filterCards();
+  });
+
+  // Add link toggle
+  addBtn?.addEventListener('click', () => { addForm?.classList.toggle('hidden'); });
+  cancelBtn?.addEventListener('click', () => { addForm?.classList.add('hidden'); });
+
+  addForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const urlInput = document.getElementById('add-url');
+    const url = urlInput.value.trim();
+    if (!url) return;
+    const btn = addForm.querySelector('button[type="submit"]');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/links', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      if (res.ok) {
+        btn.textContent = 'Saved ✓';
+        setTimeout(() => window.location.reload(), 1000);
+      } else { btn.textContent = 'Failed'; btn.disabled = false; }
+    } catch { btn.textContent = 'Error'; btn.disabled = false; }
+  });
+
+  // Load more
+  loadMoreBtn?.addEventListener('click', async () => {
+    const offset = parseInt(loadMoreBtn.dataset.offset ?? '50');
+    loadMoreBtn.textContent = 'Loading…'; loadMoreBtn.disabled = true;
+    try {
+      const res = await fetch(`/api/links?limit=50&offset=${offset}`);
+      const { links } = await res.json();
+      if (!links?.length) { loadMoreBtn.remove(); return; }
+
+      links.forEach(link => {
+        const hue = TYPE_HUE[link.type] ?? '250';
+        const tags = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
+        const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.',''); } catch { return ''; } })() : '';
+        const card = document.createElement('div');
+        card.className = 'save-card card-base p-4 transition';
+        card.dataset.type = link.type.toLowerCase();
+        card.dataset.title = (link.title ?? '').toLowerCase();
+        card.dataset.tags = link.tags.toLowerCase();
+        card.dataset.summary = (link.summary ?? '').toLowerCase();
+        const tagHtml = tags.slice(0,5).map(t => `<span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer" data-tag="${t}">${t}</span>`).join('');
+        card.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${link.type}</span>
+                ${link.is_read ? '<span class="text-[10px] text-75">✓ read</span>' : ''}
+              </div>
+              <a href="${link.url ?? '#'}" target="_blank" rel="noopener noreferrer"
+                class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1">
+                ${link.title ?? link.url ?? 'Untitled'}
+              </a>
+              ${link.summary ? `<p class="text-xs text-75 line-clamp-2 mb-2">${link.summary}</p>` : ''}
+              <div class="flex items-center gap-3 flex-wrap">
+                ${tagHtml}
+                ${domain ? `<span class="text-[10px] text-75 ml-auto">${domain}</span>` : ''}
+              </div>
+            </div>
+          </div>`;
+        grid?.appendChild(card);
+        allCards.push(card);
+      });
+
+      loadMoreBtn.dataset.offset = String(offset + 50);
+      loadMoreBtn.textContent = 'Load more'; loadMoreBtn.disabled = false;
+      if (links.length < 50) loadMoreBtn.remove();
+      filterCards();
+    } catch { loadMoreBtn.textContent = 'Error'; loadMoreBtn.disabled = false; }
+  });
+</script>

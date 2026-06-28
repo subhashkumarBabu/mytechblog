@@ -1,3 +1,4 @@
+export const prerender = true;
 import rss from "@astrojs/rss";
 import { getSortedPosts } from "@utils/content-utils";
 import { url } from "@utils/url-utils";

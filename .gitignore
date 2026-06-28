@@ -21,6 +21,9 @@ pnpm-debug.log*
 .DS_Store
 
 .vercel
+.wrangler/
+scripts/migrate.sql
+scripts/test-migrate.sql
 
 package-lock.json
 bun.lockb

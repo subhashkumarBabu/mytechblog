@@ -1,3 +1,4 @@
+import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -28,6 +29,10 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 export default defineConfig({
 	site: "https://devopsmantra.com/",
 	base: "/",
+	output: "server",
+	adapter: cloudflare({
+		platformProxy: { enabled: true },
+	}),
 	trailingSlash: "always",
 	integrations: [
 		tailwind({

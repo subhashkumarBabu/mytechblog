@@ -1,0 +1,198 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+
+const env = Astro.locals.runtime?.env;
+
+type Link = { id: string; type: string; title: string | null; url: string | null; summary: string | null; tags: string; created_at: string };
+
+let randomCards: Link[] = [];
+let recentSaves: Link[] = [];
+let stats = { total: 0, read: 0, due: 0, streak: 0 };
+
+if (env?.DB) {
+  const [randomRes, recentRes, statsRes, streakRes] = await Promise.all([
+    env.DB.prepare("SELECT id, type, title, url, summary, tags FROM links ORDER BY RANDOM() LIMIT 3").all(),
+    env.DB.prepare("SELECT id, type, title, url, summary, tags, created_at FROM links ORDER BY created_at DESC LIMIT 8").all(),
+    env.DB.prepare("SELECT (SELECT COUNT(*) FROM links) as total, (SELECT COUNT(*) FROM links WHERE is_read=1) as read_count, (SELECT COUNT(*) FROM links WHERE next_review_at IS NOT NULL AND next_review_at <= date('now')) as due_count").first<{total:number,read_count:number,due_count:number}>(),
+    env.DB.prepare("SELECT COUNT(*) as streak FROM activity WHERE date >= date('now', '-30 days') AND (links_saved + links_reviewed) > 0").first<{streak:number}>(),
+  ]);
+  randomCards = randomRes.results as Link[];
+  recentSaves = recentRes.results as Link[];
+  stats.total = statsRes?.total ?? 0;
+  stats.read = statsRes?.read_count ?? 0;
+  stats.due = statsRes?.due_count ?? 0;
+  stats.streak = streakRes?.streak ?? 0;
+}
+
+const allPosts = await getSortedPosts();
+const recentPosts = allPosts.slice(0, 5);
+
+function parseTags(json: string): string[] {
+  try { return JSON.parse(json) ?? []; } catch { return []; }
+}
+
+const TYPE_HUE: Record<string, string> = {
+  Article: "240", Repository: "150", WebPage: "300",
+  Document: "60", Note: "350", Tweet: "200",
+};
+---
+
+<MainGridLayout title="DevOps Mantra" description="SRE, AI, and Cloud learnings">
+
+  <!-- Quick save + stats -->
+  <div class="card-base p-5 mb-6 onload-animation">
+    <form id="quick-save-form" class="flex gap-2 mb-4">
+      <input
+        id="quick-save-url"
+        type="url"
+        placeholder="Paste a URL to save…"
+        required
+        class="flex-1 rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)]"
+      />
+      <button type="submit" class="btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
+        Save
+      </button>
+    </form>
+    <div class="flex flex-wrap gap-4 text-sm text-[var(--meta-divider)]">
+      <span>🔥 <strong class="text-[var(--deep-text)]">{stats.streak}</strong> day streak</span>
+      <span>📚 <strong class="text-[var(--deep-text)]">{stats.total}</strong> saved</span>
+      <span>✅ <strong class="text-[var(--deep-text)]">{stats.read}</strong> read</span>
+      {stats.due > 0 && <a href="/review/" class="text-[var(--primary)] font-medium">⏰ {stats.due} due for review →</a>}
+    </div>
+  </div>
+
+  <!-- Random review cards -->
+  {randomCards.length > 0 && (
+    <div class="mb-6 onload-animation" style="animation-delay: 50ms">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold text-[var(--deep-text)]">Review</h2>
+        <a href="/review/" class="text-xs text-[var(--primary)] hover:underline">Start session →</a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {randomCards.map((card) => {
+          const hue = TYPE_HUE[card.type] ?? "250";
+          const tags = parseTags(card.tags).slice(0, 3);
+          return (
+            <a
+              href={card.url ?? "#"}
+              target={card.url ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              class="card-base p-4 block hover:bg-[var(--btn-card-bg-hover)] active:bg-[var(--btn-card-bg-active)] transition group no-underline"
+            >
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
+                  {card.type}
+                </span>
+              </div>
+              <p class="text-sm font-medium text-[var(--deep-text)] line-clamp-2 mb-1 group-hover:text-[var(--primary)] transition">
+                {card.title ?? card.url ?? "Untitled"}
+              </p>
+              {card.summary && <p class="text-xs text-75 line-clamp-2">{card.summary}</p>}
+              {tags.length > 0 && (
+                <div class="flex flex-wrap gap-1 mt-2">
+                  {tags.map(t => <span class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">{t}</span>)}
+                </div>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  )}
+
+  <!-- Two-column: recent posts + recent saves -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 onload-animation" style="animation-delay: 100ms">
+
+    <!-- Recent posts -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold text-[var(--deep-text)]">Recent Posts</h2>
+        <a href="/archive/" class="text-xs text-[var(--primary)] hover:underline">All posts →</a>
+      </div>
+      <div class="card-base divide-y divide-[var(--line-divider)]">
+        {recentPosts.length === 0 && <p class="p-4 text-sm text-75">No posts yet.</p>}
+        {recentPosts.map((post) => (
+          <a
+            href={getPostUrlBySlug(post.slug)}
+            class="flex items-start gap-3 p-4 hover:bg-[var(--btn-card-bg-hover)] transition group no-underline block"
+          >
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-[var(--deep-text)] group-hover:text-[var(--primary)] transition line-clamp-2">
+                {post.data.title}
+              </p>
+              <p class="text-xs text-75 mt-0.5">{formatDateToYYYYMMDD(post.data.published)}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Recent saves -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold text-[var(--deep-text)]">Recently Saved</h2>
+        <a href="/saves/" class="text-xs text-[var(--primary)] hover:underline">Browse all →</a>
+      </div>
+      <div class="card-base divide-y divide-[var(--line-divider)]">
+        {recentSaves.length === 0 && <p class="p-4 text-sm text-75">No saves yet — paste a URL above!</p>}
+        {recentSaves.map((link) => {
+          const hue = TYPE_HUE[link.type] ?? "250";
+          return (
+            <a
+              href={link.url ?? "#"}
+              target={link.url ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              class="flex items-center gap-3 p-3 hover:bg-[var(--btn-card-bg-hover)] transition group no-underline"
+            >
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full shrink-0 font-medium" style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
+                {link.type}
+              </span>
+              <span class="text-sm text-[var(--deep-text)] group-hover:text-[var(--primary)] transition line-clamp-1 flex-1">
+                {link.title ?? link.url ?? "Untitled"}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+
+  </div>
+
+</MainGridLayout>
+
+<script>
+const form = document.getElementById('quick-save-form') as HTMLFormElement;
+const input = document.getElementById('quick-save-url') as HTMLInputElement;
+
+form?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const url = input.value.trim();
+  if (!url) return;
+
+  const btn = form.querySelector('button') as HTMLButtonElement;
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if (res.ok) {
+      input.value = '';
+      btn.textContent = 'Saved ✓';
+      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; window.location.reload(); }, 1500);
+    } else {
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 2000);
+    }
+  } catch {
+    btn.textContent = 'Error';
+    setTimeout(() => { btn.textContent = 'Save'; btn.disabled = false; }, 2000);
+  }
+});
+</script>

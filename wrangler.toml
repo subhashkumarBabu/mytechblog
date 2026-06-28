@@ -1,0 +1,27 @@
+name = "devopsmantra"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "devopsmantra-db"
+database_id = "fb069652-3d6c-4d55-8533-f75860631b3c"
+
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "devopsmantra-index"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "devopsmantra-content"
+
+[[queues.producers]]
+binding = "ENRICHMENT_QUEUE"
+queue = "devopsmantra-enrichment"
+
+[vars]
+ENVIRONMENT = "production"

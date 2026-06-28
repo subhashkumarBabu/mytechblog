@@ -38,8 +38,12 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		LinkPreset.About,
 		{
+			name: "Saves",
+			url: "/saves/",
+		},
+		{
 			name: "GitHub",
-			url: "https://github.com/saicaca/fuwari",
+			url: "https://github.com/subhashkumarBabu",
 			external: true,
 		},
 	],

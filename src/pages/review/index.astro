@@ -1,0 +1,172 @@
+---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+const env = Astro.locals.runtime?.env;
+
+type Link = {
+  id: string; type: string; title: string | null; url: string | null;
+  summary: string | null; tags: string; review_count: number;
+};
+
+let dueCards: Link[] = [];
+
+if (env?.DB) {
+  const today = new Date().toISOString().slice(0, 10);
+  const res = await env.DB.prepare(
+    "SELECT id, type, title, url, summary, tags, review_count FROM links WHERE next_review_at IS NOT NULL AND next_review_at <= ? ORDER BY next_review_at ASC LIMIT 20"
+  ).bind(today).all();
+  dueCards = res.results as Link[];
+}
+
+const TYPE_HUE: Record<string, string> = {
+  Article: "240", Repository: "150", WebPage: "300",
+  Document: "60", Note: "350", Tweet: "200",
+};
+---
+
+<MainGridLayout title="Review — DevOps Mantra" description="Spaced repetition review session">
+
+  <div id="review-container" class="onload-animation">
+
+    {dueCards.length === 0 ? (
+      <div class="card-base p-10 text-center">
+        <div class="text-4xl mb-4">🎉</div>
+        <h2 class="font-bold text-lg text-[var(--deep-text)] mb-2">All caught up!</h2>
+        <p class="text-sm text-75 mb-4">No cards due for review right now.</p>
+        <a href="/saves/" class="btn-regular inline-block rounded-lg px-5 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
+          Browse saves
+        </a>
+      </div>
+    ) : (
+      <div>
+        <!-- Progress bar -->
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-[var(--deep-text)]">Review Session</h2>
+          <span id="progress-label" class="text-sm text-75">0 / {dueCards.length}</span>
+        </div>
+        <div class="h-1.5 rounded-full bg-[var(--btn-regular-bg)] mb-6 overflow-hidden">
+          <div id="progress-bar" class="h-full rounded-full bg-[var(--primary)] transition-all duration-500" style="width:0%"></div>
+        </div>
+
+        <!-- Cards -->
+        <div id="cards-container">
+          {dueCards.map((card, i) => {
+            const hue = TYPE_HUE[card.type] ?? "250";
+            const tags = (() => { try { return JSON.parse(card.tags) ?? []; } catch { return []; } })();
+            return (
+              <div
+                class="review-card card-base p-6"
+                data-id={card.id}
+                data-index={i}
+                style={i === 0 ? "" : "display:none"}
+              >
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                    style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
+                    {card.type}
+                  </span>
+                  <span class="text-xs text-75">{card.review_count} review{card.review_count !== 1 ? "s" : ""} done</span>
+                </div>
+
+                <h3 class="font-bold text-lg text-[var(--deep-text)] mb-3 leading-snug">
+                  {card.title ?? card.url ?? "Untitled"}
+                </h3>
+
+                {card.summary && (
+                  <p class="text-sm text-75 mb-4 leading-relaxed">{card.summary}</p>
+                )}
+
+                {tags.length > 0 && (
+                  <div class="flex flex-wrap gap-1.5 mb-6">
+                    {tags.map((t: string) => (
+                      <span class="text-xs px-2 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">{t}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="flex flex-wrap gap-3">
+                  {card.url && (
+                    <a
+                      href={card.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition no-underline"
+                    >
+                      Open ↗
+                    </a>
+                  )}
+                  <button
+                    class="review-done-btn rounded-lg px-4 py-2 text-sm font-medium transition text-white"
+                    style="background:var(--primary)"
+                    data-id={card.id}
+                  >
+                    Reviewed ✓
+                  </button>
+                  <button
+                    class="review-skip-btn btn-regular rounded-lg px-4 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition"
+                    data-id={card.id}
+                  >
+                    Skip
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <!-- Done screen (hidden) -->
+        <div id="done-screen" class="card-base p-10 text-center hidden">
+          <div class="text-4xl mb-4">✅</div>
+          <h2 class="font-bold text-lg text-[var(--deep-text)] mb-2">Session complete!</h2>
+          <p id="done-summary" class="text-sm text-75 mb-4"></p>
+          <a href="/" class="btn-regular inline-block rounded-lg px-5 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition">
+            Back to home
+          </a>
+        </div>
+      </div>
+    )}
+  </div>
+
+</MainGridLayout>
+
+<script>
+  const total = document.querySelectorAll('.review-card').length;
+  let current = 0;
+  let reviewed = 0;
+
+  function advance() {
+    current++;
+    const progressBar = document.getElementById('progress-bar') as HTMLDivElement;
+    const progressLabel = document.getElementById('progress-label');
+    if (progressBar) progressBar.style.width = `${(current / total) * 100}%`;
+    if (progressLabel) progressLabel.textContent = `${current} / ${total}`;
+
+    const next = document.querySelector(`.review-card[data-index="${current}"]`) as HTMLElement;
+    if (next) {
+      next.style.display = '';
+    } else {
+      const container = document.getElementById('cards-container');
+      const done = document.getElementById('done-screen');
+      const summary = document.getElementById('done-summary');
+      if (container) container.style.display = 'none';
+      if (done) done.classList.remove('hidden');
+      if (summary) summary.textContent = `Reviewed ${reviewed} of ${total} cards.`;
+    }
+  }
+
+  document.querySelectorAll('.review-done-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = (btn as HTMLElement).dataset.id;
+      btn.textContent = '…'; (btn as HTMLButtonElement).disabled = true;
+      try {
+        await fetch(`/api/links/${id}/review`, { method: 'POST' });
+        reviewed++;
+      } catch {}
+      advance();
+    });
+  });
+
+  document.querySelectorAll('.review-skip-btn').forEach(btn => {
+    btn.addEventListener('click', () => advance());
+  });
+</script>
