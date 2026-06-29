@@ -23,9 +23,10 @@ if (env?.DB) {
 const TYPE_HUE: Record<string, string> = {
   Article: "240", Repository: "150", WebPage: "300",
   Document: "60", Note: "350", Tweet: "200",
+  XPost: "200", YouTubeVideo: "10",
 };
 
-const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
+const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "XPost", "WebPage", "Document", "Note"];
 ---
 
 <MainGridLayout title="Saves — DevOps Mantra" description="My saved links and resources">
@@ -121,6 +122,7 @@ const TYPES = ["All", "Article", "Repository", "WebPage", "Document", "Note"];
   const TYPE_HUE: Record<string, string> = {
     Article: '240', Repository: '150', WebPage: '300',
     Document: '60', Note: '350', Tweet: '200',
+    XPost: '200', YouTubeVideo: '10',
   };
 
   // All state is scoped to each init call so Swup re-navigation works cleanly
