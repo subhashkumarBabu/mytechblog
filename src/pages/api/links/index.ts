@@ -6,36 +6,41 @@ export async function GET({ request, locals }: APIContext) {
 	const { DB } = locals.runtime.env;
 	const url = new URL(request.url);
 
-	const type = url.searchParams.get("type");
+	const typeRaw = url.searchParams.get("type");
+	const type = typeRaw ? typeRaw.charAt(0).toUpperCase() + typeRaw.slice(1) : null;
 	const tag = url.searchParams.get("tag");
+	const q = url.searchParams.get("q")?.trim();
 	const unread = url.searchParams.get("unread") === "1";
 	const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 200);
 	const offset = Number(url.searchParams.get("offset") ?? 0);
 
-	let query = "SELECT * FROM links WHERE 1=1";
+	const conditions: string[] = [];
 	const params: (string | number)[] = [];
 
 	if (type && type !== "all") {
-		query += " AND type = ?";
+		conditions.push("type = ?");
 		params.push(type);
 	}
 	if (tag) {
-		query += " AND tags LIKE ?";
+		conditions.push('tags LIKE ?');
 		params.push(`%"${tag}"%`);
 	}
+	if (q) {
+		conditions.push("(title LIKE ? OR content LIKE ? OR tags LIKE ?)");
+		params.push(`%${q}%`, `%${q}%`, `%${q}%`);
+	}
 	if (unread) {
-		query += " AND is_read = 0";
+		conditions.push("is_read = 0");
 	}
 
-	query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+	const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
+	const query = `SELECT id, type, title, url, summary, tags, created_at, is_read FROM links${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
 	params.push(limit, offset);
 
 	const { results } = await DB.prepare(query).bind(...params).all();
 
-	const total = await DB.prepare(
-		"SELECT COUNT(*) as count FROM links" + (type && type !== "all" ? " WHERE type = ?" : "")
-	)
-		.bind(...(type && type !== "all" ? [type] : []))
+	const total = await DB.prepare(`SELECT COUNT(*) as count FROM links${where}`)
+		.bind(...params.slice(0, -2))
 		.first<{ count: number }>();
 
 	return Response.json({ links: results, total: total?.count ?? 0 });

@@ -109,6 +109,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
       id="load-more-btn"
       class="btn-regular rounded-lg px-6 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition"
       data-offset="50"
+      data-total={total}
     >
       Load more
     </button>
@@ -117,146 +118,156 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
 </MainGridLayout>
 
 <script>
-  // TYPE_HUE is a stable constant — no need for define:vars
   const TYPE_HUE: Record<string, string> = {
     Article: '240', Repository: '150', WebPage: '300',
     Document: '60', Note: '350', YouTubeVideo: '10',
   };
 
-  // All state is scoped to each init call so Swup re-navigation works cleanly
+  function renderCard(link: any): HTMLElement {
+    const hue = TYPE_HUE[link.type as string] ?? '250';
+    const tags: string[] = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
+    const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
+    const card = document.createElement('div');
+    card.className = 'save-card card-base p-4 transition';
+    const safeTitle = (link.title ?? link.url ?? 'Untitled').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const safeSummary = (link.summary ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const tagHtml = tags.slice(0, 5).map((t: string) => {
+      const safe = t.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      return `<span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag="${safe}">${safe}</span>`;
+    }).join('');
+    const safeUrl = link.url ? link.url.replace(/"/g, '%22') : '#';
+    card.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${link.type}</span>
+            ${link.is_read ? '<span class="text-[10px] text-75">read</span>' : ''}
+          </div>
+          <a href="${safeUrl}" ${link.url ? 'target="_blank" rel="noopener noreferrer"' : ''}
+            class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1">
+            ${safeTitle}
+          </a>
+          ${safeSummary ? `<p class="text-xs text-75 line-clamp-2 mb-2">${safeSummary}</p>` : ''}
+          <div class="flex items-center gap-3 flex-wrap">
+            ${tagHtml}
+            ${domain ? `<span class="text-[10px] text-75 ml-auto">${domain.replace(/</g, '&lt;')}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    return card;
+  }
+
   function initSavesPage() {
     const grid = document.getElementById('saves-grid');
-    if (!grid) return; // not on saves page
+    if (!grid) return;
 
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     const shownCount = document.getElementById('shown-count');
     const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement | null;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    let activeType = urlParams.get('type') ?? 'all';
-    let searchQuery = urlParams.get('tag') ?? '';
-    let allCards = Array.from(grid.querySelectorAll<HTMLElement>('.save-card'));
+    let activeType = 'all';
+    let searchQuery = '';
+    let currentOffset = 50; // already have 50 from SSR
+    let currentTotal = parseInt(loadMoreBtn?.dataset.total ?? '0');
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-    // Apply URL param state
-    if (searchQuery && searchInput) searchInput.value = searchQuery;
-    document.querySelectorAll<HTMLElement>('.type-filter').forEach(b => {
-      if (b.dataset.type === activeType) {
-        b.style.background = 'var(--primary)';
-        b.style.color = 'white';
-      } else {
-        b.style.background = 'var(--btn-regular-bg)';
-        b.style.color = 'var(--btn-content)';
-      }
-    });
-
-    function filterCards() {
-      let shown = 0;
-      allCards.forEach(card => {
-        const matchType = activeType === 'all' || card.dataset.type === activeType;
-        const q = searchQuery.toLowerCase();
-        const matchSearch = !q ||
-          (card.dataset.title ?? '').includes(q) ||
-          (card.dataset.tags ?? '').includes(q) ||
-          (card.dataset.summary ?? '').includes(q);
-        const visible = matchType && matchSearch;
-        card.style.display = visible ? '' : 'none';
-        if (visible) shown++;
+    function setTypeButtons(type: string) {
+      document.querySelectorAll<HTMLElement>('.type-filter').forEach(b => {
+        const active = b.dataset.type === type;
+        b.style.background = active ? 'var(--primary)' : 'var(--btn-regular-bg)';
+        b.style.color = active ? 'white' : 'var(--btn-content)';
       });
-      if (shownCount) shownCount.textContent = String(shown);
+    }
+
+    async function fetchAndReplace() {
+      grid.innerHTML = '<p class="text-sm text-75 text-center py-8">Loading…</p>';
+      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+      currentOffset = 0;
+
+      const params = new URLSearchParams({ limit: '50', offset: '0' });
+      if (activeType !== 'all') params.set('type', activeType);
+      if (searchQuery) params.set('q', searchQuery);
+
+      try {
+        const res = await fetch(`/api/links?${params}`);
+        const { links, total } = await res.json();
+        currentTotal = total ?? 0;
+        currentOffset = links?.length ?? 0;
+
+        grid.innerHTML = '';
+        if (!links?.length) {
+          grid.innerHTML = '<p class="text-sm text-75 text-center py-8">No results found.</p>';
+        } else {
+          links.forEach((link: any) => grid.appendChild(renderCard(link)));
+        }
+        if (shownCount) shownCount.textContent = String(currentOffset);
+        if (loadMoreBtn) {
+          loadMoreBtn.style.display = currentOffset < currentTotal ? '' : 'none';
+          loadMoreBtn.dataset.offset = String(currentOffset);
+          loadMoreBtn.textContent = 'Load more';
+          loadMoreBtn.disabled = false;
+        }
+      } catch {
+        grid.innerHTML = '<p class="text-sm text-75 text-center py-8">Failed to load. Please refresh.</p>';
+      }
     }
 
     // Type filter buttons
     document.querySelectorAll<HTMLElement>('.type-filter').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll<HTMLElement>('.type-filter').forEach(b => {
-          b.style.background = 'var(--btn-regular-bg)';
-          b.style.color = 'var(--btn-content)';
-        });
-        btn.style.background = 'var(--primary)';
-        btn.style.color = 'white';
         activeType = btn.dataset.type ?? 'all';
-        filterCards();
+        setTypeButtons(activeType);
+        fetchAndReplace();
       });
     });
 
-    // Tag pills — use grid-scoped delegation to avoid stale listeners on re-nav
+    // Tag pill clicks — delegate from grid
     grid.addEventListener('click', (e) => {
       const pill = (e.target as HTMLElement).closest<HTMLElement>('.tag-pill');
       if (!pill) return;
       const tag = pill.dataset.tag ?? '';
       if (searchInput) searchInput.value = tag;
-      searchQuery = tag.toLowerCase();
-      filterCards();
+      searchQuery = tag;
+      fetchAndReplace();
     });
 
-    // Search input
+    // Search input — debounced
     searchInput?.addEventListener('input', () => {
-      searchQuery = (searchInput.value ?? '').toLowerCase();
-      filterCards();
+      searchQuery = searchInput.value.trim();
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetchAndReplace, 350);
     });
 
-    // Load more
+    // Load more — respects current filters
     loadMoreBtn?.addEventListener('click', async () => {
       const offset = parseInt(loadMoreBtn.dataset.offset ?? '50');
       loadMoreBtn.textContent = 'Loading…';
       loadMoreBtn.disabled = true;
+
+      const params = new URLSearchParams({ limit: '50', offset: String(offset) });
+      if (activeType !== 'all') params.set('type', activeType);
+      if (searchQuery) params.set('q', searchQuery);
+
       try {
-        const res = await fetch(`/api/links?limit=50&offset=${offset}`);
+        const res = await fetch(`/api/links?${params}`);
         const { links } = await res.json();
-        if (!links?.length) { loadMoreBtn.remove(); return; }
-
-        links.forEach((link: any) => {
-          const hue = TYPE_HUE[link.type as string] ?? '250';
-          const tags: string[] = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
-          const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
-          const card = document.createElement('div');
-          card.className = 'save-card card-base p-4 transition';
-          card.dataset.type = (link.type as string).toLowerCase();
-          card.dataset.title = (link.title ?? '').toLowerCase();
-          card.dataset.tags = (link.tags as string).toLowerCase();
-          card.dataset.summary = (link.summary ?? '').toLowerCase();
-          const tagHtml = tags.slice(0, 5).map(t => `<span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer" data-tag="${t}">${t}</span>`).join('');
-          card.innerHTML = `
-            <div class="flex items-start gap-3">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap mb-1">
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-medium" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${link.type}</span>
-                  ${link.is_read ? '<span class="text-[10px] text-75">✓ read</span>' : ''}
-                </div>
-                <a href="${link.url ?? '#'}" target="_blank" rel="noopener noreferrer"
-                  class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1">
-                  ${link.title ?? link.url ?? 'Untitled'}
-                </a>
-                ${link.summary ? `<p class="text-xs text-75 line-clamp-2 mb-2">${link.summary}</p>` : ''}
-                <div class="flex items-center gap-3 flex-wrap">
-                  ${tagHtml}
-                  ${domain ? `<span class="text-[10px] text-75 ml-auto">${domain}</span>` : ''}
-                </div>
-              </div>
-            </div>`;
-          grid.appendChild(card);
-          allCards.push(card);
-        });
-
-        loadMoreBtn.dataset.offset = String(offset + 50);
+        if (!links?.length) { loadMoreBtn.style.display = 'none'; return; }
+        links.forEach((link: any) => grid.appendChild(renderCard(link)));
+        const newOffset = offset + links.length;
+        loadMoreBtn.dataset.offset = String(newOffset);
+        if (shownCount) shownCount.textContent = String(newOffset);
         loadMoreBtn.textContent = 'Load more';
         loadMoreBtn.disabled = false;
-        if (links.length < 50) loadMoreBtn.remove();
-        filterCards();
+        if (links.length < 50) loadMoreBtn.style.display = 'none';
       } catch {
-        loadMoreBtn.textContent = 'Error';
+        loadMoreBtn.textContent = 'Error — try again';
         loadMoreBtn.disabled = false;
       }
     });
-
-    // Apply URL param filters on load
-    if (searchQuery || activeType !== 'all') filterCards();
   }
 
-  // Run on direct load
   initSavesPage();
 
-  // Re-run after Swup page navigation
   function setupSwup() {
     (window as any).swup.hooks.on('page:view', initSavesPage);
   }
