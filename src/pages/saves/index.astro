@@ -108,8 +108,9 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
     <button
       id="load-more-btn"
       class="btn-regular rounded-lg px-6 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition"
-      data-offset="50"
+      data-offset={initialLinks.length}
       data-total={total}
+      style={total <= initialLinks.length ? "display:none" : ""}
     >
       Load more
     </button>
@@ -129,18 +130,20 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
     const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
     const card = document.createElement('div');
     card.className = 'save-card card-base p-4 transition';
-    const safeTitle = (link.title ?? link.url ?? 'Untitled').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const safeSummary = (link.summary ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const safeTitle = esc(link.title ?? link.url ?? 'Untitled');
+    const safeSummary = esc(link.summary ?? '');
+    const safeType = esc(link.type as string);
     const tagHtml = tags.slice(0, 5).map((t: string) => {
-      const safe = t.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const safe = esc(t);
       return `<span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag="${safe}">${safe}</span>`;
     }).join('');
-    const safeUrl = link.url ? link.url.replace(/"/g, '%22') : '#';
+    const safeUrl = link.url ? encodeURI(link.url) : '#';
     card.innerHTML = `
       <div class="flex items-start gap-3">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-1">
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${link.type}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${safeType}</span>
             ${link.is_read ? '<span class="text-[10px] text-75">read</span>' : ''}
           </div>
           <a href="${safeUrl}" ${link.url ? 'target="_blank" rel="noopener noreferrer"' : ''}
@@ -157,9 +160,13 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
     return card;
   }
 
+  const initialized = new WeakSet<Element>();
+
   function initSavesPage() {
     const grid = document.getElementById('saves-grid');
     if (!grid) return;
+    if (initialized.has(grid)) return;
+    initialized.add(grid);
 
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     const shownCount = document.getElementById('shown-count');

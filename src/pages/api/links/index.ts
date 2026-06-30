@@ -21,7 +21,8 @@ export async function GET({ request, locals }: APIContext) {
 	const conditions: string[] = [];
 	const params: (string | number)[] = [];
 
-	if (type && type !== "all") {
+	const VALID_TYPES = new Set(Object.values(TYPE_MAP));
+	if (type && VALID_TYPES.has(type)) {
 		conditions.push("type = ?");
 		params.push(type);
 	}
