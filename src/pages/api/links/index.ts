@@ -6,8 +6,12 @@ export async function GET({ request, locals }: APIContext) {
 	const { DB } = locals.runtime.env;
 	const url = new URL(request.url);
 
+	const TYPE_MAP: Record<string, string> = {
+		article: "Article", repository: "Repository", youtubevideo: "YouTubeVideo",
+		webpage: "WebPage", document: "Document", note: "Note", xpost: "XPost",
+	};
 	const typeRaw = url.searchParams.get("type");
-	const type = typeRaw ? typeRaw.charAt(0).toUpperCase() + typeRaw.slice(1) : null;
+	const type = typeRaw ? (TYPE_MAP[typeRaw.toLowerCase()] ?? typeRaw) : null;
 	const tag = url.searchParams.get("tag");
 	const q = url.searchParams.get("q")?.trim();
 	const unread = url.searchParams.get("unread") === "1";
