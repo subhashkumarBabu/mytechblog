@@ -64,6 +64,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
       const hue = TYPE_HUE[link.type] ?? "250";
       const tags = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
       const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace("www.", ""); } catch { return ""; } })() : "";
+      const dateLabel = (() => { try { return new Date(link.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" }); } catch { return ""; } })();
       return (
         <div
           class="save-card card-base p-4 transition"
@@ -94,7 +95,10 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
                 {tags.slice(0, 5).map((t: string) => (
                   <span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag={t}>{t}</span>
                 ))}
-                {domain && <span class="text-[10px] text-75 ml-auto">{domain}</span>}
+                <span class="text-[10px] text-75 ml-auto flex items-center gap-2">
+                  {dateLabel && <span>{dateLabel}</span>}
+                  {domain && <span>{domain}</span>}
+                </span>
               </div>
             </div>
           </div>
@@ -128,6 +132,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
     const hue = TYPE_HUE[link.type as string] ?? '250';
     const tags: string[] = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
     const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
+    const dateLabel = (() => { try { return new Date(link.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); } catch { return ''; } })();
     const card = document.createElement('div');
     card.className = 'save-card card-base p-4 transition';
     const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -153,7 +158,10 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
           ${safeSummary ? `<p class="text-xs text-75 line-clamp-2 mb-2">${safeSummary}</p>` : ''}
           <div class="flex items-center gap-3 flex-wrap">
             ${tagHtml}
-            ${domain ? `<span class="text-[10px] text-75 ml-auto">${domain.replace(/</g, '&lt;')}</span>` : ''}
+            <span class="text-[10px] text-75 ml-auto flex items-center gap-2">
+              ${dateLabel ? `<span>${dateLabel}</span>` : ''}
+              ${domain ? `<span>${esc(domain)}</span>` : ''}
+            </span>
           </div>
         </div>
       </div>`;
