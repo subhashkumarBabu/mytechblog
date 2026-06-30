@@ -55,7 +55,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
 
   <!-- Stats -->
   <p id="count-label" class="text-sm text-75 mb-3 onload-animation" style="animation-delay:50ms">
-    Showing <strong id="shown-count">{initialLinks.length}</strong> of <strong>{total}</strong> saves
+    Showing <strong id="shown-count">{initialLinks.length}</strong> of <strong id="total-count">{total}</strong> saves
   </p>
 
   <!-- Grid -->
@@ -163,6 +163,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
 
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     const shownCount = document.getElementById('shown-count');
+    const totalCount = document.getElementById('total-count');
     const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement | null;
 
     let activeType = 'all';
@@ -201,6 +202,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
           links.forEach((link: any) => grid.appendChild(renderCard(link)));
         }
         if (shownCount) shownCount.textContent = String(currentOffset);
+        if (totalCount) totalCount.textContent = String(currentTotal);
         if (loadMoreBtn) {
           loadMoreBtn.style.display = currentOffset < currentTotal ? '' : 'none';
           loadMoreBtn.dataset.offset = String(currentOffset);
@@ -256,6 +258,7 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
         const newOffset = offset + links.length;
         loadMoreBtn.dataset.offset = String(newOffset);
         if (shownCount) shownCount.textContent = String(newOffset);
+        // total-count stays the same on load more — filtered total already set
         loadMoreBtn.textContent = 'Load more';
         loadMoreBtn.disabled = false;
         if (links.length < 50) loadMoreBtn.style.display = 'none';
