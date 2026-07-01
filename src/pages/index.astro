@@ -218,11 +218,21 @@ function yearOf(str: string) {
         <p class="text-white/20 text-xs tracking-widest uppercase">
           <span id="results-count">0</span> results
         </p>
-        <span class="text-white/15 text-xs">top 10 from library</span>
+        <span id="results-page-label" class="text-white/15 text-xs"></span>
       </div>
       <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"></div>
       <div id="results-empty" class="hidden text-center py-20">
         <p class="text-white/20 text-sm">Nothing found.</p>
+      </div>
+      <!-- Pagination -->
+      <div id="results-pagination" class="hidden flex items-center justify-center gap-3 mt-8">
+        <button id="page-prev" class="liquid-glass rounded-full px-5 py-2 text-white/40 hover:text-white/80 text-xs transition-colors disabled:opacity-20 disabled:pointer-events-none">
+          &larr; Prev
+        </button>
+        <span id="page-indicator" class="text-white/25 text-xs tabular-nums"></span>
+        <button id="page-next" class="liquid-glass rounded-full px-5 py-2 text-white/40 hover:text-white/80 text-xs transition-colors disabled:opacity-20 disabled:pointer-events-none">
+          Next &rarr;
+        </button>
       </div>
     </div>
 
@@ -303,39 +313,74 @@ function yearOf(str: string) {
 
     if (!searchInput) return;
 
+    const PAGE_SIZE = 20;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let lastQuery = "";
+    let currentPage = 0;
+    let totalResults = 0;
+
+    const pageLabel     = document.getElementById("results-page-label");
+    const pagination    = document.getElementById("results-pagination");
+    const pageIndicator = document.getElementById("page-indicator");
+    const pagePrev      = document.getElementById("page-prev") as HTMLButtonElement | null;
+    const pageNext      = document.getElementById("page-next") as HTMLButtonElement | null;
 
     function showDiscover() {
       discoverSection?.classList.remove("hidden");
       resultsPanel?.classList.add("hidden");
+      pagination?.classList.add("hidden");
       clearBtn?.classList.add("hidden");
     }
 
-    function showResults(links: any[]) {
+    function showResults(links: any[], total: number, page: number) {
       discoverSection?.classList.add("hidden");
       resultsPanel?.classList.remove("hidden");
-      if (resultsCount) resultsCount.textContent = String(links.length);
+      totalResults = total;
+      currentPage = page;
+
+      if (resultsCount) resultsCount.textContent = total.toLocaleString("en-US");
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      if (pageLabel) pageLabel.textContent = totalPages > 1 ? `page ${page + 1} of ${totalPages}` : "";
+
       resultsGrid?.replaceChildren();
       if (!links.length) {
         resultsEmpty?.classList.remove("hidden");
+        pagination?.classList.add("hidden");
       } else {
         resultsEmpty?.classList.add("hidden");
         links.forEach(l => resultsGrid?.appendChild(buildCard(l)));
+
+        if (totalPages > 1) {
+          pagination?.classList.remove("hidden");
+          if (pageIndicator) pageIndicator.textContent = `${page + 1} / ${totalPages}`;
+          if (pagePrev) pagePrev.disabled = page === 0;
+          if (pageNext) pageNext.disabled = page >= totalPages - 1;
+        } else {
+          pagination?.classList.add("hidden");
+        }
       }
     }
 
-    async function doSearch(q: string) {
+    async function doSearch(q: string, page = 0) {
       discoverSection?.classList.add("hidden");
       resultsPanel?.classList.add("hidden");
       try {
-        const res = await fetch(`/api/links?q=${encodeURIComponent(q)}&limit=10`);
-        const { links } = await res.json() as { links: any[] };
-        showResults(links ?? []);
+        const offset = page * PAGE_SIZE;
+        const res = await fetch(`/api/links?q=${encodeURIComponent(q)}&limit=${PAGE_SIZE}&offset=${offset}`);
+        const { links, total } = await res.json() as { links: any[]; total: number };
+        showResults(links ?? [], total ?? 0, page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch {
-        showResults([]);
+        showResults([], 0, 0);
       }
     }
+
+    pagePrev?.addEventListener("click", () => {
+      if (currentPage > 0) doSearch(lastQuery, currentPage - 1);
+    });
+    pageNext?.addEventListener("click", () => {
+      if ((currentPage + 1) * PAGE_SIZE < totalResults) doSearch(lastQuery, currentPage + 1);
+    });
 
     // Shuffle
     shuffleBtn?.addEventListener("click", async () => {
@@ -376,7 +421,8 @@ function yearOf(str: string) {
       if (!q) { lastQuery = ""; showDiscover(); return; }
       if (q === lastQuery) return;
       lastQuery = q;
-      debounceTimer = setTimeout(() => doSearch(q), 320);
+      currentPage = 0;
+      debounceTimer = setTimeout(() => doSearch(q, 0), 320);
     });
 
     clearBtn?.addEventListener("click", () => {
