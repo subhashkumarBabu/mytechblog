@@ -13,13 +13,17 @@ let cards: Link[] = [];
 let total = 0;
 
 if (env?.DB) {
-  const [cardRes, countRes] = await Promise.all([
+  const q = (type: string) =>
     env.DB.prepare(
-      "SELECT id, type, title, url, summary, tags, created_at FROM links WHERE url IS NOT NULL AND title IS NOT NULL ORDER BY RANDOM() LIMIT 5"
-    ).all(),
+      "SELECT id, type, title, url, summary, tags, created_at FROM links WHERE type=? AND url IS NOT NULL AND title IS NOT NULL ORDER BY RANDOM() LIMIT 1"
+    ).bind(type).first<Link>();
+
+  const [webPage, article, repo, yt, doc, countRes] = await Promise.all([
+    q("WebPage"), q("Article"), q("Repository"), q("YouTubeVideo"), q("Document"),
     env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
   ]);
-  cards = cardRes.results as Link[];
+
+  cards = [webPage, article, repo, yt, doc].filter((c): c is Link => !!c);
   total = countRes?.n ?? 0;
 }
 
@@ -51,7 +55,7 @@ function yearOf(str: string) {
 <div class="min-h-screen bg-black">
 
   <!-- Hero -->
-  <div class="max-w-5xl mx-auto px-6 pt-14 pb-10 text-center">
+  <div class="max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6 md:pb-10 text-center">
     <p class="text-white/30 text-sm md:text-base tracking-widest uppercase mb-10">
       {totalFormatted} links &mdash; SRE &middot; AI &middot; Cloud
     </p>
@@ -84,24 +88,23 @@ function yearOf(str: string) {
     <!-- Random D1 cards (magazine grid) -->
     <div id="home-cards" class="transition-opacity duration-300">
       {cards.length > 0 ? (
-        <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 auto-rows-[minmax(180px,auto)]">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {cards.map((card, i) => {
             const style = TYPE_STYLE[card.type] ?? DEFAULT_STYLE;
             const domain = domainOf(card.url);
             const year = yearOf(card.created_at);
             const isHero = i === 0;
+            // hero: full-width on mobile/tablet, spans 2 cols + 2 rows on desktop
             const colSpan = isHero
-              ? "col-span-2 lg:col-span-4 lg:row-span-2"
-              : i === 1
-              ? "col-span-2 lg:col-span-2"
-              : "col-span-1 lg:col-span-2";
+              ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2"
+              : "col-span-1";
 
             return (
               <a
                 href={card.url ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-6 md:p-8 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${colSpan}`}
+                class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 md:p-7 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${isHero ? "min-h-[220px] md:min-h-[300px]" : "min-h-[160px] md:min-h-[180px]"} ${colSpan}`}
                 style="background: rgb(10,10,10);"
               >
                 {/* Gradient blob */}
@@ -158,9 +161,9 @@ function yearOf(str: string) {
 
     <!-- Loading skeleton -->
     <div id="home-loading" class="hidden">
-      <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {[...Array(5)].map((_, i) => (
-          <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "col-span-2 lg:col-span-4 min-h-[320px]" : i === 1 ? "col-span-2 lg:col-span-2 min-h-[160px]" : "col-span-1 lg:col-span-2 min-h-[160px]"}`}></div>
+          <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px]" : "min-h-[160px]"}`}></div>
         ))}
       </div>
     </div>
