@@ -1,5 +1,5 @@
 ---
-import MainGridLayout from "@layouts/MainGridLayout.astro";
+import HomeLayout from "@layouts/HomeLayout.astro";
 
 const env = Astro.locals.runtime?.env;
 
@@ -13,196 +13,269 @@ let total = 0;
 
 if (env?.DB) {
   const [res, countRes] = await Promise.all([
-    env.DB.prepare("SELECT id, type, title, url, summary, tags, created_at, is_read FROM links ORDER BY created_at DESC LIMIT 50").all(),
-    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{n:number}>(),
+    env.DB.prepare(
+      "SELECT id, type, title, url, summary, tags, created_at, is_read FROM links ORDER BY created_at DESC LIMIT 50"
+    ).all(),
+    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
   ]);
   initialLinks = res.results as Link[];
   total = countRes?.n ?? 0;
 }
 
-const TYPE_HUE: Record<string, string> = {
-  Article: "240", Repository: "150", WebPage: "300",
-  Document: "60", Note: "350", YouTubeVideo: "10",
+const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
+  Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
+  Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
+  YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
+  WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
+  Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
+  Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
 };
+const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
 
 const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Document", "Note"];
+
+function domainOf(url: string | null) {
+  if (!url) return "";
+  try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
+}
+function yearOf(str: string) {
+  try { return new Date(str).getFullYear().toString(); } catch { return ""; }
+}
 ---
 
-<MainGridLayout title="Saves — DevOps Mantra" description="My saved links and resources">
+<HomeLayout title="Library — DevOps Mantra" description="All saved links and resources">
 
-  <!-- Header + filters -->
-  <div class="card-base p-5 mb-5 onload-animation">
-    <input
-      id="search-input"
-      type="search"
-      placeholder="Search titles, tags, summaries…"
-      class="w-full rounded-lg px-3 py-2 text-sm bg-[var(--btn-regular-bg)] border border-[var(--line-color)] focus:outline-none focus:border-[var(--primary)] transition text-[var(--deep-text)] mb-3"
-    />
+<div class="min-h-screen bg-black">
+  <div class="max-w-5xl mx-auto px-6 pt-8 md:pt-12 pb-16">
 
-    <!-- Type filters -->
-    <div class="flex flex-wrap gap-2">
-      {TYPES.map((t) => (
-        <button
-          class="type-filter text-xs px-3 py-1 rounded-full transition font-medium"
-          data-type={t.toLowerCase()}
-          style={t === "All" ? "background:var(--primary);color:white" : "background:var(--btn-regular-bg);color:var(--btn-content)"}
-        >
-          {t}
-        </button>
-      ))}
+    <!-- Header -->
+    <div class="mb-8">
+      <p class="text-white/20 text-xs tracking-widest uppercase mb-2">Library</p>
+      <p class="text-white/40 text-sm">{total.toLocaleString("en-US")} saved links</p>
     </div>
-  </div>
 
-  <!-- Stats -->
-  <p id="count-label" class="text-sm text-75 mb-3 onload-animation" style="animation-delay:50ms">
-    Showing <strong id="shown-count">{initialLinks.length}</strong> of <strong id="total-count">{total}</strong> saves
-  </p>
+    <!-- Search + filters -->
+    <div class="mb-6 space-y-3">
+      <div class="liquid-glass rounded-full px-5 py-3 flex items-center gap-3">
+        <svg class="w-4 h-4 shrink-0 text-white/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          id="search-input"
+          type="search"
+          autocomplete="off"
+          placeholder="Search titles, tags, summaries…"
+          class="flex-1 bg-transparent text-white placeholder:text-white/25 text-sm focus:outline-none"
+        />
+        <button id="search-clear" class="hidden text-white/30 hover:text-white/60 transition-colors" aria-label="Clear">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
 
-  <!-- Grid -->
-  <div id="saves-grid" class="flex flex-col gap-3 onload-animation" style="animation-delay:100ms">
-    {initialLinks.map((link) => {
-      const hue = TYPE_HUE[link.type] ?? "250";
-      const tags = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
-      const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace("www.", ""); } catch { return ""; } })() : "";
-      const dateLabel = (() => { try { return new Date(link.created_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" }); } catch { return ""; } })();
-      return (
-        <div
-          class="save-card card-base p-4 transition"
-          data-type={link.type.toLowerCase()}
-          data-title={(link.title ?? "").toLowerCase()}
-          data-tags={link.tags.toLowerCase()}
-          data-summary={(link.summary ?? "").toLowerCase()}
-        >
-          <div class="flex items-start gap-3">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap mb-1">
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
-                  style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
-                  {link.type}
-                </span>
-                {link.is_read === 1 && <span class="text-[10px] text-75">✓ read</span>}
-              </div>
-              <a
-                href={link.url ?? "#"}
-                target={link.url ? "_blank" : undefined}
-                rel="noopener noreferrer"
-                class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1"
-              >
-                {link.title ?? link.url ?? "Untitled"}
-              </a>
-              {link.summary && <p class="text-xs text-75 line-clamp-2 mb-2">{link.summary}</p>}
-              <div class="flex items-center gap-3 flex-wrap">
-                {tags.slice(0, 5).map((t: string) => (
-                  <span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag={t}>{t}</span>
-                ))}
-                <span class="text-[10px] text-75 ml-auto flex items-center gap-2">
-                  {dateLabel && <span>{dateLabel}</span>}
-                  {domain && <span>{domain}</span>}
-                </span>
-              </div>
+      <!-- Type filter pills -->
+      <div class="flex flex-wrap gap-2">
+        {TYPES.map((t, i) => (
+          <button
+            class="type-filter text-xs px-4 py-1.5 rounded-full transition-colors font-medium"
+            data-type={t.toLowerCase()}
+            style={i === 0
+              ? "background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.9)"
+              : "background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.35)"}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Count label -->
+    <p id="count-label" class="text-white/20 text-xs mb-4">
+      Showing <span id="shown-count">{initialLinks.length}</span> of <span id="total-count">{total.toLocaleString("en-US")}</span>
+    </p>
+
+    <!-- Cards grid -->
+    <div id="saves-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+      {initialLinks.map((link) => {
+        const style = TYPE_STYLE[link.type] ?? DEFAULT_STYLE;
+        const domain = domainOf(link.url);
+        const year = yearOf(link.created_at);
+        const tags: string[] = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
+        return (
+          <a
+            href={link.url ?? "#"}
+            target={link.url ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            class="save-card group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] min-h-[160px]"
+            style="background:rgb(10,10,10)"
+            data-type={link.type.toLowerCase()}
+            data-title={(link.title ?? "").toLowerCase()}
+            data-tags={link.tags.toLowerCase()}
+            data-summary={(link.summary ?? "").toLowerCase()}
+          >
+            <div class={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80`}></div>
+            <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style={`background:${style.accent}`}></div>
+            <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
+
+            <div class="relative z-10 flex items-start justify-between gap-2">
+              <span class={`text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}`}>{link.type}</span>
+              {year && <span class="text-white/20 text-[10px] shrink-0">{year}</span>}
             </div>
-          </div>
-        </div>
-      );
-    })}
-  </div>
 
-  <!-- Load more -->
-  <div class="text-center mt-6">
-    <button
-      id="load-more-btn"
-      class="btn-regular rounded-lg px-6 py-2 text-sm font-medium text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition"
-      data-offset={initialLinks.length}
-      data-total={total}
-      style={total <= initialLinks.length ? "display:none" : ""}
-    >
-      Load more
-    </button>
-  </div>
+            <div class="relative z-10 mt-3">
+              {domain && (
+                <p class="text-xs mb-1.5 group-hover:opacity-80 transition-opacity" style={`color:${style.accent};opacity:0.6`}>{domain}</p>
+              )}
+              <p class="text-white text-sm font-medium leading-snug line-clamp-2" style="font-family:'Instrument Serif',serif;">
+                {link.title ?? domain ?? "Untitled"}
+              </p>
+              {link.summary && (
+                <p class="text-white/35 text-xs mt-1.5 leading-relaxed line-clamp-2">{link.summary}</p>
+              )}
+              {tags.length > 0 && (
+                <div class="flex flex-wrap gap-1 mt-2">
+                  {tags.slice(0, 4).map(t => (
+                    <span class="tag-pill text-[10px] px-2 py-0.5 rounded-full cursor-pointer transition-colors"
+                          style={`background:${style.accent}18;color:${style.accent};opacity:0.8`}
+                          data-tag={t}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
 
-</MainGridLayout>
+            <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+              <svg class="w-4 h-4" style={`color:${style.accent}`} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17 17 7M7 7h10v10"/>
+              </svg>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    <!-- Empty state -->
+    <div id="saves-empty" class="hidden text-center py-20">
+      <p class="text-white/20 text-sm">No results found.</p>
+    </div>
+
+    <!-- Load more -->
+    <div class="text-center mt-8">
+      <button
+        id="load-more-btn"
+        class="liquid-glass rounded-full px-8 py-3 text-white/40 hover:text-white/80 text-sm transition-colors"
+        data-offset={initialLinks.length}
+        data-total={total}
+        style={total <= initialLinks.length ? "display:none" : ""}
+      >
+        Load more
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</HomeLayout>
 
 <script>
-  const TYPE_HUE: Record<string, string> = {
-    Article: '240', Repository: '150', WebPage: '300',
-    Document: '60', Note: '350', YouTubeVideo: '10',
+  const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
+    Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
+    Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
+    YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
+    WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
+    Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
+    Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
   };
+  const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
+
+  function esc(s: unknown) {
+    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function domainOf(url: string | null) {
+    if (!url) return "";
+    try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
+  }
+  function yearOf(str: string) {
+    try { return new Date(str).getFullYear().toString(); } catch { return ""; }
+  }
 
   function renderCard(link: any): HTMLElement {
-    const hue = TYPE_HUE[link.type as string] ?? '250';
+    const style = TYPE_STYLE[link.type as string] ?? DEFAULT_STYLE;
+    const domain = domainOf(link.url);
+    const year = yearOf(link.created_at);
     const tags: string[] = (() => { try { return JSON.parse(link.tags) ?? []; } catch { return []; } })();
-    const domain = link.url ? (() => { try { return new URL(link.url).hostname.replace('www.', ''); } catch { return ''; } })() : '';
-    const dateLabel = (() => { try { return new Date(link.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); } catch { return ''; } })();
-    const card = document.createElement('div');
-    card.className = 'save-card card-base p-4 transition';
-    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const safeTitle = esc(link.title ?? link.url ?? 'Untitled');
-    const safeSummary = esc(link.summary ?? '');
-    const safeType = esc(link.type as string);
-    const tagHtml = tags.slice(0, 5).map((t: string) => {
-      const safe = esc(t);
-      return `<span class="tag-pill text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] cursor-pointer hover:bg-[var(--btn-regular-bg-hover)] transition" data-tag="${safe}">${safe}</span>`;
-    }).join('');
-    const safeUrl = link.url ? encodeURI(link.url) : '#';
-    card.innerHTML = `
-      <div class="flex items-start gap-3">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap mb-1">
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0" style="background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})">${safeType}</span>
-            ${link.is_read ? '<span class="text-[10px] text-75">read</span>' : ''}
-          </div>
-          <a href="${safeUrl}" ${link.url ? 'target="_blank" rel="noopener noreferrer"' : ''}
-            class="font-medium text-sm text-[var(--deep-text)] hover:text-[var(--primary)] transition line-clamp-2 block mb-1">
-            ${safeTitle}
-          </a>
-          ${safeSummary ? `<p class="text-xs text-75 line-clamp-2 mb-2">${safeSummary}</p>` : ''}
-          <div class="flex items-center gap-3 flex-wrap">
-            ${tagHtml}
-            <span class="text-[10px] text-75 ml-auto flex items-center gap-2">
-              ${dateLabel ? `<span>${dateLabel}</span>` : ''}
-              ${domain ? `<span>${esc(domain)}</span>` : ''}
-            </span>
-          </div>
-        </div>
+    const a = document.createElement("a");
+    a.href = link.url ?? "#";
+    if (link.url) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    a.className = "save-card group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] min-h-[160px]";
+    a.style.background = "rgb(10,10,10)";
+    a.dataset.type = (link.type as string).toLowerCase();
+
+    const tagHtml = tags.slice(0, 4).map((t: string) =>
+      `<span class="tag-pill text-[10px] px-2 py-0.5 rounded-full cursor-pointer transition-colors"
+             style="background:${esc(style.accent)}18;color:${esc(style.accent)};opacity:0.8"
+             data-tag="${esc(t)}">${esc(t)}</span>`
+    ).join("");
+
+    a.innerHTML = `
+      <div class="absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80"></div>
+      <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style="background:${esc(style.accent)}"></div>
+      <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
+      <div class="relative z-10 flex items-start justify-between gap-2">
+        <span class="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}">${esc(link.type)}</span>
+        ${year ? `<span class="text-white/20 text-[10px] shrink-0">${esc(year)}</span>` : ""}
+      </div>
+      <div class="relative z-10 mt-3">
+        ${domain ? `<p class="text-xs mb-1.5 group-hover:opacity-80 transition-opacity" style="color:${esc(style.accent)};opacity:0.6">${esc(domain)}</p>` : ""}
+        <p class="text-white text-sm font-medium leading-snug line-clamp-2" style="font-family:'Instrument Serif',serif;">${esc(link.title ?? link.url ?? "Untitled")}</p>
+        ${link.summary ? `<p class="text-white/35 text-xs mt-1.5 leading-relaxed line-clamp-2">${esc(link.summary)}</p>` : ""}
+        ${tagHtml ? `<div class="flex flex-wrap gap-1 mt-2">${tagHtml}</div>` : ""}
+      </div>
+      <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+        <svg class="w-4 h-4" style="color:${esc(style.accent)}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M7 17 17 7M7 7h10v10"/>
+        </svg>
       </div>`;
-    return card;
+    return a;
   }
 
   const initialized = new WeakSet<Element>();
 
   function initSavesPage() {
-    const grid = document.getElementById('saves-grid');
-    if (!grid) return;
-    if (initialized.has(grid)) return;
+    const grid = document.getElementById("saves-grid");
+    if (!grid || initialized.has(grid)) return;
     initialized.add(grid);
 
-    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
-    const shownCount = document.getElementById('shown-count');
-    const totalCount = document.getElementById('total-count');
-    const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement | null;
+    const searchInput = document.getElementById("search-input") as HTMLInputElement | null;
+    const clearBtn    = document.getElementById("search-clear");
+    const shownCount  = document.getElementById("shown-count");
+    const totalCount  = document.getElementById("total-count");
+    const emptyState  = document.getElementById("saves-empty");
+    const loadMoreBtn = document.getElementById("load-more-btn") as HTMLButtonElement | null;
 
-    let activeType = 'all';
-    let searchQuery = '';
-    let currentOffset = 50; // already have 50 from SSR
-    let currentTotal = parseInt(loadMoreBtn?.dataset.total ?? '0');
+    let activeType = "all";
+    let searchQuery = "";
+    let currentOffset = 50;
+    let currentTotal = parseInt(loadMoreBtn?.dataset.total ?? "0");
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
     function setTypeButtons(type: string) {
-      document.querySelectorAll<HTMLElement>('.type-filter').forEach(b => {
+      document.querySelectorAll<HTMLElement>(".type-filter").forEach(b => {
         const active = b.dataset.type === type;
-        b.style.background = active ? 'var(--primary)' : 'var(--btn-regular-bg)';
-        b.style.color = active ? 'white' : 'var(--btn-content)';
+        b.style.background = active ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.04)";
+        b.style.color = active ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)";
       });
     }
 
     async function fetchAndReplace() {
-      grid.innerHTML = '<p class="text-sm text-75 text-center py-8">Loading…</p>';
-      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+      grid.innerHTML = "";
+      emptyState?.classList.add("hidden");
+      if (loadMoreBtn) loadMoreBtn.style.display = "none";
       currentOffset = 0;
 
-      const params = new URLSearchParams({ limit: '50', offset: '0' });
-      if (activeType !== 'all') params.set('type', activeType);
-      if (searchQuery) params.set('q', searchQuery);
+      const params = new URLSearchParams({ limit: "50", offset: "0" });
+      if (activeType !== "all") params.set("type", activeType);
+      if (searchQuery) params.set("q", searchQuery);
 
       try {
         const res = await fetch(`/api/links?${params}`);
@@ -210,75 +283,83 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
         currentTotal = total ?? 0;
         currentOffset = links?.length ?? 0;
 
-        grid.innerHTML = '';
         if (!links?.length) {
-          grid.innerHTML = '<p class="text-sm text-75 text-center py-8">No results found.</p>';
+          emptyState?.classList.remove("hidden");
         } else {
           links.forEach((link: any) => grid.appendChild(renderCard(link)));
         }
         if (shownCount) shownCount.textContent = String(currentOffset);
-        if (totalCount) totalCount.textContent = String(currentTotal);
+        if (totalCount) totalCount.textContent = currentTotal.toLocaleString("en-US");
         if (loadMoreBtn) {
-          loadMoreBtn.style.display = currentOffset < currentTotal ? '' : 'none';
+          loadMoreBtn.style.display = currentOffset < currentTotal ? "" : "none";
           loadMoreBtn.dataset.offset = String(currentOffset);
-          loadMoreBtn.textContent = 'Load more';
+          loadMoreBtn.textContent = "Load more";
           loadMoreBtn.disabled = false;
         }
       } catch {
-        grid.innerHTML = '<p class="text-sm text-75 text-center py-8">Failed to load. Please refresh.</p>';
+        grid.innerHTML = `<p class="text-white/20 text-sm text-center py-12 col-span-3">Failed to load. Please refresh.</p>`;
       }
     }
 
-    // Type filter buttons
-    document.querySelectorAll<HTMLElement>('.type-filter').forEach(btn => {
-      btn.addEventListener('click', () => {
-        activeType = btn.dataset.type ?? 'all';
+    // Type filter clicks
+    document.querySelectorAll<HTMLElement>(".type-filter").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeType = btn.dataset.type ?? "all";
         setTypeButtons(activeType);
         fetchAndReplace();
       });
     });
 
-    // Tag pill clicks — delegate from grid
-    grid.addEventListener('click', (e) => {
-      const pill = (e.target as HTMLElement).closest<HTMLElement>('.tag-pill');
+    // Tag pill clicks — delegated
+    grid.addEventListener("click", (e) => {
+      const pill = (e.target as HTMLElement).closest<HTMLElement>(".tag-pill");
       if (!pill) return;
-      const tag = pill.dataset.tag ?? '';
+      e.preventDefault();
+      const tag = pill.dataset.tag ?? "";
       if (searchInput) searchInput.value = tag;
       searchQuery = tag;
+      clearBtn?.classList.toggle("hidden", !tag);
       fetchAndReplace();
     });
 
-    // Search input — debounced
-    searchInput?.addEventListener('input', () => {
+    // Search
+    searchInput?.addEventListener("input", () => {
       searchQuery = searchInput.value.trim();
+      clearBtn?.classList.toggle("hidden", !searchQuery);
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(fetchAndReplace, 350);
     });
 
-    // Load more — respects current filters
-    loadMoreBtn?.addEventListener('click', async () => {
-      const offset = parseInt(loadMoreBtn.dataset.offset ?? '50');
-      loadMoreBtn.textContent = 'Loading…';
+    clearBtn?.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      searchQuery = "";
+      clearBtn.classList.add("hidden");
+      fetchAndReplace();
+    });
+
+    // Load more
+    loadMoreBtn?.addEventListener("click", async () => {
+      const offset = parseInt(loadMoreBtn.dataset.offset ?? "50");
+      loadMoreBtn.textContent = "Loading…";
       loadMoreBtn.disabled = true;
 
-      const params = new URLSearchParams({ limit: '50', offset: String(offset) });
-      if (activeType !== 'all') params.set('type', activeType);
-      if (searchQuery) params.set('q', searchQuery);
+      const params = new URLSearchParams({ limit: "50", offset: String(offset) });
+      if (activeType !== "all") params.set("type", activeType);
+      if (searchQuery) params.set("q", searchQuery);
 
       try {
         const res = await fetch(`/api/links?${params}`);
         const { links } = await res.json();
-        if (!links?.length) { loadMoreBtn.style.display = 'none'; return; }
+        if (!links?.length) { loadMoreBtn.style.display = "none"; return; }
         links.forEach((link: any) => grid.appendChild(renderCard(link)));
         const newOffset = offset + links.length;
         loadMoreBtn.dataset.offset = String(newOffset);
         if (shownCount) shownCount.textContent = String(newOffset);
-        // total-count stays the same on load more — filtered total already set
-        loadMoreBtn.textContent = 'Load more';
+        loadMoreBtn.textContent = "Load more";
         loadMoreBtn.disabled = false;
-        if (links.length < 50) loadMoreBtn.style.display = 'none';
+        if (links.length < 50) loadMoreBtn.style.display = "none";
       } catch {
-        loadMoreBtn.textContent = 'Error — try again';
+        loadMoreBtn.textContent = "Error — try again";
         loadMoreBtn.disabled = false;
       }
     });
@@ -287,11 +368,8 @@ const TYPES = ["All", "Article", "Repository", "YouTubeVideo", "WebPage", "Docum
   initSavesPage();
 
   function setupSwup() {
-    (window as any).swup.hooks.on('page:view', initSavesPage);
+    (window as any).swup?.hooks?.on("page:view", initSavesPage);
   }
-  if ((window as any).swup) {
-    setupSwup();
-  } else {
-    document.addEventListener('swup:enable', setupSwup);
-  }
+  if ((window as any).swup) setupSwup();
+  else document.addEventListener("swup:enable", setupSwup);
 </script>
