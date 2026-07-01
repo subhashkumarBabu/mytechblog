@@ -59,7 +59,7 @@ function yearOf(str: string) {
 }
 ---
 
-<HomeLayout title="DevOps Mantra" description="SRE, AI and Cloud learnings by Subhash Kumar">
+<HomeLayout title="DevOps Mantra" description="A running index of the web, curated.">
 
 <div class="min-h-screen bg-black relative">
 
@@ -69,53 +69,64 @@ function yearOf(str: string) {
   </div>
 
   <!-- Hero — always visible, even during search -->
-  <div class="relative max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6 text-center">
+  <div class="relative max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-12">
 
-    <p class="text-white/25 text-xs md:text-sm tracking-widest uppercase mb-8">
-      {totalFormatted} links &mdash; SRE &middot; AI &middot; Cloud
-    </p>
-
-    <!-- Search bar -->
-    <div class="max-w-lg mx-auto mb-6">
-      <div class="liquid-glass rounded-full px-5 py-3.5 flex items-center gap-3">
-        <svg class="w-4 h-4 shrink-0" style="color:rgba(255,255,255,0.3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input
-          id="home-search"
-          type="search"
-          autocomplete="off"
-          placeholder={`Search ${totalFormatted} saved links…`}
-          class="flex-1 bg-transparent text-white placeholder:text-white/25 text-sm focus:outline-none"
-        />
-        <button id="search-clear" class="hidden shrink-0 transition-colors" style="color:rgba(255,255,255,0.3)" aria-label="Clear">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
-        </button>
+      <!-- Left: title + description -->
+      <div class="shrink-0">
+        <h1 class="text-3xl md:text-4xl text-white/90 leading-tight mb-3"
+            style="font-family:'Instrument Serif',serif;font-style:italic;">
+          DevOps Mantra
+        </h1>
+        <p class="text-white/30 text-sm leading-relaxed max-w-xs">
+          A running index of the web, curated.
+        </p>
       </div>
-    </div>
 
-    <!-- Stats row: type counts + library link -->
-    {typeCounts.length > 0 && (() => {
-      const filtered = typeCounts.filter(t => TYPE_LABEL[t.type]);
-      return (
-        <div class="flex items-center justify-center gap-2 flex-wrap">
-          {filtered.map((t, i) => (
-            <>
-              <span class="text-white/25 text-xs tabular-nums">
-                {t.n.toLocaleString("en-US")} {TYPE_LABEL[t.type]}
-              </span>
-              {i < filtered.length - 1 && <span class="text-white/10 text-xs">&middot;</span>}
-            </>
-          ))}
-          <span class="text-white/10 text-xs">&middot;</span>
-          <a href="/saves/" class="text-white/35 hover:text-white/70 text-xs transition-colors underline-offset-2 hover:underline">
-            Browse library &rarr;
-          </a>
+      <!-- Right: search + stats -->
+      <div class="flex-1 min-w-0 max-w-lg">
+        <!-- Search bar -->
+        <div class="liquid-glass rounded-full px-5 py-3.5 flex items-center gap-3 mb-3">
+          <svg class="w-4 h-4 shrink-0" style="color:rgba(255,255,255,0.3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            id="home-search"
+            type="search"
+            autocomplete="off"
+            placeholder={`Search ${totalFormatted} saved links…`}
+            class="flex-1 bg-transparent text-white placeholder:text-white/25 text-sm focus:outline-none"
+          />
+          <button id="search-clear" class="hidden shrink-0 transition-colors" style="color:rgba(255,255,255,0.3)" aria-label="Clear">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
-      );
-    })()}
+
+        <!-- Stats row -->
+        {typeCounts.length > 0 && (() => {
+          const filtered = typeCounts.filter(t => TYPE_LABEL[t.type]);
+          return (
+            <div class="flex items-center gap-2 flex-wrap">
+              {filtered.map((t, i) => (
+                <>
+                  <span class="text-white/25 text-xs tabular-nums">
+                    {t.n.toLocaleString("en-US")} {TYPE_LABEL[t.type]}
+                  </span>
+                  {i < filtered.length - 1 && <span class="text-white/10 text-xs">&middot;</span>}
+                </>
+              ))}
+              <span class="text-white/10 text-xs">&middot;</span>
+              <a href="/saves/" class="text-white/35 hover:text-white/70 text-xs transition-colors underline-offset-2 hover:underline">
+                Browse library &rarr;
+              </a>
+            </div>
+          );
+        })()}
+      </div>
+
+    </div>
   </div>
 
   <!-- Content area -->
