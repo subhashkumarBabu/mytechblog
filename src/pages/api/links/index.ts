@@ -15,6 +15,7 @@ export async function GET({ request, locals }: APIContext) {
 	const tag = url.searchParams.get("tag");
 	const q = url.searchParams.get("q")?.trim();
 	const unread = url.searchParams.get("unread") === "1";
+	const random = url.searchParams.get("random") === "1";
 	const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 200);
 	const offset = Number(url.searchParams.get("offset") ?? 0);
 
@@ -39,7 +40,8 @@ export async function GET({ request, locals }: APIContext) {
 	}
 
 	const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
-	const query = `SELECT id, type, title, url, summary, tags, created_at, is_read FROM links${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+	const orderBy = random ? "RANDOM()" : "created_at DESC";
+	const query = `SELECT id, type, title, url, summary, tags, created_at, is_read FROM links${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
 	params.push(limit, offset);
 
 	const { results } = await DB.prepare(query).bind(...params).all();

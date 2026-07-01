@@ -9,8 +9,11 @@ type Link = {
   tags: string; created_at: string;
 };
 
+type TypeCount = { type: string; n: number };
+
 let cards: Link[] = [];
 let total = 0;
+let typeCounts: TypeCount[] = [];
 
 if (env?.DB) {
   const q = (type: string) =>
@@ -18,27 +21,33 @@ if (env?.DB) {
       "SELECT id, type, title, url, summary, tags, created_at FROM links WHERE type=? AND url IS NOT NULL AND title IS NOT NULL ORDER BY RANDOM() LIMIT 1"
     ).bind(type).first<Link>();
 
-  const [webPage, article, repo, yt, doc, countRes] = await Promise.all([
+  const [webPage, article, repo, yt, doc, countRes, typeRes] = await Promise.all([
     q("WebPage"), q("Article"), q("Repository"), q("YouTubeVideo"), q("Document"),
     env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
+    env.DB.prepare("SELECT type, COUNT(*) as n FROM links GROUP BY type ORDER BY n DESC").all(),
   ]);
 
   cards = [webPage, article, repo, yt, doc].filter((c): c is Link => !!c);
   total = countRes?.n ?? 0;
+  typeCounts = typeRes.results as TypeCount[];
 }
 
 const totalFormatted = total.toLocaleString("en-US");
 
 const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
-  Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",    accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
+  Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
   Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
-  YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",      accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
-  WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent", accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
-  Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",  accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
-  Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",    accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
+  YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
+  WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
+  Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
+  Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
 };
-
 const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
+
+const TYPE_LABEL: Record<string, string> = {
+  WebPage: "Web", Article: "Articles", Repository: "Repos",
+  YouTubeVideo: "Videos", Document: "Docs", Note: "Notes",
+};
 
 function domainOf(url: string | null) {
   if (!url) return "";
@@ -52,16 +61,22 @@ function yearOf(str: string) {
 
 <HomeLayout title="DevOps Mantra" description="SRE, AI and Cloud learnings by Subhash Kumar">
 
-<div class="min-h-screen bg-black">
+<div class="min-h-screen bg-black relative">
 
-  <!-- Hero -->
-  <div class="max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6 md:pb-10 text-center">
-    <p class="text-white/30 text-sm md:text-base tracking-widest uppercase mb-10">
+  <!-- Subtle radial gradient behind hero -->
+  <div class="absolute inset-x-0 top-0 h-[420px] pointer-events-none"
+       style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,0.035), transparent)">
+  </div>
+
+  <!-- Hero — always visible, even during search -->
+  <div class="relative max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6 text-center">
+
+    <p class="text-white/25 text-xs md:text-sm tracking-widest uppercase mb-8">
       {totalFormatted} links &mdash; SRE &middot; AI &middot; Cloud
     </p>
 
     <!-- Search bar -->
-    <div class="max-w-lg mx-auto">
+    <div class="max-w-lg mx-auto mb-6">
       <div class="liquid-glass rounded-full px-5 py-3.5 flex items-center gap-3">
         <svg class="w-4 h-4 shrink-0" style="color:rgba(255,255,255,0.3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -80,101 +95,130 @@ function yearOf(str: string) {
         </button>
       </div>
     </div>
+
+    <!-- Stats row: type counts + library link -->
+    {typeCounts.length > 0 && (() => {
+      const filtered = typeCounts.filter(t => TYPE_LABEL[t.type]);
+      return (
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+          {filtered.map((t, i) => (
+            <>
+              <span class="text-white/25 text-xs tabular-nums">
+                {t.n.toLocaleString("en-US")} {TYPE_LABEL[t.type]}
+              </span>
+              {i < filtered.length - 1 && <span class="text-white/10 text-xs">&middot;</span>}
+            </>
+          ))}
+          <span class="text-white/10 text-xs">&middot;</span>
+          <a href="/saves/" class="text-white/35 hover:text-white/70 text-xs transition-colors underline-offset-2 hover:underline">
+            Browse library &rarr;
+          </a>
+        </div>
+      );
+    })()}
   </div>
 
   <!-- Content area -->
-  <div class="max-w-5xl mx-auto px-6 pb-24">
+  <div class="relative max-w-5xl mx-auto px-6 pb-8">
 
-    <!-- Random D1 cards (magazine grid) -->
-    <div id="home-cards" class="transition-opacity duration-300">
-      {cards.length > 0 ? (
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {cards.map((card, i) => {
-            const style = TYPE_STYLE[card.type] ?? DEFAULT_STYLE;
-            const domain = domainOf(card.url);
-            const year = yearOf(card.created_at);
-            const isHero = i === 0;
-            // hero: full-width on mobile/tablet, spans 2 cols + 2 rows on desktop
-            const colSpan = isHero
-              ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2"
-              : "col-span-1";
+    <!-- Discover section (hidden during search) -->
+    <div id="discover-section">
 
-            return (
-              <a
-                href={card.url ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 md:p-7 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${isHero ? "min-h-[220px] md:min-h-[300px]" : "min-h-[160px] md:min-h-[180px]"} ${colSpan}`}
-                style="background: rgb(10,10,10);"
-              >
-                {/* Gradient blob */}
-                <div class={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80`}></div>
-
-                {/* Colored glow orb */}
-                <div
-                  class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40"
-                  style={`background:${style.accent};`}
-                ></div>
-
-                {/* Glass border overlay */}
-                <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08), inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
-
-                {/* Content */}
-                <div class="relative z-10 flex items-start justify-between gap-2">
-                  <span class={`text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}`}>
-                    {card.type}
-                  </span>
-                  {year && <span class="text-white/20 text-[10px] shrink-0">{year}</span>}
-                </div>
-
-                <div class="relative z-10">
-                  {domain && (
-                    <p class="text-xs mb-2 transition-colors duration-300 group-hover:opacity-80" style={`color:${style.accent};opacity:0.6;`}>
-                      {domain}
-                    </p>
-                  )}
-                  <p
-                    class={`text-white font-medium leading-snug ${isHero ? "text-2xl md:text-3xl" : "text-base md:text-lg"}`}
-                    style="font-family:'Instrument Serif',serif;"
-                  >
-                    {card.title ?? domain ?? "Untitled"}
-                  </p>
-                  {isHero && card.summary && (
-                    <p class="text-white/40 text-sm mt-3 line-clamp-2 leading-relaxed">{card.summary}</p>
-                  )}
-                </div>
-
-                {/* Arrow */}
-                <div class="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                  <svg class="w-5 h-5" style={`color:${style.accent}`} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M7 17 17 7M7 7h10v10"/>
-                  </svg>
-                </div>
-              </a>
-            );
-          })}
-        </div>
-      ) : (
-        <div class="text-center py-24 text-white/20 text-sm">No saved links yet.</div>
-      )}
-    </div>
-
-    <!-- Loading skeleton -->
-    <div id="home-loading" class="hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {[...Array(5)].map((_, i) => (
-          <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px]" : "min-h-[160px]"}`}></div>
-        ))}
+      <!-- Section header -->
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-white/20 text-xs tracking-widest uppercase">Discover</p>
+        <button
+          id="shuffle-btn"
+          class="liquid-glass rounded-full px-4 py-1.5 flex items-center gap-2 text-white/40 hover:text-white/80 text-xs transition-colors"
+          aria-label="Shuffle cards"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/>
+            <path d="m19 15 3 3-3 3"/>
+            <path d="M2 6h1.9c1.3 0 2.5.6 3.3 1.7l.5.7"/>
+            <path d="m19 9 3-3-3-3"/>
+            <path d="M22 9h-4.7c-1.3 0-2.5-.6-3.3-1.7L13 7"/>
+          </svg>
+          Shuffle
+        </button>
       </div>
+
+      <!-- Cards grid -->
+      <div id="home-cards">
+        {cards.length > 0 ? (
+          <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {cards.map((card, i) => {
+              const style = TYPE_STYLE[card.type] ?? DEFAULT_STYLE;
+              const domain = domainOf(card.url);
+              const year = yearOf(card.created_at);
+              const isHero = i === 0;
+              const colSpan = isHero
+                ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2"
+                : "col-span-1";
+              return (
+                <a
+                  href={card.url ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 md:p-7 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${isHero ? "min-h-[220px] md:min-h-[300px]" : "min-h-[160px] md:min-h-[180px]"} ${colSpan}`}
+                  style="background:rgb(10,10,10)"
+                >
+                  <div class={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80`}></div>
+                  <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style={`background:${style.accent}`}></div>
+                  <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
+
+                  <div class="relative z-10 flex items-start justify-between gap-2">
+                    <span class={`text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}`}>{card.type}</span>
+                    {year && <span class="text-white/20 text-[10px] shrink-0">{year}</span>}
+                  </div>
+
+                  <div class="relative z-10">
+                    {domain && (
+                      <p class="text-xs mb-2 group-hover:opacity-80 transition-opacity" style={`color:${style.accent};opacity:0.6`}>{domain}</p>
+                    )}
+                    <p class={`text-white font-medium leading-snug ${isHero ? "text-xl md:text-2xl" : "text-sm md:text-base"}`}
+                       style="font-family:'Instrument Serif',serif;">
+                      {card.title ?? domain ?? "Untitled"}
+                    </p>
+                    {card.summary && (
+                      <p class={`text-white/35 mt-2 leading-relaxed ${isHero ? "text-sm line-clamp-2" : "text-xs line-clamp-1"}`}>
+                        {card.summary}
+                      </p>
+                    )}
+                  </div>
+
+                  <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    <svg class="w-4 h-4" style={`color:${style.accent}`} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M7 17 17 7M7 7h10v10"/>
+                    </svg>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          <div class="text-center py-24 text-white/20 text-sm">No saved links yet.</div>
+        )}
+      </div>
+
+      <!-- Shuffle skeleton (shown while loading new cards) -->
+      <div id="shuffle-loading" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {[...Array(5)].map((_, i) => (
+            <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px]" : "min-h-[160px]"}`}></div>
+          ))}
+        </div>
+      </div>
+
     </div>
 
-    <!-- Search results -->
+    <!-- Search results (replaces discover section) -->
     <div id="home-results" class="hidden">
-      <div class="flex items-center justify-between mb-5">
-        <p class="text-white/30 text-xs tracking-widest uppercase">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-white/20 text-xs tracking-widest uppercase">
           <span id="results-count">0</span> results
         </p>
-        <span class="text-white/15 text-xs">top 10 from D1</span>
+        <span class="text-white/15 text-xs">top 10 from library</span>
       </div>
       <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"></div>
       <div id="results-empty" class="hidden text-center py-20">
@@ -202,79 +246,74 @@ function yearOf(str: string) {
     if (!url) return "";
     try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
   }
-
   function yearOf(str: string) {
     try { return new Date(str).getFullYear().toString(); } catch { return ""; }
   }
-
   function esc(s: unknown) {
     return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  function renderResultCard(link: any): HTMLElement {
+  function buildCard(link: any, isHero = false): HTMLAnchorElement {
     const style = TYPE_STYLE[link.type as string] ?? DEFAULT_STYLE;
     const domain = domainOf(link.url);
     const year = yearOf(link.created_at);
-
     const a = document.createElement("a");
     a.href = link.url ?? "#";
     if (link.url) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
-    a.className = "group relative rounded-3xl overflow-hidden flex flex-col justify-between p-6 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] min-h-[140px]";
+    const sizeClass = isHero
+      ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px] p-5 md:p-7"
+      : "col-span-1 min-h-[160px] md:min-h-[180px] p-5";
+    a.className = `group relative rounded-3xl overflow-hidden flex flex-col justify-between no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${sizeClass}`;
     a.style.background = "rgb(10,10,10)";
-
+    const titleSize = isHero ? "text-xl md:text-2xl" : "text-sm md:text-base";
+    const summarySize = isHero ? "text-sm line-clamp-2" : "text-xs line-clamp-1";
     a.innerHTML = `
-      <div class="absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-70"></div>
-      <div class="absolute -top-8 -right-8 w-28 h-28 rounded-full opacity-15 blur-2xl group-hover:opacity-30 transition-opacity" style="background:${esc(style.accent)}"></div>
+      <div class="absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80"></div>
+      <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style="background:${esc(style.accent)}"></div>
       <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
-      <div class="relative z-10 flex items-center justify-between gap-2">
+      <div class="relative z-10 flex items-start justify-between gap-2">
         <span class="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}">${esc(link.type)}</span>
-        ${year ? `<span class="text-white/20 text-[10px]">${esc(year)}</span>` : ""}
+        ${year ? `<span class="text-white/20 text-[10px] shrink-0">${esc(year)}</span>` : ""}
       </div>
-      <div class="relative z-10 mt-3">
-        ${domain ? `<p class="text-xs mb-1.5" style="color:${esc(style.accent)};opacity:0.6">${esc(domain)}</p>` : ""}
-        <p class="text-white text-base font-medium leading-snug line-clamp-2" style="font-family:'Instrument Serif',serif;">${esc(link.title ?? link.url ?? "Untitled")}</p>
+      <div class="relative z-10">
+        ${domain ? `<p class="text-xs mb-2 group-hover:opacity-80 transition-opacity" style="color:${esc(style.accent)};opacity:0.6">${esc(domain)}</p>` : ""}
+        <p class="text-white font-medium leading-snug ${titleSize}" style="font-family:'Instrument Serif',serif;">${esc(link.title ?? link.url ?? "Untitled")}</p>
+        ${link.summary ? `<p class="text-white/35 mt-2 leading-relaxed ${summarySize}">${esc(link.summary)}</p>` : ""}
       </div>
-      <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
         <svg class="w-4 h-4" style="color:${esc(style.accent)}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M7 17 17 7M7 7h10v10"/>
         </svg>
-      </div>
-    `;
+      </div>`;
     return a;
   }
 
   function initHome() {
-    const searchInput  = document.getElementById("home-search") as HTMLInputElement | null;
-    const clearBtn     = document.getElementById("search-clear");
-    const cardsPanel   = document.getElementById("home-cards");
-    const loadingPanel = document.getElementById("home-loading");
-    const resultsPanel = document.getElementById("home-results");
-    const resultsGrid  = document.getElementById("results-grid");
-    const resultsCount = document.getElementById("results-count");
-    const resultsEmpty = document.getElementById("results-empty");
+    const searchInput     = document.getElementById("home-search") as HTMLInputElement | null;
+    const clearBtn        = document.getElementById("search-clear");
+    const discoverSection = document.getElementById("discover-section");
+    const cardsEl         = document.getElementById("home-cards");
+    const cardsGrid       = document.getElementById("cards-grid");
+    const shuffleLoading  = document.getElementById("shuffle-loading");
+    const shuffleBtn      = document.getElementById("shuffle-btn");
+    const resultsPanel    = document.getElementById("home-results");
+    const resultsGrid     = document.getElementById("results-grid");
+    const resultsCount    = document.getElementById("results-count");
+    const resultsEmpty    = document.getElementById("results-empty");
 
     if (!searchInput) return;
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let lastQuery = "";
 
-    function showCards() {
-      cardsPanel?.classList.remove("hidden","opacity-0");
-      loadingPanel?.classList.add("hidden");
+    function showDiscover() {
+      discoverSection?.classList.remove("hidden");
       resultsPanel?.classList.add("hidden");
       clearBtn?.classList.add("hidden");
     }
 
-    function showLoading() {
-      cardsPanel?.classList.add("opacity-0");
-      setTimeout(() => cardsPanel?.classList.add("hidden"), 200);
-      loadingPanel?.classList.remove("hidden");
-      resultsPanel?.classList.add("hidden");
-    }
-
     function showResults(links: any[]) {
-      loadingPanel?.classList.add("hidden");
-      cardsPanel?.classList.add("hidden");
+      discoverSection?.classList.add("hidden");
       resultsPanel?.classList.remove("hidden");
       if (resultsCount) resultsCount.textContent = String(links.length);
       resultsGrid?.replaceChildren();
@@ -282,12 +321,13 @@ function yearOf(str: string) {
         resultsEmpty?.classList.remove("hidden");
       } else {
         resultsEmpty?.classList.add("hidden");
-        links.forEach(l => resultsGrid?.appendChild(renderResultCard(l)));
+        links.forEach(l => resultsGrid?.appendChild(buildCard(l)));
       }
     }
 
     async function doSearch(q: string) {
-      showLoading();
+      discoverSection?.classList.add("hidden");
+      resultsPanel?.classList.add("hidden");
       try {
         const res = await fetch(`/api/links?q=${encodeURIComponent(q)}&limit=10`);
         const { links } = await res.json() as { links: any[] };
@@ -297,11 +337,43 @@ function yearOf(str: string) {
       }
     }
 
+    // Shuffle
+    shuffleBtn?.addEventListener("click", async () => {
+      if (!cardsEl || !shuffleLoading) return;
+      cardsEl.classList.add("hidden");
+      shuffleLoading.classList.remove("hidden");
+
+      const types = ["WebPage", "Article", "Repository", "YouTubeVideo", "Document"];
+      try {
+        const results = await Promise.all(
+          types.map(t => fetch(`/api/links?type=${t}&limit=1&random=1`).then(r => r.json()))
+        );
+        const newCards = results.map((r: any) => r.links?.[0]).filter(Boolean);
+
+        if (cardsGrid) {
+          cardsGrid.replaceChildren();
+          newCards.forEach((card: any, i: number) => cardsGrid.appendChild(buildCard(card, i === 0)));
+        } else if (cardsEl) {
+          const grid = document.createElement("div");
+          grid.id = "cards-grid";
+          grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4";
+          newCards.forEach((card: any, i: number) => grid.appendChild(buildCard(card, i === 0)));
+          cardsEl.replaceChildren(grid);
+        }
+      } catch {
+        // silently keep existing cards on error
+      }
+
+      shuffleLoading.classList.add("hidden");
+      cardsEl.classList.remove("hidden");
+    });
+
+    // Search
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim();
       clearBtn?.classList.toggle("hidden", !q);
       if (debounceTimer) clearTimeout(debounceTimer);
-      if (!q) { lastQuery = ""; showCards(); return; }
+      if (!q) { lastQuery = ""; showDiscover(); return; }
       if (q === lastQuery) return;
       lastQuery = q;
       debounceTimer = setTimeout(() => doSearch(q), 320);
@@ -310,7 +382,7 @@ function yearOf(str: string) {
     clearBtn?.addEventListener("click", () => {
       if (searchInput) searchInput.value = "";
       lastQuery = "";
-      showCards();
+      showDiscover();
       searchInput?.focus();
     });
   }

@@ -1,5 +1,6 @@
 ---
 import BackToTop from "@components/control/BackToTop.astro";
+import DarkFooter from "@components/DarkFooter.astro";
 import DarkNavbar from "@components/DarkNavbar.astro";
 import Layout from "./Layout.astro";
 
@@ -22,6 +23,7 @@ const { title, description } = Astro.props;
     <main id="swup-container" class="transition-swup-fade">
       <div id="content-wrapper" class="onload-animation">
         <slot />
+        <DarkFooter />
       </div>
     </main>
     <BackToTop />
