@@ -1,15 +1,79 @@
 ---
 export const prerender = true;
-import ArchivePanel from "@components/ArchivePanel.svelte";
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { getSortedPostsList } from "../utils/content-utils";
+import HomeLayout from "@layouts/HomeLayout.astro";
+import { getSortedPostsList } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
 
-const sortedPostsList = await getSortedPostsList();
+const posts = await getSortedPostsList();
+
+function yearOf(d: Date | string) {
+  try { return new Date(d).getFullYear(); } catch { return null; }
+}
+
+// Group by year
+const byYear = posts.reduce<Record<number, typeof posts>>((acc, p) => {
+  const y = yearOf(p.data.published) ?? 0;
+  if (!acc[y]) acc[y] = [];
+  acc[y].push(p);
+  return acc;
+}, {});
+
+const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)}>
-    <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
-</MainGridLayout>
+<HomeLayout title="Blog — DevOps Mantra" description="Writing on SRE, AI and Cloud">
 
+  <div class="min-h-screen bg-black px-6 pb-24">
+    <div class="max-w-3xl mx-auto pt-14 pb-12">
+
+      <h1
+        class="text-5xl md:text-7xl text-white tracking-tight leading-none mb-3"
+        style="font-family:'Instrument Serif',serif;"
+      >
+        Writing
+      </h1>
+      <p class="text-white/30 text-sm tracking-widest uppercase mb-14">
+        {posts.length} post{posts.length !== 1 ? "s" : ""}
+      </p>
+
+      {posts.length === 0 && (
+        <p class="text-white/20 text-sm">No posts yet.</p>
+      )}
+
+      {years.map((year) => (
+        <div class="mb-12">
+          <p class="text-white/15 text-xs tracking-widest uppercase mb-5">{year}</p>
+          <div class="flex flex-col gap-3">
+            {byYear[year].map((post) => {
+              const date = new Date(post.data.published).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+              return (
+                <a
+                  href={getPostUrlBySlug(post.slug)}
+                  class="group liquid-glass rounded-2xl px-6 py-5 flex items-center justify-between gap-4 no-underline transition-all duration-200 hover:bg-white/[0.06]"
+                >
+                  <p
+                    class="text-white/80 group-hover:text-white text-base md:text-lg leading-snug transition-colors"
+                    style="font-family:'Instrument Serif',serif;"
+                  >
+                    {post.data.title}
+                  </p>
+                  <div class="flex items-center gap-4 shrink-0">
+                    {post.data.tags?.slice(0,2).map((tag: string) => (
+                      <span class="hidden sm:block text-white/20 text-[10px] tracking-wide">{tag}</span>
+                    ))}
+                    <span class="text-white/25 text-xs tabular-nums">{date}</span>
+                    <svg class="w-4 h-4 text-white/20 group-hover:text-white/50 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M7 17 17 7M7 7h10v10"/>
+                    </svg>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+    </div>
+  </div>
+
+</HomeLayout>

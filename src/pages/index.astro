@@ -1,153 +1,328 @@
 ---
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { getSortedPosts } from "@utils/content-utils";
-import { getPostUrlBySlug } from "@utils/url-utils";
-import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import HomeLayout from "@layouts/HomeLayout.astro";
 
 const env = Astro.locals.runtime?.env;
 
-type Link = { id: string; type: string; title: string | null; url: string | null; summary: string | null; tags: string; created_at: string };
+type Link = {
+  id: string; type: string; title: string | null;
+  url: string | null; summary: string | null;
+  tags: string; created_at: string;
+};
 
-let randomCards: Link[] = [];
-let recentSaves: Link[] = [];
-let stats = { total: 0, read: 0, due: 0, streak: 0 };
+let cards: Link[] = [];
+let total = 0;
 
 if (env?.DB) {
-  const [randomRes, recentRes, statsRes, streakRes] = await Promise.all([
-    env.DB.prepare("SELECT id, type, title, url, summary, tags FROM links ORDER BY RANDOM() LIMIT 3").all(),
-    env.DB.prepare("SELECT id, type, title, url, summary, tags, created_at FROM links ORDER BY created_at DESC LIMIT 8").all(),
-    env.DB.prepare("SELECT (SELECT COUNT(*) FROM links) as total, (SELECT COUNT(*) FROM links WHERE is_read=1) as read_count, (SELECT COUNT(*) FROM links WHERE next_review_at IS NOT NULL AND next_review_at <= date('now')) as due_count").first<{total:number,read_count:number,due_count:number}>(),
-    env.DB.prepare("SELECT COUNT(*) as streak FROM activity WHERE date >= date('now', '-30 days') AND (links_saved + links_reviewed) > 0").first<{streak:number}>(),
+  const [cardRes, countRes] = await Promise.all([
+    env.DB.prepare(
+      "SELECT id, type, title, url, summary, tags, created_at FROM links WHERE url IS NOT NULL AND title IS NOT NULL ORDER BY RANDOM() LIMIT 5"
+    ).all(),
+    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
   ]);
-  randomCards = randomRes.results as Link[];
-  recentSaves = recentRes.results as Link[];
-  stats.total = statsRes?.total ?? 0;
-  stats.read = statsRes?.read_count ?? 0;
-  stats.due = statsRes?.due_count ?? 0;
-  stats.streak = streakRes?.streak ?? 0;
+  cards = cardRes.results as Link[];
+  total = countRes?.n ?? 0;
 }
 
-const allPosts = await getSortedPosts();
-const recentPosts = allPosts.slice(0, 5);
+const totalFormatted = total.toLocaleString("en-US");
 
-function parseTags(json: string): string[] {
-  try { return JSON.parse(json) ?? []; } catch { return []; }
-}
-
-const TYPE_HUE: Record<string, string> = {
-  Article: "240", Repository: "150", WebPage: "300",
-  Document: "60", Note: "350", Tweet: "200",
+const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
+  Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",    accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
+  Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
+  YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",      accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
+  WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent", accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
+  Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",  accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
+  Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",    accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
 };
+
+const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
+
+function domainOf(url: string | null) {
+  if (!url) return "";
+  try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
+}
+
+function yearOf(str: string) {
+  try { return new Date(str).getFullYear().toString(); } catch { return ""; }
+}
 ---
 
-<MainGridLayout title="DevOps Mantra" description="SRE, AI, and Cloud learnings">
+<HomeLayout title="DevOps Mantra" description="SRE, AI and Cloud learnings by Subhash Kumar">
 
-  <!-- Stats bar -->
-  <div class="card-base p-5 mb-6 onload-animation">
-    <div class="flex flex-wrap gap-4 text-sm">
-      <span>🔥 <strong class="text-[var(--deep-text)]">{stats.streak}</strong> day streak</span>
-      <span>📚 <strong class="text-[var(--deep-text)]">{stats.total}</strong> saved</span>
-      <span>✅ <strong class="text-[var(--deep-text)]">{stats.read}</strong> read</span>
-      {stats.due > 0 && <a href="/review/" class="text-[var(--primary)] font-medium">⏰ {stats.due} due for review →</a>}
+<div class="min-h-screen bg-black">
+
+  <!-- Hero -->
+  <div class="max-w-5xl mx-auto px-6 pt-14 pb-10 text-center">
+    <h1
+      class="text-6xl md:text-8xl lg:text-9xl text-white tracking-tight leading-none mb-5"
+      style="font-family:'Instrument Serif',serif;"
+    >
+      Know it <em class="italic text-white/35">all</em>
+    </h1>
+    <p class="text-white/30 text-sm md:text-base tracking-widest uppercase mb-10">
+      {totalFormatted} links &mdash; SRE &middot; AI &middot; Cloud
+    </p>
+
+    <!-- Search bar -->
+    <div class="max-w-lg mx-auto">
+      <div class="liquid-glass rounded-full px-5 py-3.5 flex items-center gap-3">
+        <svg class="w-4 h-4 shrink-0" style="color:rgba(255,255,255,0.3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          id="home-search"
+          type="search"
+          autocomplete="off"
+          placeholder={`Search ${totalFormatted} saved links…`}
+          class="flex-1 bg-transparent text-white placeholder:text-white/25 text-sm focus:outline-none"
+        />
+        <button id="search-clear" class="hidden shrink-0 transition-colors" style="color:rgba(255,255,255,0.3)" aria-label="Clear">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Random review cards -->
-  {randomCards.length > 0 && (
-    <div class="mb-6 onload-animation" style="animation-delay: 50ms">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold text-[var(--deep-text)]">Review</h2>
-        <a href="/review/" class="text-xs text-[var(--primary)] hover:underline">Start session →</a>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {randomCards.map((card) => {
-          const hue = TYPE_HUE[card.type] ?? "250";
-          const tags = parseTags(card.tags).slice(0, 3);
-          return (
-            <a
-              href={card.url ?? "#"}
-              target={card.url ? "_blank" : undefined}
-              rel="noopener noreferrer"
-              class="card-base p-4 block hover:bg-[var(--btn-card-bg-hover)] active:bg-[var(--btn-card-bg-active)] transition group no-underline"
-            >
-              <div class="flex items-center gap-2 mb-2">
-                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
-                  {card.type}
-                </span>
-              </div>
-              <p class="text-sm font-medium text-[var(--deep-text)] line-clamp-2 mb-1 group-hover:text-[var(--primary)] transition">
-                {card.title ?? card.url ?? "Untitled"}
-              </p>
-              {card.summary && <p class="text-xs text-75 line-clamp-2">{card.summary}</p>}
-              {tags.length > 0 && (
-                <div class="flex flex-wrap gap-1 mt-2">
-                  {tags.map(t => <span class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">{t}</span>)}
+  <!-- Content area -->
+  <div class="max-w-5xl mx-auto px-6 pb-24">
+
+    <!-- Random D1 cards (magazine grid) -->
+    <div id="home-cards" class="transition-opacity duration-300">
+      {cards.length > 0 ? (
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4 auto-rows-[minmax(180px,auto)]">
+          {cards.map((card, i) => {
+            const style = TYPE_STYLE[card.type] ?? DEFAULT_STYLE;
+            const domain = domainOf(card.url);
+            const year = yearOf(card.created_at);
+            const isHero = i === 0;
+            const colSpan = isHero
+              ? "col-span-2 lg:col-span-4 lg:row-span-2"
+              : i === 1
+              ? "col-span-2 lg:col-span-2"
+              : "col-span-1 lg:col-span-2";
+
+            return (
+              <a
+                href={card.url ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-6 md:p-8 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${colSpan}`}
+                style="background: rgb(10,10,10);"
+              >
+                {/* Gradient blob */}
+                <div class={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80`}></div>
+
+                {/* Colored glow orb */}
+                <div
+                  class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40"
+                  style={`background:${style.accent};`}
+                ></div>
+
+                {/* Glass border overlay */}
+                <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08), inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
+
+                {/* Content */}
+                <div class="relative z-10 flex items-start justify-between gap-2">
+                  <span class={`text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}`}>
+                    {card.type}
+                  </span>
+                  {year && <span class="text-white/20 text-[10px] shrink-0">{year}</span>}
                 </div>
-              )}
-            </a>
-          );
-        })}
-      </div>
+
+                <div class="relative z-10">
+                  {domain && (
+                    <p class="text-xs mb-2 transition-colors duration-300 group-hover:opacity-80" style={`color:${style.accent};opacity:0.6;`}>
+                      {domain}
+                    </p>
+                  )}
+                  <p
+                    class={`text-white font-medium leading-snug ${isHero ? "text-2xl md:text-3xl" : "text-base md:text-lg"}`}
+                    style="font-family:'Instrument Serif',serif;"
+                  >
+                    {card.title ?? domain ?? "Untitled"}
+                  </p>
+                  {isHero && card.summary && (
+                    <p class="text-white/40 text-sm mt-3 line-clamp-2 leading-relaxed">{card.summary}</p>
+                  )}
+                </div>
+
+                {/* Arrow */}
+                <div class="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                  <svg class="w-5 h-5" style={`color:${style.accent}`} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M7 17 17 7M7 7h10v10"/>
+                  </svg>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="text-center py-24 text-white/20 text-sm">No saved links yet.</div>
+      )}
     </div>
-  )}
 
-  <!-- Two-column: recent posts + recent saves -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 onload-animation" style="animation-delay: 100ms">
-
-    <!-- Recent posts -->
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold text-[var(--deep-text)]">Recent Posts</h2>
-        <a href="/archive/" class="text-xs text-[var(--primary)] hover:underline">All posts →</a>
-      </div>
-      <div class="card-base divide-y divide-[var(--line-divider)]">
-        {recentPosts.length === 0 && <p class="p-4 text-sm text-75">No posts yet.</p>}
-        {recentPosts.map((post) => (
-          <a
-            href={getPostUrlBySlug(post.slug)}
-            class="flex items-start gap-3 p-4 hover:bg-[var(--btn-card-bg-hover)] transition group no-underline block"
-          >
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-[var(--deep-text)] group-hover:text-[var(--primary)] transition line-clamp-2">
-                {post.data.title}
-              </p>
-              <p class="text-xs text-75 mt-0.5">{formatDateToYYYYMMDD(post.data.published)}</p>
-            </div>
-          </a>
+    <!-- Loading skeleton -->
+    <div id="home-loading" class="hidden">
+      <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4">
+        {[...Array(5)].map((_, i) => (
+          <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "col-span-2 lg:col-span-4 min-h-[320px]" : i === 1 ? "col-span-2 lg:col-span-2 min-h-[160px]" : "col-span-1 lg:col-span-2 min-h-[160px]"}`}></div>
         ))}
       </div>
     </div>
 
-    <!-- Recent saves -->
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold text-[var(--deep-text)]">Recently Saved</h2>
-        <a href="/saves/" class="text-xs text-[var(--primary)] hover:underline">Browse all →</a>
+    <!-- Search results -->
+    <div id="home-results" class="hidden">
+      <div class="flex items-center justify-between mb-5">
+        <p class="text-white/30 text-xs tracking-widest uppercase">
+          <span id="results-count">0</span> results
+        </p>
+        <span class="text-white/15 text-xs">top 10 from D1</span>
       </div>
-      <div class="card-base divide-y divide-[var(--line-divider)]">
-        {recentSaves.length === 0 && <p class="p-4 text-sm text-75">No saves yet — paste a URL above!</p>}
-        {recentSaves.map((link) => {
-          const hue = TYPE_HUE[link.type] ?? "250";
-          return (
-            <a
-              href={link.url ?? "#"}
-              target={link.url ? "_blank" : undefined}
-              rel="noopener noreferrer"
-              class="flex items-center gap-3 p-3 hover:bg-[var(--btn-card-bg-hover)] transition group no-underline"
-            >
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full shrink-0 font-medium" style={`background:oklch(0.92 0.05 ${hue});color:oklch(0.45 0.12 ${hue})`}>
-                {link.type}
-              </span>
-              <span class="text-sm text-[var(--deep-text)] group-hover:text-[var(--primary)] transition line-clamp-1 flex-1">
-                {link.title ?? link.url ?? "Untitled"}
-              </span>
-            </a>
-          );
-        })}
+      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"></div>
+      <div id="results-empty" class="hidden text-center py-20">
+        <p class="text-white/20 text-sm">Nothing found.</p>
       </div>
     </div>
 
   </div>
+</div>
 
-</MainGridLayout>
+</HomeLayout>
 
+<script>
+  const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
+    Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
+    Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
+    YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
+    WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
+    Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
+    Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
+  };
+  const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
+
+  function domainOf(url: string | null) {
+    if (!url) return "";
+    try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
+  }
+
+  function yearOf(str: string) {
+    try { return new Date(str).getFullYear().toString(); } catch { return ""; }
+  }
+
+  function esc(s: unknown) {
+    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function renderResultCard(link: any): HTMLElement {
+    const style = TYPE_STYLE[link.type as string] ?? DEFAULT_STYLE;
+    const domain = domainOf(link.url);
+    const year = yearOf(link.created_at);
+
+    const a = document.createElement("a");
+    a.href = link.url ?? "#";
+    if (link.url) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    a.className = "group relative rounded-3xl overflow-hidden flex flex-col justify-between p-6 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] min-h-[140px]";
+    a.style.background = "rgb(10,10,10)";
+
+    a.innerHTML = `
+      <div class="absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-70"></div>
+      <div class="absolute -top-8 -right-8 w-28 h-28 rounded-full opacity-15 blur-2xl group-hover:opacity-30 transition-opacity" style="background:${esc(style.accent)}"></div>
+      <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
+      <div class="relative z-10 flex items-center justify-between gap-2">
+        <span class="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}">${esc(link.type)}</span>
+        ${year ? `<span class="text-white/20 text-[10px]">${esc(year)}</span>` : ""}
+      </div>
+      <div class="relative z-10 mt-3">
+        ${domain ? `<p class="text-xs mb-1.5" style="color:${esc(style.accent)};opacity:0.6">${esc(domain)}</p>` : ""}
+        <p class="text-white text-base font-medium leading-snug line-clamp-2" style="font-family:'Instrument Serif',serif;">${esc(link.title ?? link.url ?? "Untitled")}</p>
+      </div>
+      <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <svg class="w-4 h-4" style="color:${esc(style.accent)}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M7 17 17 7M7 7h10v10"/>
+        </svg>
+      </div>
+    `;
+    return a;
+  }
+
+  function initHome() {
+    const searchInput  = document.getElementById("home-search") as HTMLInputElement | null;
+    const clearBtn     = document.getElementById("search-clear");
+    const cardsPanel   = document.getElementById("home-cards");
+    const loadingPanel = document.getElementById("home-loading");
+    const resultsPanel = document.getElementById("home-results");
+    const resultsGrid  = document.getElementById("results-grid");
+    const resultsCount = document.getElementById("results-count");
+    const resultsEmpty = document.getElementById("results-empty");
+
+    if (!searchInput) return;
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastQuery = "";
+
+    function showCards() {
+      cardsPanel?.classList.remove("hidden","opacity-0");
+      loadingPanel?.classList.add("hidden");
+      resultsPanel?.classList.add("hidden");
+      clearBtn?.classList.add("hidden");
+    }
+
+    function showLoading() {
+      cardsPanel?.classList.add("opacity-0");
+      setTimeout(() => cardsPanel?.classList.add("hidden"), 200);
+      loadingPanel?.classList.remove("hidden");
+      resultsPanel?.classList.add("hidden");
+    }
+
+    function showResults(links: any[]) {
+      loadingPanel?.classList.add("hidden");
+      cardsPanel?.classList.add("hidden");
+      resultsPanel?.classList.remove("hidden");
+      if (resultsCount) resultsCount.textContent = String(links.length);
+      resultsGrid?.replaceChildren();
+      if (!links.length) {
+        resultsEmpty?.classList.remove("hidden");
+      } else {
+        resultsEmpty?.classList.add("hidden");
+        links.forEach(l => resultsGrid?.appendChild(renderResultCard(l)));
+      }
+    }
+
+    async function doSearch(q: string) {
+      showLoading();
+      try {
+        const res = await fetch(`/api/links?q=${encodeURIComponent(q)}&limit=10`);
+        const { links } = await res.json() as { links: any[] };
+        showResults(links ?? []);
+      } catch {
+        showResults([]);
+      }
+    }
+
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim();
+      clearBtn?.classList.toggle("hidden", !q);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      if (!q) { lastQuery = ""; showCards(); return; }
+      if (q === lastQuery) return;
+      lastQuery = q;
+      debounceTimer = setTimeout(() => doSearch(q), 320);
+    });
+
+    clearBtn?.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      lastQuery = "";
+      showCards();
+      searchInput?.focus();
+    });
+  }
+
+  initHome();
+
+  function setupSwup() {
+    (window as any).swup?.hooks?.on("page:view", initHome);
+  }
+  if ((window as any).swup) setupSwup();
+  else document.addEventListener("swup:enable", setupSwup);
+</script>

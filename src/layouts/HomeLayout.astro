@@ -1,0 +1,39 @@
+---
+import BackToTop from "@components/control/BackToTop.astro";
+import DarkNavbar from "@components/DarkNavbar.astro";
+import Layout from "./Layout.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <!-- Navbar -->
+  <div id="top-row" class="relative z-50">
+    <DarkNavbar />
+  </div>
+
+  <!-- Full-width content, no sidebar -->
+  <div class="relative w-full z-30">
+    <main id="swup-container" class="transition-swup-fade">
+      <div id="content-wrapper" class="onload-animation">
+        <slot />
+      </div>
+    </main>
+    <BackToTop />
+  </div>
+
+  <!-- Required empty TOC anchor so Swup doesn't error navigating between pages -->
+  <div id="toc" class="hidden"></div>
+</Layout>
+
+<style is:global>
+  /* Force black background for all dark-layout pages */
+  html:has(#swup-container) {
+    background: black !important;
+  }
+</style>
