@@ -1,14 +1,27 @@
 /* devopsmantra — "Air" design tokens (midnight sky through glass, via styles.refero.design)
-   Rules: no gradients, no shadows/elevation, one saturated accent per page. */
-:root {
-  color-scheme: dark;
+   Rules: no gradients, no shadows/elevation, one saturated accent per page.
+   Themes: dark = midnight sky (default), light = day sky. Toggled via
+   [data-theme] on <html>; light-dark() resolves from color-scheme. */
+:root { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { color-scheme: light; }
+}
 
-  --whiteout: #ffffff;  /* text/borders on dark */
-  --haze:     #f5f5f5;  /* cards, inputs on dark */
-  --ink:      #1b1b1b;  /* text on light surfaces */
-  --void:     #0c1a38;  /* canvas — unmistakably midnight blue */
-  --twilight: #6c92c4;  /* heading chroma on dark */
-  --signal:   #2b7fff;  /* links, tags, emphasis — the one accent */
+:root {
+  /* canvas + text — light-dark(day, midnight) */
+  --void:     light-dark(#eef2fa, #0c1a38);  /* canvas */
+  --whiteout: light-dark(#16233e, #ffffff);  /* text/borders on canvas */
+  --haze:     light-dark(#ffffff, #e9eef7);  /* neutral cards, inputs */
+  --ink:      #16233e;                       /* text on card surfaces (both themes) */
+  --twilight: light-dark(#3f628f, #6c92c4);  /* heading chroma */
+  --signal:   light-dark(#1f6ff2, #2b7fff);  /* links, chips, emphasis — the one accent */
+
+  /* derived */
+  --mist:     light-dark(rgb(22 35 62 / .64), rgb(235 242 255 / .6));   /* muted text on canvas */
+  --faint:    light-dark(rgb(22 35 62 / .42), rgb(235 242 255 / .34));  /* meta text on canvas */
+  --hairline: light-dark(rgb(22 35 62 / .16), rgb(235 242 255 / .17));  /* borders on canvas */
+  --ink-2:    rgb(22 35 62 / .62);                                      /* muted text on cards */
 
   --r-input: 4px;
   --r-btn: 8px;
@@ -22,10 +35,15 @@
   --page-max: 1150px;
   --gap-section: 48px;
   --pad-card: 20px;
-
-  /* derived — stay within the six-color palette */
-  --mist:     rgb(235 242 255 / .6);   /* muted text on dark, sky-tinted */
-  --faint:    rgb(235 242 255 / .34);  /* meta text on dark */
-  --hairline: rgb(235 242 255 / .17);  /* borders on dark */
-  --ink-2:    rgb(27 27 27 / .6);      /* muted text on light surfaces */
 }
+
+/* ── type stocks: each content type prints on its own pale paper ──
+   Cards read background: var(--stock, var(--haze));
+   labels on cards read color: var(--stock-ink, var(--ink-2));
+   labels on the canvas read color: var(--stock-hi, var(--faint)). */
+.t-Repository   { --stock: light-dark(#ddf0e4, #e0f2e6); --stock-ink: #1e6b45; --stock-hi: light-dark(#1e6b45, #8fd8b0); }
+.t-YouTubeVideo { --stock: light-dark(#fbe3e3, #fbe7e7); --stock-ink: #a03535; --stock-hi: light-dark(#a03535, #f2a8a8); }
+.t-Article      { --stock: light-dark(#deebfb, #e3edfb); --stock-ink: #2b5fa8; --stock-hi: light-dark(#2b5fa8, #9cc0f2); }
+.t-WebPage      { --stock: light-dark(#e9e3f8, #ece7f8); --stock-ink: #5f4aa8; --stock-hi: light-dark(#5f4aa8, #c3b3f0); }
+.t-Document     { --stock: light-dark(#f6ecd8, #f7eedd); --stock-ink: #8a6a1f; --stock-hi: light-dark(#8a6a1f, #e8cf96); }
+.t-Note         { --stock: light-dark(#f6e3ee, #f7e7f0); --stock-ink: #93356b; --stock-hi: light-dark(#93356b, #f0aed4); }

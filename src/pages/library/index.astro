@@ -81,6 +81,7 @@ const TOPICS = [
       font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
       color: var(--faint); margin-bottom: 3px;
     }
+    .row .rk span:first-child { color: var(--stock-hi, var(--faint)); }
     .row .rk .rtag { color: var(--signal); text-transform: none; letter-spacing: 0; }
     .row .rt { color: var(--whiteout); font-size: 15.5px; font-weight: 500; line-height: 1.4; }
     .row .rs { color: var(--mist); font-size: 13px; margin-top: 3px;
@@ -105,7 +106,7 @@ const TOPICS = [
       try { tags = JSON.parse(l.tags || "[]"); } catch {}
       const domain = (() => { try { return new URL(l.url!).hostname.replace(/^www\./, ""); } catch { return ""; } })();
       const year = (l.created_at || "").slice(0, 4);
-      return `<a class="row" href="${esc(l.url ?? "#")}" target="_blank" rel="noopener">
+      return `<a class="row t-${esc(l.type)}" href="${esc(l.url ?? "#")}" target="_blank" rel="noopener">
         <div class="rk"><span>${esc(l.type)}</span><span>${esc(domain)}</span><span>${year}</span>${
           tags.slice(0, 3).map((t) => `<span class="rtag">${esc(t)}</span>`).join("")
         }</div>

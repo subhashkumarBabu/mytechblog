@@ -69,7 +69,7 @@ function meta(l: QueueItem) {
     {queue.map((l) => {
       const m = meta(l);
       return (
-        <article class="qcard" data-id={l.id}>
+        <article class={`qcard t-${l.type}`} data-id={l.id}>
           <div class="kick">
             <span class:list={["src", { due: l.source === "due" }]}>
               {l.source === "due" ? "due for review" : `resurfaced from ${m.year}`}
@@ -110,7 +110,7 @@ function meta(l: QueueItem) {
 
     #queue { display: flex; flex-direction: column; gap: 14px; }
     .qcard {
-      background: var(--haze); color: var(--ink);
+      background: var(--stock, var(--haze)); color: var(--ink);
       border-radius: var(--r-card); padding: var(--pad-card);
       transition: opacity .25s, transform .25s;
     }
@@ -125,7 +125,7 @@ function meta(l: QueueItem) {
     .qcard h3 a:hover { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
     .qcard .sum { color: var(--ink-2); font-size: 13.5px; margin-top: 6px; }
     .qcard .tags { display: flex; gap: 10px; margin-top: 8px; }
-    .qcard .tags span { color: var(--signal); font-size: 12.5px; font-weight: 600; }
+    .qcard .tags span { color: var(--stock-ink, var(--signal)); font-size: 12.5px; font-weight: 600; }
     .qcard .acts { display: flex; gap: 10px; margin-top: 16px; }
     .act {
       appearance: none; cursor: pointer; min-height: 40px; padding: 8px 18px;
@@ -133,7 +133,7 @@ function meta(l: QueueItem) {
       border: 1px solid var(--ink); background: transparent; color: var(--ink);
       text-decoration: none; display: inline-flex; align-items: center;
     }
-    .act.read { background: var(--signal); border-color: var(--signal); color: var(--whiteout); }
+    .act.read { background: var(--signal); border-color: var(--signal); color: #fff; }
     .act.ghost { border-color: transparent; color: var(--ink-2); }
     .act.ghost:hover { border-color: var(--ink); color: var(--ink); }
 

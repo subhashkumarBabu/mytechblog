@@ -73,22 +73,28 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
   <style is:global>
     .lk {
       display: flex; flex-direction: column; gap: 10px; min-height: 168px;
-      background: var(--haze); color: var(--ink);
+      background: var(--stock, var(--haze)); color: var(--ink);
       border-radius: var(--r-card); padding: var(--pad-card);
       text-decoration: none;
+      animation: deal .34s cubic-bezier(.2, .8, .3, 1) both;
+      animation-delay: var(--d, 0ms);
+      transition: transform .15s;
     }
+    @keyframes deal { from { opacity: 0; transform: translateY(14px); } }
+    .lk:hover { transform: translateY(-2px); }
     .lk:hover .t { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
     .lk .kick {
       display: flex; justify-content: space-between; gap: 8px;
       font-size: 11.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
       color: var(--ink-2);
     }
+    .lk .kick span:first-child { color: var(--stock-ink, var(--ink-2)); }
     .lk .t { font-size: 16px; font-weight: 600; line-height: 1.35; color: var(--ink);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     .lk .meta { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
       font-size: 12.5px; color: var(--ink-2); }
     .lk .meta .dom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lk .tag { flex: none; color: var(--signal); font-weight: 600; }
+    .lk .tag { flex: none; color: var(--stock-ink, var(--signal)); font-weight: 600; }
     .grid .lk:first-child { grid-column: span 2; }
     .grid .lk:first-child .t { font-size: 22px; }
     @media (max-width: 540px) { .grid .lk:first-child { grid-column: span 1; } }
@@ -110,13 +116,13 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
 
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-    function tile(l: Row): string {
+    function tile(l: Row, i: number): string {
       let tags: string[] = [];
       try { tags = JSON.parse(l.tags || "[]"); } catch {}
       const topic = tags[0] ?? "";
       const domain = (() => { try { return new URL(l.url).hostname.replace(/^www\./, ""); } catch { return ""; } })();
       const year = (l.created_at || "").slice(0, 4);
-      return `<a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener">
+      return `<a class="lk t-${esc(l.type)}" style="--d:${Math.min(i, 10) * 45}ms" href="${esc(l.url)}" target="_blank" rel="noopener">
         <div class="kick"><span>${TYPE_LABEL[l.type] ?? "Web"}</span><span>${year}</span></div>
         <h3 class="t">${esc(l.title ?? domain)}</h3>
         <div class="meta"><span class="dom">${esc(domain)}</span>${topic ? `<span class="tag">${esc(topic)}</span>` : ""}</div>
