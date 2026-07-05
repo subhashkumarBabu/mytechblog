@@ -174,7 +174,7 @@ function meta(l: QueueItem) {
 
       if (act === "read") {
         // link opens via the anchor; record + schedule a revisit
-        fetch(`/api/links/${id}/review/`, { method: "POST" })
+        fetch(`/api/owner/links/${id}/review/`, { method: "POST" })
           .then((r) => r.json())
           .then((d) => say(`Nice. It'll come back in ${d.interval_days} day${d.interval_days === 1 ? "" : "s"}.`))
           .catch(() => {});
@@ -182,13 +182,13 @@ function meta(l: QueueItem) {
         return;
       }
       if (act === "snooze") {
-        await fetch(`/api/links/${id}/snooze/`, { method: "POST" });
+        await fetch(`/api/owner/links/${id}/snooze/`, { method: "POST" });
         say("Snoozed — back tomorrow.");
         dismiss(card);
         return;
       }
       if (act === "letgo") {
-        await fetch(`/api/links/${id}/letgo/`, { method: "POST" });
+        await fetch(`/api/owner/links/${id}/letgo/`, { method: "POST" });
         say("Let go. It won't come back.");
         dismiss(card);
       }
