@@ -6,8 +6,8 @@
   --whiteout: #ffffff;  /* text/borders on dark */
   --haze:     #f5f5f5;  /* cards, inputs on dark */
   --ink:      #1b1b1b;  /* text on light surfaces */
-  --void:     #060e1f;  /* canvas — midnight sky, not pure black */
-  --twilight: #5b7ea8;  /* heading chroma on dark */
+  --void:     #0c1a38;  /* canvas — unmistakably midnight blue */
+  --twilight: #6c92c4;  /* heading chroma on dark */
   --signal:   #2b7fff;  /* links, tags, emphasis — the one accent */
 
   --r-input: 4px;

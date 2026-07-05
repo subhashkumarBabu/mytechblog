@@ -4,16 +4,17 @@ export const prerender = false;
 
 const COLS = "id, type, title, url, tags, created_at";
 
-// Quality pool for serendipity: real titles, topic-tagged, recent-ish.
+// Quality pool for serendipity: real titles, topic-tagged, saved within the last year.
 export const RANDOM_SQL = `SELECT ${COLS} FROM links
   WHERE title IS NOT NULL AND length(title) > 25 AND tags != '[]'
-    AND title NOT LIKE 'http%' AND created_at >= '2022'
+    AND title NOT LIKE 'http%' AND created_at >= date('now', '-1 year')
   ORDER BY RANDOM() LIMIT 5`;
 
-// Same pool scoped to one topic — no date cutoff, so old gems resurface too.
+// Same pool scoped to one topic.
 const RANDOM_TAG_SQL = `SELECT ${COLS} FROM links
   WHERE title IS NOT NULL AND length(title) > 25
-    AND title NOT LIKE 'http%' AND tags LIKE ?1
+    AND title NOT LIKE 'http%' AND created_at >= date('now', '-1 year')
+    AND tags LIKE ?1
   ORDER BY RANDOM() LIMIT 5`;
 
 export async function GET({ request, locals }: APIContext) {
