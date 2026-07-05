@@ -1,0 +1,136 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+
+export const prerender = true;
+
+const TOPICS = [
+  "ai-agents", "llms", "rag", "azure", "kubernetes", "devops",
+  "terraform", "python", "security", "machine-learning", "leadership",
+  "programming", "learning-resources", "data-science",
+];
+---
+
+<AirLayout title="Save — devopsmantra" description="Save a link to the vault." active="save">
+  <header class="head">
+    <h1 class="display">Save</h1>
+    <p class="annot">drop a link into the vault</p>
+  </header>
+
+  <form id="f" class="form">
+    <input class="input" id="url" type="url" placeholder="https://…" required autocomplete="off" />
+    <input class="input" id="title" type="text" placeholder="Title (optional — fetched later if empty)" autocomplete="off" />
+    <textarea class="input area" id="note" placeholder="Why did you save this? (optional)" rows="3"></textarea>
+
+    <p class="lbl">Topics</p>
+    <div class="rail wrap" id="topics">
+      {TOPICS.map((t) => <button type="button" class="chip" data-tag={t}>{t}</button>)}
+    </div>
+
+    <button class="btn accent big" type="submit" id="go">Save to vault</button>
+    <p class="note" id="msg" hidden></p>
+  </form>
+
+  <details class="tok">
+    <summary>Save token</summary>
+    <p>Stored only in this browser. Set once.</p>
+    <input class="input" id="token" type="password" placeholder="Bearer token" autocomplete="off" />
+  </details>
+
+  <style>
+    .head { margin-bottom: 34px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+    .form { max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
+    .area { resize: vertical; }
+    .lbl { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; margin-top: 8px; }
+    .rail.wrap { flex-wrap: wrap; }
+    .big { margin-top: 12px; font-size: 15px; }
+    .note { color: var(--mist); font-size: 13.5px; }
+    .note.err { color: var(--signal); }
+    .tok { margin-top: var(--gap-section); max-width: 640px; color: var(--faint); font-size: 13px; }
+    .tok summary { cursor: pointer; }
+    .tok p { margin: 10px 0; }
+  </style>
+
+  <script>
+    const f = document.getElementById("f") as HTMLFormElement;
+    const urlEl = document.getElementById("url") as HTMLInputElement;
+    const titleEl = document.getElementById("title") as HTMLInputElement;
+    const noteEl = document.getElementById("note") as HTMLTextAreaElement;
+    const tokenEl = document.getElementById("token") as HTMLInputElement;
+    const msg = document.getElementById("msg")!;
+    const go = document.getElementById("go") as HTMLButtonElement;
+
+    tokenEl.value = localStorage.getItem("save_token") ?? "";
+    tokenEl.addEventListener("change", () => localStorage.setItem("save_token", tokenEl.value.trim()));
+
+    // Prefill from PWA share-target (GET params; shared URLs often arrive in `text`)
+    const p = new URLSearchParams(location.search);
+    const fromText = (p.get("text") ?? "").match(/https?:\/\/\S+/)?.[0];
+    urlEl.value = p.get("url") ?? fromText ?? "";
+    titleEl.value = p.get("title") ?? "";
+    if (fromText && p.get("text") !== fromText && !titleEl.value) {
+      titleEl.value = (p.get("text") ?? "").replace(fromText, "").trim();
+    }
+
+    const picked = new Set<string>();
+    document.querySelectorAll<HTMLButtonElement>("#topics .chip").forEach((c) =>
+      c.addEventListener("click", () => {
+        const t = c.dataset.tag!;
+        picked.has(t) ? picked.delete(t) : picked.add(t);
+        c.classList.toggle("on", picked.has(t));
+      }),
+    );
+
+    // quick type guess by domain
+    function guessType(u: string): string {
+      try {
+        const h = new URL(u).hostname;
+        if (/youtube\.com|youtu\.be/.test(h)) return "YouTubeVideo";
+        if (/github\.com|gitlab\.com/.test(h)) return "Repository";
+        if (/medium\.com|dev\.to|substack\.com|towardsdatascience\.com/.test(h)) return "Article";
+      } catch {}
+      return "WebPage";
+    }
+
+    function say(text: string, err = false) {
+      msg.textContent = text;
+      msg.hidden = false;
+      msg.classList.toggle("err", err);
+    }
+
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = tokenEl.value.trim();
+      if (!token) { say("Set your save token first (below).", true); return; }
+      go.disabled = true;
+      say("Saving…");
+      try {
+        const res = await fetch("/api/links/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            url: urlEl.value.trim(),
+            title: titleEl.value.trim() || undefined,
+            note: noteEl.value.trim() || undefined,
+            type: guessType(urlEl.value),
+            tags: [...picked],
+          }),
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          say(`Failed: ${d.error ?? res.status}`, true);
+        } else {
+          say("Saved. It'll surface in your queue one day.");
+          f.reset();
+          picked.clear();
+          document.querySelectorAll("#topics .chip").forEach((c) => c.classList.remove("on"));
+        }
+      } catch {
+        say("Network error — try again.", true);
+      } finally {
+        go.disabled = false;
+      }
+    });
+  </script>
+</AirLayout>

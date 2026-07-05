@@ -1,5 +1,5 @@
 ---
-import "../styles/app-tokens.css";
+import AirLayout from "../layouts/AirLayout.astro";
 import { RANDOM_SQL } from "./api/landing";
 
 export const prerender = false;
@@ -26,143 +26,72 @@ const totalFmt = total.toLocaleString("en-US");
 const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
-  <title>devopsmantra — {totalFmt} links, curated over 14 years</title>
-  <meta name="description" content={`A living knowledge base: ${totalFmt} hand-picked links on DevOps, Azure, Kubernetes and AI, organized into topic pages by an AI librarian.`} />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-</head>
-<body>
-  <div class="shell">
-    <header class="hero">
-      <div class="kicker">devopsmantra</div>
-      <h1>{totalFmt} links, curated over 14 years.<br />Organized by an AI librarian.</h1>
-    </header>
+<AirLayout
+  title={`devopsmantra — ${totalFmt} links, curated over 14 years`}
+  description={`A living knowledge base: ${totalFmt} hand-picked links on DevOps, Azure, Kubernetes and AI, organized into topic pages by an AI librarian.`}
+  active="home"
+>
+  <header class="hero">
+    <h1 class="display"><em>{totalFmt}</em> links,<br />curated over 14 years.</h1>
+    <p class="annot">organized by an AI librarian ↓</p>
+  </header>
 
-    <input class="search" id="q" type="search" placeholder="Search the whole collection…" autocomplete="off" />
-    <div class="rail" id="rail">
-      <button class="chip on" data-topic="">All</button>
-      {TOPICS.map((t) => <button class="chip" data-topic={t}>{t}</button>)}
-    </div>
-
-    <div class="headrow">
-      <h2 id="head">Five from the vault</h2>
-      <button class="btn" id="shuffle">🔀 Shuffle</button>
-    </div>
-
-    <div class="sqgrid" id="grid" data-initial={JSON.stringify(cards)}></div>
-    <button class="btn more" id="more" hidden>Show 10 more</button>
-
-    <footer>
-      <span class="mono">curated by subhash · devops → ai</span>
-      <a href="/archive">blog archive →</a>
-    </footer>
+  <input class="input search" id="q" type="search" placeholder="Search the whole collection…" autocomplete="off" />
+  <div class="rail" id="rail">
+    <button class="chip on" data-topic="">All</button>
+    {TOPICS.map((t) => <button class="chip" data-topic={t}>{t}</button>)}
   </div>
 
+  <div class="headrow">
+    <h2 id="head">Five from the vault</h2>
+    <button class="btn" id="shuffle">Shuffle</button>
+  </div>
+
+  <div class="grid" id="grid" data-initial={JSON.stringify(cards)}></div>
+  <button class="btn more" id="more" hidden>Show 10 more</button>
+
+  <style>
+    .hero { margin-bottom: var(--gap-section); }
+    .hero h1 { font-size: clamp(40px, 7.5vw, 84px); }
+    .hero .annot { margin-top: 14px; }
+
+    .search { margin-bottom: 14px; }
+    .headrow {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 34px 0 18px;
+    }
+    .headrow h2 { font-family: var(--display); font-weight: 400; font-size: 20px;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--whiteout); }
+
+    .grid {
+      display: grid; gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+    .more { width: 100%; margin-top: 16px; }
+  </style>
+
   <style is:global>
-    * { margin: 0; box-sizing: border-box; }
-    body {
-      font-family: var(--sans); color: var(--ink); min-height: 100vh;
-      background:
-        radial-gradient(55% 40% at 12% 0%, oklch(0.32 0.1 300 / .45), transparent 65%),
-        radial-gradient(45% 35% at 92% 15%, oklch(0.32 0.09 150 / .35), transparent 65%),
-        radial-gradient(50% 35% at 55% 105%, oklch(0.3 0.09 60 / .35), transparent 65%),
-        oklch(0.09 0.01 285);
+    .lk {
+      display: flex; flex-direction: column; gap: 10px; min-height: 168px;
+      background: var(--haze); color: var(--ink);
+      border-radius: var(--r-card); padding: var(--pad-card);
+      text-decoration: none;
     }
-    body::before { /* film grain */
-      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 99; opacity: .04;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
+    .lk:hover .t { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
+    .lk .kick {
+      display: flex; justify-content: space-between; gap: 8px;
+      font-size: 11.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
+      color: var(--ink-2);
     }
-    .shell { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
-
-    .hero {
-      position: relative; overflow: hidden; border-radius: var(--r-card); color: white;
-      padding: 22px 20px; margin-bottom: 18px;
-      background: linear-gradient(135deg, oklch(0.6 0.2 300), oklch(0.55 0.2 265) 45%, oklch(0.66 0.19 150));
-      background-size: 220% 220%; animation: heroshift 9s ease infinite;
-    }
-    @keyframes heroshift { 0%,100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
-    .hero::after { content: ""; position: absolute; inset: -60%; pointer-events: none;
-      background: radial-gradient(circle at 72% 15%, rgb(255 255 255 / .3), transparent 42%); }
-    .kicker { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; color: oklch(0.93 0.09 150); margin-bottom: 8px; }
-    .hero h1 { font-size: clamp(19px, 3.2vw, 26px); font-weight: 900; line-height: 1.25; letter-spacing: -.3px; }
-
-    .search { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
-      border-radius: var(--r-btn); padding: 14px 18px; font: 700 15px var(--sans); margin-bottom: 12px; }
-    .search:focus { outline: 2px solid oklch(0.65 0.15 250 / .7); outline-offset: 1px; }
-
-    .rail { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
-    .chip { flex: none; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 8px 14px;
-      border-radius: 999px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
-    .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-
-    .headrow { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 16px; }
-    .headrow h2 { font-size: 18px; font-weight: 900; }
-
-    .btn { appearance: none; border: 0; border-radius: var(--r-btn); font: 800 14px var(--sans);
-      padding: 11px 16px; min-height: 44px; cursor: pointer; color: var(--ink);
-      background: var(--surface); box-shadow: 0 4px 0 var(--line); transition: transform .06s, box-shadow .06s; }
-    .btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--line); }
-    .btn:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
-    .btn.more { width: 100%; margin-top: 6px; }
-
-    /* ── 3D bento tiles ── */
-    .sqgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 18px; perspective: 1100px; padding: 6px 4px 18px; }
-    .sq { position: relative; aspect-ratio: 1; border-radius: 22px; padding: 14px; color: white;
-      display: flex; flex-direction: column; cursor: pointer; text-decoration: none;
-      will-change: transform; transform: var(--tilt, none); transform-style: preserve-3d;
-      transition: transform .2s ease, box-shadow .25s ease; }
-    .sq:nth-child(3n+1) { --tilt: rotateY(-8deg) rotateX(5deg); }
-    .sq:nth-child(3n+2) { --tilt: rotateX(7deg); }
-    .sq:nth-child(3n)   { --tilt: rotateY(8deg) rotateX(5deg); }
-    .sq::before, .sq::after { content: ""; position: absolute; inset: 0; border-radius: inherit;
-      background: inherit; z-index: -1; }
-    .sq::before { transform: translate(7px, 8px); filter: brightness(.8); opacity: .5; }
-    .sq::after  { transform: translate(14px, 16px); filter: brightness(.6); opacity: .25; }
-    .sq:hover { box-shadow: 0 0 0 1px rgb(255 255 255 / .15), 0 18px 44px rgb(0 0 0 / .55); }
-    .sq .ico { font-size: 26px; margin-bottom: auto; }
-    .sq h3 { font-size: 13px; font-weight: 800; line-height: 1.3; margin: 8px 0; color: white;
+    .lk .t { font-size: 16px; font-weight: 600; line-height: 1.35; color: var(--ink);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-    .sq .meta { display: flex; justify-content: space-between; align-items: center; gap: 6px;
-      font-family: var(--mono); font-size: 10.5px; font-weight: 700; opacity: .9; }
-    .sq .meta span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .sq .tag { flex: none; background: rgb(255 255 255 / .25); border-radius: 999px; padding: 3px 8px; }
-    .sq .hook { display: none; }
-    .sqgrid .sq:first-child { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; padding: 20px; }
-    .sqgrid .sq:first-child h3 { font-size: 19px; -webkit-line-clamp: 4; }
-    .sqgrid .sq:first-child .ico { font-size: 36px; }
-    .sqgrid .sq:first-child .hook { display: block; font-family: var(--mono); font-size: 11.5px;
-      color: rgb(255 255 255 / .8); margin-bottom: 8px; }
-    .glare { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
-      transition: opacity .25s;
-      background: radial-gradient(170px circle at var(--gx, 50%) var(--gy, 40%), rgb(255 255 255 / .32), transparent 65%); }
-    .sq:hover .glare { opacity: 1; }
-    .g-purple { background: linear-gradient(135deg, oklch(0.62 0.2 300), oklch(0.5 0.22 270)); }
-    .g-green  { background: linear-gradient(135deg, oklch(0.7 0.19 150), oklch(0.55 0.17 175)); }
-    .g-blue   { background: linear-gradient(135deg, oklch(0.62 0.16 250), oklch(0.5 0.17 275)); }
-    .g-sky    { background: linear-gradient(135deg, oklch(0.68 0.14 230), oklch(0.55 0.15 255)); }
-    .g-orange { background: linear-gradient(135deg, oklch(0.75 0.16 60),  oklch(0.62 0.18 35)); }
-    .g-pink   { background: linear-gradient(135deg, oklch(0.65 0.21 350), oklch(0.55 0.22 20)); }
-    .g-teal   { background: linear-gradient(135deg, oklch(0.7 0.14 190),  oklch(0.55 0.13 220)); }
-    .sq { animation: pop .5s cubic-bezier(.34,1.45,.64,1) backwards; }
-    .sq:nth-child(2) { animation-delay: .07s } .sq:nth-child(3) { animation-delay: .14s }
-    .sq:nth-child(4) { animation-delay: .21s } .sq:nth-child(5) { animation-delay: .28s }
-    .sq:nth-child(n+6) { animation-delay: .34s }
-    @keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.96) } }
-
-    footer { display: flex; justify-content: space-between; align-items: center; margin-top: 26px;
+    .lk .meta { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
       font-size: 12.5px; color: var(--ink-2); }
-    footer .mono { font-family: var(--mono); }
-    footer a { color: var(--ink-2); font-weight: 700; }
-
-    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+    .lk .meta .dom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lk .tag { flex: none; color: var(--signal); font-weight: 600; }
+    .grid .lk:first-child { grid-column: span 2; }
+    .grid .lk:first-child .t { font-size: 22px; }
+    @media (max-width: 540px) { .grid .lk:first-child { grid-column: span 1; } }
   </style>
 
   <script>
@@ -174,42 +103,28 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
 
     type Row = { id: string; type: string; title: string; url: string; tags: string; created_at: string };
 
-    const GRADS: Record<string, string> = {
-      "ai-agents": "g-purple", llms: "g-green", rag: "g-blue", azure: "g-sky",
-      kubernetes: "g-teal", devops: "g-orange", security: "g-pink",
-      "learning-resources": "g-orange", "machine-learning": "g-green",
-    };
-    const CYCLE = ["g-purple", "g-green", "g-blue", "g-orange", "g-pink", "g-teal"];
-    const ICONS: Record<string, string> = {
-      YouTubeVideo: "▶️", Repository: "📦", Article: "📄", Document: "📑", WebPage: "🌐", Note: "📝",
+    const TYPE_LABEL: Record<string, string> = {
+      YouTubeVideo: "Video", Repository: "Repo", Article: "Article",
+      Document: "Doc", WebPage: "Web", Note: "Note",
     };
 
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-    function tile(l: Row, g: string): string {
+    function tile(l: Row): string {
       let tags: string[] = [];
       try { tags = JSON.parse(l.tags || "[]"); } catch {}
-      const topic = tags[0] ?? l.type.toLowerCase();
+      const topic = tags[0] ?? "";
       const domain = (() => { try { return new URL(l.url).hostname.replace(/^www\./, ""); } catch { return ""; } })();
       const year = (l.created_at || "").slice(0, 4);
-      return `<a class="sq ${g}" href="${esc(l.url)}" target="_blank" rel="noopener">
-        <div class="ico">${ICONS[l.type] ?? "🌐"}</div>
-        <h3>${esc(l.title ?? domain)}</h3>
-        <div class="hook">from the ${esc(topic)} collection · ${year}</div>
-        <div class="meta"><span>${esc(domain)} · ${year}</span><span class="tag">${esc(topic)}</span></div>
-        <i class="glare"></i></a>`;
+      return `<a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener">
+        <div class="kick"><span>${TYPE_LABEL[l.type] ?? "Web"}</span><span>${year}</span></div>
+        <h3 class="t">${esc(l.title ?? domain)}</h3>
+        <div class="meta"><span class="dom">${esc(domain)}</span>${topic ? `<span class="tag">${esc(topic)}</span>` : ""}</div>
+      </a>`;
     }
 
     function render(rows: Row[]) {
-      let last = "";
-      grid.innerHTML = rows.map((l, i) => {
-        let tags: string[] = [];
-        try { tags = JSON.parse(l.tags || "[]"); } catch {}
-        let g = GRADS[tags[0]] ?? CYCLE[i % CYCLE.length];
-        if (g === last) g = CYCLE[(CYCLE.indexOf(g) + 1) % CYCLE.length];
-        last = g;
-        return tile(l, g);
-      }).join("");
+      grid.innerHTML = rows.map(tile).join("");
     }
 
     let topic = "", offset = 0, rows: Row[] = [];
@@ -246,24 +161,5 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
         load();
       }),
     );
-
-    /* 3D tilt + glare (fine pointers only) */
-    const fine = matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (fine) {
-      document.addEventListener("pointermove", (e) => {
-        const el = (e.target as Element).closest<HTMLElement>(".sq");
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-        el.style.transform = `perspective(700px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) translateY(-3px)`;
-        el.style.setProperty("--gx", `${(x + 0.5) * 100}%`);
-        el.style.setProperty("--gy", `${(y + 0.5) * 100}%`);
-      });
-      document.addEventListener("pointerout", (e) => {
-        const el = (e.target as Element).closest<HTMLElement>(".sq");
-        if (el && !el.contains(e.relatedTarget as Node)) el.style.transform = "";
-      });
-    }
   </script>
-</body>
-</html>
+</AirLayout>

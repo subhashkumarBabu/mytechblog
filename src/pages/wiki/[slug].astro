@@ -1,0 +1,72 @@
+---
+import { getCollection } from "astro:content";
+import AirLayout from "../../layouts/AirLayout.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const pages = await getCollection("wiki");
+  return pages.map((p) => ({ params: { slug: p.slug }, props: { page: p } }));
+}
+
+const { page } = Astro.props;
+const { Content } = await page.render();
+const { title, topic, draft, generated, sources } = page.data;
+---
+
+<AirLayout
+  title={`${title} — devopsmantra wiki`}
+  description={`${title}: a topic page synthesized from saved links.`}
+  active="wiki"
+>
+  <header class="head">
+    <a class="crumb" href="/wiki/">← wiki</a>
+    <h1 class="display">{title}</h1>
+    <p class="annot">{sources}{generated && ` · updated ${generated}`}</p>
+    {draft && <p class="draftnote">Draft — auto-generated overview, curated upgrade pending.</p>}
+  </header>
+
+  <article class="prose">
+    <Content />
+  </article>
+
+  <div class="foot">
+    <a class="btn" href={`/library/?tag=${encodeURIComponent(topic)}`}>Browse all {title} links in the library →</a>
+  </div>
+
+  <style>
+    .head { margin-bottom: var(--gap-section); }
+    .crumb { color: var(--faint); font-size: 13px; display: inline-block; margin-bottom: 14px; }
+    .head h1 { font-size: clamp(36px, 6vw, 64px); }
+    .head .annot { margin-top: 10px; }
+    .draftnote { color: var(--faint); font-size: 13px; margin-top: 10px; }
+    .foot { margin-top: var(--gap-section); }
+  </style>
+
+  <style is:global>
+    .prose { max-width: 820px; color: var(--mist); font-size: 15.5px; line-height: 1.65; }
+    .prose h2 {
+      font-family: var(--display); font-weight: 400; font-size: 22px;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--twilight);
+      margin: 40px 0 14px;
+    }
+    .prose h3 { color: var(--whiteout); font-size: 16.5px; margin: 26px 0 10px; }
+    .prose p { margin: 0 0 14px; }
+    .prose strong { color: var(--whiteout); }
+    .prose a { color: var(--signal); }
+    .prose a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .prose ul, .prose ol { margin: 0 0 16px; padding-left: 22px; }
+    .prose li { margin-bottom: 7px; }
+    .prose blockquote {
+      border-left: 2px solid var(--signal); margin: 0 0 16px; padding: 2px 0 2px 16px;
+      color: var(--faint);
+    }
+    .prose hr { border: 0; border-top: 1px solid var(--hairline); margin: 28px 0; }
+    .prose code {
+      font-family: ui-monospace, Consolas, monospace; font-size: 13.5px;
+      background: var(--haze); color: var(--ink); border-radius: 4px; padding: 1px 6px;
+    }
+    .prose table { border-collapse: collapse; font-size: 14px; }
+    .prose th, .prose td { border: 1px solid var(--hairline); padding: 6px 12px; text-align: left; }
+  </style>
+</AirLayout>

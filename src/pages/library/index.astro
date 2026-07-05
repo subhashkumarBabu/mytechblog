@@ -1,0 +1,177 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+
+export const prerender = false;
+
+type Link = {
+  id: string; type: string; title: string | null; url: string | null;
+  summary: string | null; tags: string; created_at: string; is_read: number;
+};
+
+const env = Astro.locals.runtime?.env;
+let initial: Link[] = [];
+let total = 0;
+
+if (env?.DB) {
+  const [res, countRes] = await Promise.all([
+    env.DB.prepare(
+      "SELECT id, type, title, url, summary, tags, created_at, is_read FROM links ORDER BY created_at DESC LIMIT 50",
+    ).all(),
+    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
+  ]);
+  initial = res.results as Link[];
+  total = countRes?.n ?? 0;
+}
+
+const totalFmt = total.toLocaleString("en-US");
+const TYPES = [
+  ["", "All"], ["article", "Articles"], ["repository", "Repos"],
+  ["youtubevideo", "Videos"], ["webpage", "Web"], ["document", "Docs"], ["note", "Notes"],
+];
+const TOPICS = [
+  "ai-agents", "llms", "rag", "azure", "kubernetes", "devops",
+  "terraform", "python", "security", "machine-learning", "leadership",
+];
+---
+
+<AirLayout
+  title={`Library — devopsmantra`}
+  description={`Browse and search all ${totalFmt} saved links.`}
+  active="library"
+>
+  <header class="head">
+    <h1 class="display">Library</h1>
+    <p class="annot">{totalFmt} saves, 2012 → today</p>
+  </header>
+
+  <input class="input" id="q" type="search" placeholder="Search titles, summaries, tags…" autocomplete="off" />
+
+  <div class="rail" id="types">
+    {TYPES.map(([v, label], i) => (
+      <button class:list={["chip", { on: i === 0 }]} data-type={v}>{label}</button>
+    ))}
+  </div>
+  <div class="rail" id="topics">
+    {TOPICS.map((t) => <button class="chip" data-tag={t}>{t}</button>)}
+  </div>
+
+  <p class="count" id="count">Showing {initial.length} of {totalFmt}</p>
+
+  <div class="list" id="list" data-initial={JSON.stringify(initial)}></div>
+  <button class="btn more" id="more">Load 50 more</button>
+
+  <style>
+    .head { margin-bottom: 34px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+    .input { margin-bottom: 12px; }
+    #types { margin-bottom: 8px; }
+    .count { color: var(--faint); font-size: 12.5px; margin: 16px 0 6px; }
+    .more { width: 100%; margin-top: 18px; }
+  </style>
+
+  <style is:global>
+    .row {
+      display: block; padding: 14px 2px; border-bottom: 1px solid var(--hairline);
+      text-decoration: none;
+    }
+    .row:hover .rt { color: var(--signal); }
+    .row .rk {
+      display: flex; gap: 10px; align-items: baseline;
+      font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
+      color: var(--faint); margin-bottom: 3px;
+    }
+    .row .rk .rtag { color: var(--signal); text-transform: none; letter-spacing: 0; }
+    .row .rt { color: var(--whiteout); font-size: 15.5px; font-weight: 500; line-height: 1.4; }
+    .row .rs { color: var(--mist); font-size: 13px; margin-top: 3px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+
+  <script>
+    const list = document.getElementById("list")!;
+    const count = document.getElementById("count")!;
+    const more = document.getElementById("more") as HTMLButtonElement;
+    const input = document.getElementById("q") as HTMLInputElement;
+
+    type Row = {
+      id: string; type: string; title: string | null; url: string | null;
+      summary: string | null; tags: string; created_at: string;
+    };
+
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+    function rowHtml(l: Row): string {
+      let tags: string[] = [];
+      try { tags = JSON.parse(l.tags || "[]"); } catch {}
+      const domain = (() => { try { return new URL(l.url!).hostname.replace(/^www\./, ""); } catch { return ""; } })();
+      const year = (l.created_at || "").slice(0, 4);
+      return `<a class="row" href="${esc(l.url ?? "#")}" target="_blank" rel="noopener">
+        <div class="rk"><span>${esc(l.type)}</span><span>${esc(domain)}</span><span>${year}</span>${
+          tags.slice(0, 3).map((t) => `<span class="rtag">${esc(t)}</span>`).join("")
+        }</div>
+        <div class="rt">${esc(l.title ?? l.url ?? "Untitled")}</div>
+        ${l.summary ? `<div class="rs">${esc(l.summary)}</div>` : ""}
+      </a>`;
+    }
+
+    let type = "", tag = "", offset = 0, shown = 0, totalNow = 0;
+
+    async function load(append = false) {
+      if (!append) offset = 0;
+      const p = new URLSearchParams({ limit: "50", offset: String(offset) });
+      const q = input.value.trim();
+      if (q) p.set("q", q);
+      if (type) p.set("type", type);
+      if (tag) p.set("tag", tag);
+      const res = await fetch(`/api/links/?${p}`);
+      const data = await res.json();
+      const html = data.links.map(rowHtml).join("");
+      if (append) list.insertAdjacentHTML("beforeend", html);
+      else list.innerHTML = html;
+      shown = append ? shown + data.links.length : data.links.length;
+      totalNow = data.total;
+      count.textContent = `Showing ${shown} of ${totalNow.toLocaleString()}`;
+      more.hidden = shown >= totalNow;
+    }
+
+    const initial = JSON.parse(list.dataset.initial || "[]");
+    list.innerHTML = initial.map(rowHtml).join("");
+    shown = initial.length;
+    list.removeAttribute("data-initial");
+
+    // deep links from wiki pages: /library/?tag=azure or ?q=…
+    const params = new URLSearchParams(location.search);
+    const deepTag = params.get("tag");
+    const deepQ = params.get("q");
+    if (deepTag || deepQ) {
+      if (deepQ) input.value = deepQ;
+      if (deepTag) {
+        tag = deepTag;
+        document.querySelectorAll<HTMLButtonElement>("#topics .chip").forEach((x) =>
+          x.classList.toggle("on", x.dataset.tag === deepTag),
+        );
+      }
+      load();
+    }
+
+    let t: ReturnType<typeof setTimeout>;
+    input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => load(), 250); });
+    more.addEventListener("click", () => { offset += 50; load(true); });
+
+    document.querySelectorAll<HTMLButtonElement>("#types .chip").forEach((c) =>
+      c.addEventListener("click", () => {
+        type = c.dataset.type ?? "";
+        document.querySelectorAll("#types .chip").forEach((x) => x.classList.toggle("on", x === c));
+        load();
+      }),
+    );
+    document.querySelectorAll<HTMLButtonElement>("#topics .chip").forEach((c) =>
+      c.addEventListener("click", () => {
+        const next = c.dataset.tag ?? "";
+        tag = tag === next ? "" : next; // toggle off on second click
+        document.querySelectorAll("#topics .chip").forEach((x) => x.classList.toggle("on", x === c && tag !== ""));
+        load();
+      }),
+    );
+  </script>
+</AirLayout>

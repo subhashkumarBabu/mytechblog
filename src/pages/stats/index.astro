@@ -1,0 +1,130 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+
+export const prerender = false;
+
+const env = Astro.locals.runtime?.env;
+
+let total = 0, read = 0, due = 0, streak = 0;
+let activity: { date: string; links_saved: number; links_reviewed: number }[] = [];
+let byType: { type: string; n: number }[] = [];
+let byYear: { y: string; n: number }[] = [];
+
+if (env?.DB) {
+  const DB = env.DB;
+  const [totalRes, readRes, dueRes, streakRes, actRes, typeRes, yearRes] = await Promise.all([
+    DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
+    DB.prepare("SELECT COUNT(*) as n FROM links WHERE is_read = 1").first<{ n: number }>(),
+    DB.prepare("SELECT COUNT(*) as n FROM links WHERE next_review_at IS NOT NULL AND next_review_at <= date('now')").first<{ n: number }>(),
+    DB.prepare(`
+      WITH RECURSIVE dates AS (
+        SELECT date('now') as d
+        UNION ALL SELECT date(d, '-1 day') FROM dates WHERE d > date('now', '-365 day')
+      ),
+      streak_check AS (
+        SELECT d, (SELECT 1 FROM activity WHERE date = d AND (links_saved + links_reviewed) > 0) as active FROM dates
+      )
+      SELECT COUNT(*) as streak FROM (
+        SELECT d FROM streak_check WHERE active = 1
+        AND d >= (SELECT MIN(d) FROM (SELECT d FROM streak_check WHERE active IS NULL ORDER BY d DESC LIMIT 1) missed)
+      )
+    `).first<{ streak: number }>(),
+    DB.prepare("SELECT date, links_saved, links_reviewed FROM activity WHERE date >= date('now', '-83 day') ORDER BY date ASC").all(),
+    DB.prepare("SELECT type, COUNT(*) as n FROM links GROUP BY type ORDER BY n DESC").all(),
+    DB.prepare("SELECT substr(created_at, 1, 4) as y, COUNT(*) as n FROM links WHERE created_at >= '2012' GROUP BY y ORDER BY y ASC").all(),
+  ]);
+  total = totalRes?.n ?? 0;
+  read = readRes?.n ?? 0;
+  due = dueRes?.n ?? 0;
+  streak = streakRes?.streak ?? 0;
+  activity = actRes.results as typeof activity;
+  byType = typeRes.results as typeof byType;
+  byYear = yearRes.results as typeof byYear;
+}
+
+// 84-day grid ending today; intensity = saved + reviewed that day
+const byDate = new Map(activity.map((a) => [a.date, a.links_saved + a.links_reviewed]));
+const days: { date: string; n: number }[] = [];
+for (let i = 83; i >= 0; i--) {
+  const d = new Date();
+  d.setDate(d.getDate() - i);
+  const key = d.toISOString().slice(0, 10);
+  days.push({ date: key, n: byDate.get(key) ?? 0 });
+}
+const level = (n: number) => (n === 0 ? 0 : n < 3 ? 1 : n < 8 ? 2 : 3);
+
+const maxType = Math.max(1, ...byType.map((t) => t.n));
+const maxYear = Math.max(1, ...byYear.map((y) => y.n));
+---
+
+<AirLayout title="Stats — devopsmantra" description="Collection and review stats." active="stats">
+  <header class="head">
+    <h1 class="display">Stats</h1>
+    <p class="annot">the shape of 14 years of curiosity</p>
+  </header>
+
+  <div class="strip">
+    <div class="stat"><em>{total.toLocaleString("en-US")}</em><span>links saved</span></div>
+    <div class="stat"><em>{read.toLocaleString("en-US")}</em><span>read</span></div>
+    <div class="stat"><em>{due}</em><span>due today</span></div>
+    <div class="stat"><em>{streak}</em><span>day streak</span></div>
+  </div>
+
+  <section>
+    <h2>Last 12 weeks</h2>
+    <div class="heat" role="img" aria-label="Daily activity for the last 84 days">
+      {days.map((d) => <i class={`l${level(d.n)}`} title={`${d.date}: ${d.n}`}></i>)}
+    </div>
+  </section>
+
+  <section>
+    <h2>By type</h2>
+    {byType.map((t) => (
+      <div class="bar">
+        <span class="lbl">{t.type}</span>
+        <span class="trk"><i style={`width:${Math.max(1.5, (t.n / maxType) * 100)}%`}></i></span>
+        <span class="num">{t.n.toLocaleString("en-US")}</span>
+      </div>
+    ))}
+  </section>
+
+  <section>
+    <h2>By year saved</h2>
+    {byYear.map((y) => (
+      <div class="bar">
+        <span class="lbl">{y.y}</span>
+        <span class="trk"><i style={`width:${Math.max(1.5, (y.n / maxYear) * 100)}%`}></i></span>
+        <span class="num">{y.n.toLocaleString("en-US")}</span>
+      </div>
+    ))}
+  </section>
+
+  <style>
+    .head { margin-bottom: 28px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+
+    .strip { display: flex; gap: 28px; margin-bottom: var(--gap-section); flex-wrap: wrap; }
+    .stat em { font-style: normal; font-family: var(--display); font-size: 34px; color: var(--whiteout); display: block; line-height: 1; }
+    .stat span { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
+
+    section { margin-bottom: var(--gap-section); }
+    h2 {
+      font-family: var(--display); font-weight: 400; font-size: 18px;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--twilight);
+      margin-bottom: 16px;
+    }
+
+    .heat { display: grid; grid-template-rows: repeat(7, 13px); grid-auto-flow: column; gap: 4px; }
+    .heat i { width: 13px; height: 13px; border-radius: 3px; background: var(--haze); opacity: .12; }
+    .heat i.l1 { background: var(--signal); opacity: .35; }
+    .heat i.l2 { background: var(--signal); opacity: .65; }
+    .heat i.l3 { background: var(--signal); opacity: 1; }
+
+    .bar { display: grid; grid-template-columns: 110px 1fr 64px; gap: 12px; align-items: center; margin-bottom: 9px; }
+    .bar .lbl { color: var(--mist); font-size: 13px; }
+    .bar .trk { height: 12px; border-radius: 3px; overflow: hidden; }
+    .bar .trk i { display: block; height: 100%; background: var(--signal); border-radius: 3px; }
+    .bar .num { color: var(--faint); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+  </style>
+</AirLayout>

@@ -1,0 +1,80 @@
+---
+import { getCollection } from "astro:content";
+import AirLayout from "../../layouts/AirLayout.astro";
+
+export const prerender = true;
+
+const pages = await getCollection("wiki");
+const linkCount = (sources: string) => {
+  const m = sources.match(/^([\d,]+)/);
+  return m ? Number(m[1].replace(/,/g, "")) : 0;
+};
+const curated = pages
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => linkCount(b.data.sources) - linkCount(a.data.sources));
+const drafts = pages
+  .filter((p) => p.data.draft)
+  .sort((a, b) => linkCount(b.data.sources) - linkCount(a.data.sources));
+---
+
+<AirLayout
+  title="Wiki — devopsmantra"
+  description="Topic pages synthesized from 14 years of saved links by an AI librarian."
+  active="wiki"
+>
+  <header class="head">
+    <h1 class="display">Wiki</h1>
+    <p class="annot">{pages.length} topic pages, written by an AI librarian from the vault</p>
+  </header>
+
+  <h2 class="sect">Curated</h2>
+  <div class="grid">
+    {curated.map((p) => (
+      <a class="topic curated" href={`/wiki/${p.slug}/`}>
+        <span class="badge">curated</span>
+        <h3>{p.data.title}</h3>
+        <span class="n">{linkCount(p.data.sources).toLocaleString("en-US")} links</span>
+      </a>
+    ))}
+  </div>
+
+  <h2 class="sect">All topics</h2>
+  <div class="grid">
+    {drafts.map((p) => (
+      <a class="topic" href={`/wiki/${p.slug}/`}>
+        <h3>{p.data.title}</h3>
+        <span class="n">{linkCount(p.data.sources).toLocaleString("en-US")} links</span>
+      </a>
+    ))}
+  </div>
+
+  <style>
+    .head { margin-bottom: var(--gap-section); }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+
+    .sect {
+      font-family: var(--display); font-weight: 400; font-size: 18px;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--twilight);
+      margin: 0 0 16px;
+    }
+    .grid {
+      display: grid; gap: 14px; margin-bottom: var(--gap-section);
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    }
+    .topic {
+      display: flex; flex-direction: column; gap: 6px; min-height: 118px;
+      background: var(--haze); color: var(--ink);
+      border-radius: var(--r-card); padding: var(--pad-card);
+      text-decoration: none;
+    }
+    .topic:hover h3 { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
+    .topic h3 { font-size: 17px; font-weight: 600; line-height: 1.3; margin-top: auto; }
+    .topic .n { color: var(--ink-2); font-size: 12.5px; }
+    .topic .badge {
+      align-self: flex-start; font-size: 11px; font-weight: 600;
+      letter-spacing: .8px; text-transform: uppercase; color: var(--signal);
+    }
+    .topic.curated { border: 1px solid var(--signal); }
+  </style>
+</AirLayout>

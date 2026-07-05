@@ -22,7 +22,18 @@ const postsCollection = defineCollection({
 const specCollection = defineCollection({
 	schema: z.object({}),
 });
+// Synced from the Obsidian vault by pipeline/sync_wiki_to_site.py — do not edit by hand.
+const wikiCollection = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		topic: z.string(),
+		draft: z.boolean().default(false),
+		generated: z.string().optional().default(""),
+		sources: z.string().optional().default(""),
+	}),
+});
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
+	wiki: wikiCollection,
 };

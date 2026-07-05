@@ -1,0 +1,206 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+import { getQueue, type QueueItem } from "../api/queue";
+
+export const prerender = false;
+
+const env = Astro.locals.runtime?.env;
+let queue: QueueItem[] = [];
+let streak = 0;
+let readTotal = 0;
+
+if (env?.DB) {
+  const [q, readRes, streakRes] = await Promise.all([
+    getQueue(env.DB),
+    env.DB.prepare("SELECT COUNT(*) as n FROM links WHERE is_read = 1").first<{ n: number }>(),
+    env.DB.prepare(`
+      WITH RECURSIVE dates AS (
+        SELECT date('now') as d
+        UNION ALL
+        SELECT date(d, '-1 day') FROM dates WHERE d > date('now', '-365 day')
+      ),
+      streak_check AS (
+        SELECT d, (SELECT 1 FROM activity WHERE date = d AND (links_saved + links_reviewed) > 0) as active
+        FROM dates
+      )
+      SELECT COUNT(*) as streak FROM (
+        SELECT d FROM streak_check
+        WHERE active = 1
+        AND d >= (
+          SELECT MIN(d) FROM (
+            SELECT d FROM streak_check WHERE active IS NULL ORDER BY d DESC LIMIT 1
+          ) missed
+        )
+      )
+    `).first<{ streak: number }>(),
+  ]);
+  queue = q;
+  readTotal = readRes?.n ?? 0;
+  streak = streakRes?.streak ?? 0;
+}
+
+const dateFmt = new Date().toLocaleDateString("en-US", {
+  weekday: "long", month: "long", day: "numeric",
+});
+const dueCount = queue.filter((l) => l.source === "due").length;
+
+function meta(l: QueueItem) {
+  let tags: string[] = [];
+  try { tags = JSON.parse(l.tags || "[]"); } catch {}
+  let domain = "";
+  try { domain = new URL(l.url!).hostname.replace(/^www\./, ""); } catch {}
+  return { tags: tags.slice(0, 3), domain, year: (l.created_at || "").slice(0, 4) };
+}
+---
+
+<AirLayout title="Today — devopsmantra" description="Today's review queue." active="today">
+  <header class="head">
+    <h1 class="display">Today</h1>
+    <p class="annot">{dateFmt}</p>
+  </header>
+
+  <div class="strip">
+    <div class="stat"><em>{streak}</em><span>day streak</span></div>
+    <div class="stat"><em>{dueCount}</em><span>due for review</span></div>
+    <div class="stat"><em>{readTotal.toLocaleString("en-US")}</em><span>read all-time</span></div>
+  </div>
+
+  <div id="queue">
+    {queue.map((l) => {
+      const m = meta(l);
+      return (
+        <article class="qcard" data-id={l.id}>
+          <div class="kick">
+            <span class:list={["src", { due: l.source === "due" }]}>
+              {l.source === "due" ? "due for review" : `resurfaced from ${m.year}`}
+            </span>
+            <span>{m.domain}</span>
+          </div>
+          <h3><a href={l.url} target="_blank" rel="noopener">{l.title ?? l.url}</a></h3>
+          {l.summary && <p class="sum">{l.summary}</p>}
+          {m.tags.length > 0 && (
+            <div class="tags">{m.tags.map((t) => <span>{t}</span>)}</div>
+          )}
+          <div class="acts">
+            <a class="act read" href={l.url} target="_blank" rel="noopener" data-act="read">Read</a>
+            <button class="act" data-act="snooze">Snooze</button>
+            <button class="act ghost" data-act="letgo">Let go</button>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+
+  <div class="empty" id="empty" hidden>
+    <p class="display em-head">All clear.</p>
+    <p class="annot">nothing due — pull something old from the vault?</p>
+    <button class="btn" id="pull">Surface 5 more</button>
+  </div>
+
+  <p class="note" id="note" hidden></p>
+
+  <style>
+    .head { margin-bottom: 28px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+
+    .strip { display: flex; gap: 28px; margin-bottom: var(--gap-section); flex-wrap: wrap; }
+    .stat em { font-style: normal; font-family: var(--display); font-size: 34px; color: var(--whiteout); display: block; line-height: 1; }
+    .stat span { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
+
+    #queue { display: flex; flex-direction: column; gap: 14px; }
+    .qcard {
+      background: var(--haze); color: var(--ink);
+      border-radius: var(--r-card); padding: var(--pad-card);
+      transition: opacity .25s, transform .25s;
+    }
+    .qcard.gone { opacity: 0; transform: translateX(40px); }
+    .qcard .kick {
+      display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px;
+      font-size: 11.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--ink-2);
+    }
+    .qcard .kick .src.due { color: var(--signal); }
+    .qcard h3 { font-size: 18px; font-weight: 600; line-height: 1.35; }
+    .qcard h3 a { color: var(--ink); }
+    .qcard h3 a:hover { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
+    .qcard .sum { color: var(--ink-2); font-size: 13.5px; margin-top: 6px; }
+    .qcard .tags { display: flex; gap: 10px; margin-top: 8px; }
+    .qcard .tags span { color: var(--signal); font-size: 12.5px; font-weight: 600; }
+    .qcard .acts { display: flex; gap: 10px; margin-top: 16px; }
+    .act {
+      appearance: none; cursor: pointer; min-height: 40px; padding: 8px 18px;
+      border-radius: var(--r-btn); font-size: 13.5px; font-weight: 600;
+      border: 1px solid var(--ink); background: transparent; color: var(--ink);
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .act.read { background: var(--signal); border-color: var(--signal); color: var(--whiteout); }
+    .act.ghost { border-color: transparent; color: var(--ink-2); }
+    .act.ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+    .empty { text-align: center; padding: 48px 0; }
+    .empty .em-head { font-size: clamp(32px, 5vw, 52px); color: var(--whiteout); }
+    .empty .annot { margin: 10px 0 22px; }
+
+    .note { color: var(--mist); font-size: 13.5px; margin-top: 14px; text-align: center; }
+  </style>
+
+  <script>
+    const queueEl = document.getElementById("queue")!;
+    const empty = document.getElementById("empty")!;
+    const note = document.getElementById("note")!;
+    const pull = document.getElementById("pull") as HTMLButtonElement;
+
+    function say(msg: string) {
+      note.textContent = msg;
+      note.hidden = false;
+      setTimeout(() => { note.hidden = true; }, 3500);
+    }
+
+    function checkEmpty() {
+      empty.hidden = queueEl.querySelectorAll(".qcard").length > 0;
+    }
+
+    function dismiss(card: HTMLElement) {
+      card.classList.add("gone");
+      setTimeout(() => { card.remove(); checkEmpty(); }, 260);
+    }
+
+    queueEl.addEventListener("click", async (e) => {
+      const el = (e.target as Element).closest<HTMLElement>("[data-act]");
+      if (!el) return;
+      const card = el.closest<HTMLElement>(".qcard")!;
+      const id = card.dataset.id!;
+      const act = el.dataset.act!;
+
+      if (act === "read") {
+        // link opens via the anchor; record + schedule a revisit
+        fetch(`/api/links/${id}/review/`, { method: "POST" })
+          .then((r) => r.json())
+          .then((d) => say(`Nice. It'll come back in ${d.interval_days} day${d.interval_days === 1 ? "" : "s"}.`))
+          .catch(() => {});
+        dismiss(card);
+        return;
+      }
+      if (act === "snooze") {
+        await fetch(`/api/links/${id}/snooze/`, { method: "POST" });
+        say("Snoozed — back tomorrow.");
+        dismiss(card);
+        return;
+      }
+      if (act === "letgo") {
+        await fetch(`/api/links/${id}/letgo/`, { method: "POST" });
+        say("Let go. It won't come back.");
+        dismiss(card);
+      }
+    });
+
+    checkEmpty();
+
+    pull?.addEventListener("click", async () => {
+      const res = await fetch("/api/queue/?size=5");
+      const data = await res.json();
+      if (!data.queue.length) { say("The vault has nothing unread left. Impressive."); return; }
+      location.reload();
+    });
+  </script>
+</AirLayout>
