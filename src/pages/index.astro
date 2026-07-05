@@ -130,11 +130,13 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
     let topic = "", offset = 0, rows: Row[] = [];
 
     async function load(append = false) {
-      const q = [input.value.trim(), topic].filter(Boolean).join(" ").trim();
+      const q = input.value.trim();
       const searching = q.length > 0;
       shuffle.hidden = searching;
       if (!append) offset = 0;
-      const res = await fetch(`/api/landing/?q=${encodeURIComponent(q)}&offset=${offset}`);
+      const p = new URLSearchParams({ q, offset: String(offset) });
+      if (topic) p.set("tag", topic);
+      const res = await fetch(`/api/landing/?${p}`);
       const data = await res.json();
       rows = append ? rows.concat(data.links) : data.links;
       render(rows);
@@ -142,7 +144,7 @@ const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
         head.textContent = `${data.total.toLocaleString()} result${data.total === 1 ? "" : "s"}`;
         more.hidden = rows.length >= data.total;
       } else {
-        head.textContent = "Five from the vault";
+        head.textContent = topic ? `Five from ${topic}` : "Five from the vault";
         more.hidden = true;
       }
     }

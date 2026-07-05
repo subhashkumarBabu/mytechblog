@@ -6,8 +6,8 @@
   --whiteout: #ffffff;  /* text/borders on dark */
   --haze:     #f5f5f5;  /* cards, inputs on dark */
   --ink:      #1b1b1b;  /* text on light surfaces */
-  --void:     #000000;  /* canvas */
-  --twilight: #426188;  /* heading chroma on dark */
+  --void:     #060e1f;  /* canvas — midnight sky, not pure black */
+  --twilight: #5b7ea8;  /* heading chroma on dark */
   --signal:   #2b7fff;  /* links, tags, emphasis — the one accent */
 
   --r-input: 4px;
@@ -24,8 +24,8 @@
   --pad-card: 20px;
 
   /* derived — stay within the six-color palette */
-  --mist:     rgb(255 255 255 / .56);  /* muted text on dark */
-  --faint:    rgb(255 255 255 / .32);  /* meta text on dark */
-  --hairline: rgb(255 255 255 / .16);  /* borders on dark */
+  --mist:     rgb(235 242 255 / .6);   /* muted text on dark, sky-tinted */
+  --faint:    rgb(235 242 255 / .34);  /* meta text on dark */
+  --hairline: rgb(235 242 255 / .17);  /* borders on dark */
   --ink-2:    rgb(27 27 27 / .6);      /* muted text on light surfaces */
 }
