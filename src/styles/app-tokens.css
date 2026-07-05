@@ -1,0 +1,26 @@
+/* devopsmantra learning app — design tokens (see D:\mind\design\DESIGN.md) */
+:root {
+  color-scheme: dark;
+
+  --brand:       oklch(0.72 0.19 145);
+  --brand-deep:  oklch(0.55 0.17 145);
+  --brand-soft:  oklch(0.3 0.06 145);
+  --accent:      oklch(0.75 0.16 60);
+  --accent-deep: oklch(0.6 0.14 60);
+  --accent-soft: oklch(0.32 0.06 60);
+  --info:        oklch(0.65 0.15 250);
+  --info-soft:   oklch(0.3 0.06 250);
+  --purple:      oklch(0.62 0.17 300);
+  --purple-soft: oklch(0.3 0.06 300);
+
+  --bg:      oklch(0.145 0.012 285);
+  --surface: oklch(0.19 0.015 285);
+  --line:    oklch(0.27 0.015 285);
+  --ink:     oklch(0.96 0.005 260);
+  --ink-2:   oklch(0.72 0.012 270);
+
+  --r-card: 20px;
+  --r-btn: 16px;
+  --sans: "Nunito", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, Consolas, monospace;
+}

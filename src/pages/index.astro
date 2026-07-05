@@ -1,454 +1,269 @@
 ---
-import HomeLayout from "@layouts/HomeLayout.astro";
+import "../styles/app-tokens.css";
+import { RANDOM_SQL } from "./api/landing";
 
-const env = Astro.locals.runtime?.env;
+export const prerender = false;
 
 type Link = {
   id: string; type: string; title: string | null;
-  url: string | null; summary: string | null;
-  tags: string; created_at: string;
+  url: string | null; tags: string; created_at: string;
 };
 
-type TypeCount = { type: string; n: number };
-
+const env = Astro.locals.runtime?.env;
 let cards: Link[] = [];
 let total = 0;
-let typeCounts: TypeCount[] = [];
 
 if (env?.DB) {
-  const q = (type: string) =>
-    env.DB.prepare(
-      "SELECT id, type, title, url, summary, tags, created_at FROM links WHERE type=? AND url IS NOT NULL AND title IS NOT NULL ORDER BY RANDOM() LIMIT 1"
-    ).bind(type).first<Link>();
-
-  const [webPage, article, repo, yt, doc, countRes, typeRes] = await Promise.all([
-    q("WebPage"), q("Article"), q("Repository"), q("YouTubeVideo"), q("Document"),
-    env.DB.prepare("SELECT COUNT(*) as n FROM links").first<{ n: number }>(),
-    env.DB.prepare("SELECT type, COUNT(*) as n FROM links GROUP BY type ORDER BY n DESC").all(),
+  const [randomRes, countRes] = await Promise.all([
+    env.DB.prepare(RANDOM_SQL).all(),
+    env.DB.prepare("SELECT COUNT(*) AS n FROM links").first<{ n: number }>(),
   ]);
-
-  cards = [webPage, article, repo, yt, doc].filter((c): c is Link => !!c);
+  cards = randomRes.results as Link[];
   total = countRes?.n ?? 0;
-  typeCounts = typeRes.results as TypeCount[];
 }
 
-const totalFormatted = total.toLocaleString("en-US");
-
-const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
-  Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
-  Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
-  YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
-  WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
-  Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
-  Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
-};
-const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
-
-const TYPE_LABEL: Record<string, string> = {
-  WebPage: "Web", Article: "Articles", Repository: "Repos",
-  YouTubeVideo: "Videos", Document: "Docs", Note: "Notes",
-};
-
-function domainOf(url: string | null) {
-  if (!url) return "";
-  try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
-}
-
-function yearOf(str: string) {
-  try { return new Date(str).getFullYear().toString(); } catch { return ""; }
-}
+const totalFmt = total.toLocaleString("en-US");
+const TOPICS = ["ai-agents", "llms", "rag", "azure", "kubernetes", "devops"];
 ---
 
-<HomeLayout title="DevOps Mantra" description="A running index of the web, curated.">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>devopsmantra — {totalFmt} links, curated over 14 years</title>
+  <meta name="description" content={`A living knowledge base: ${totalFmt} hand-picked links on DevOps, Azure, Kubernetes and AI, organized into topic pages by an AI librarian.`} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div class="kicker">devopsmantra</div>
+      <h1>{totalFmt} links, curated over 14 years.<br />Organized by an AI librarian.</h1>
+    </header>
 
-<div class="min-h-screen bg-black relative">
-
-  <!-- Subtle radial gradient behind hero -->
-  <div class="absolute inset-x-0 top-0 h-[420px] pointer-events-none"
-       style="background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,0.035), transparent)">
-  </div>
-
-  <!-- Hero — always visible, even during search -->
-  <div class="relative max-w-5xl mx-auto px-6 pt-8 md:pt-14 pb-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-12">
-
-      <!-- Left: title + description -->
-      <div class="shrink-0">
-        <h1 class="text-3xl md:text-4xl text-white/90 leading-tight mb-3"
-            style="font-family:'Instrument Serif',serif;font-style:italic;">
-          DevOps Mantra
-        </h1>
-        <p class="text-white/30 text-sm leading-relaxed max-w-xs">
-          A running index of the web, curated.
-        </p>
-      </div>
-
-      <!-- Right: search + stats -->
-      <div class="flex-1 min-w-0 max-w-lg">
-        <!-- Search bar -->
-        <div class="liquid-glass rounded-full px-5 py-3.5 flex items-center gap-3 mb-3">
-          <svg class="w-4 h-4 shrink-0" style="color:rgba(255,255,255,0.3)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input
-            id="home-search"
-            type="search"
-            autocomplete="off"
-            placeholder={`Search ${totalFormatted} saved links…`}
-            class="flex-1 bg-transparent text-white placeholder:text-white/25 text-sm focus:outline-none"
-          />
-          <button id="search-clear" class="hidden shrink-0 transition-colors" style="color:rgba(255,255,255,0.3)" aria-label="Clear">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Stats row -->
-        {typeCounts.length > 0 && (() => {
-          const filtered = typeCounts.filter(t => TYPE_LABEL[t.type]);
-          return (
-            <div class="flex items-center gap-2 flex-wrap">
-              {filtered.map((t, i) => (
-                <>
-                  <span class="text-white/25 text-xs tabular-nums">
-                    {t.n.toLocaleString("en-US")} {TYPE_LABEL[t.type]}
-                  </span>
-                  {i < filtered.length - 1 && <span class="text-white/10 text-xs">&middot;</span>}
-                </>
-              ))}
-              <span class="text-white/10 text-xs">&middot;</span>
-              <a href="/saves/" class="text-white/35 hover:text-white/70 text-xs transition-colors underline-offset-2 hover:underline">
-                Browse library &rarr;
-              </a>
-            </div>
-          );
-        })()}
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Content area -->
-  <div class="relative max-w-5xl mx-auto px-6 pb-8">
-
-    <!-- Discover section (hidden during search) -->
-    <div id="discover-section">
-
-      <!-- Section header -->
-      <div class="flex items-center justify-between mb-4">
-        <p class="text-white/20 text-xs tracking-widest uppercase">Discover</p>
-        <button
-          id="shuffle-btn"
-          class="liquid-glass rounded-full px-4 py-1.5 flex items-center gap-2 text-white/40 hover:text-white/80 text-xs transition-colors"
-          aria-label="Shuffle cards"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/>
-            <path d="m19 15 3 3-3 3"/>
-            <path d="M2 6h1.9c1.3 0 2.5.6 3.3 1.7l.5.7"/>
-            <path d="m19 9 3-3-3-3"/>
-            <path d="M22 9h-4.7c-1.3 0-2.5-.6-3.3-1.7L13 7"/>
-          </svg>
-          Shuffle
-        </button>
-      </div>
-
-      <!-- Cards grid -->
-      <div id="home-cards">
-        {cards.length > 0 ? (
-          <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {cards.map((card, i) => {
-              const style = TYPE_STYLE[card.type] ?? DEFAULT_STYLE;
-              const domain = domainOf(card.url);
-              const year = yearOf(card.created_at);
-              const isHero = i === 0;
-              const colSpan = isHero
-                ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2"
-                : "col-span-1";
-              return (
-                <a
-                  href={card.url ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class={`group relative rounded-3xl overflow-hidden flex flex-col justify-between p-5 md:p-7 no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${isHero ? "min-h-[220px] md:min-h-[300px]" : "min-h-[160px] md:min-h-[180px]"} ${colSpan}`}
-                  style="background:rgb(10,10,10)"
-                >
-                  <div class={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80`}></div>
-                  <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style={`background:${style.accent}`}></div>
-                  <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
-
-                  <div class="relative z-10 flex items-start justify-between gap-2">
-                    <span class={`text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}`}>{card.type}</span>
-                    {year && <span class="text-white/20 text-[10px] shrink-0">{year}</span>}
-                  </div>
-
-                  <div class="relative z-10">
-                    {domain && (
-                      <p class="text-xs mb-2 group-hover:opacity-80 transition-opacity" style={`color:${style.accent};opacity:0.6`}>{domain}</p>
-                    )}
-                    <p class={`text-white font-medium leading-snug ${isHero ? "text-xl md:text-2xl" : "text-sm md:text-base"}`}
-                       style="font-family:'Instrument Serif',serif;">
-                      {card.title ?? domain ?? "Untitled"}
-                    </p>
-                    {card.summary && (
-                      <p class={`text-white/35 mt-2 leading-relaxed ${isHero ? "text-sm line-clamp-2" : "text-xs line-clamp-1"}`}>
-                        {card.summary}
-                      </p>
-                    )}
-                  </div>
-
-                  <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                    <svg class="w-4 h-4" style={`color:${style.accent}`} fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path d="M7 17 17 7M7 7h10v10"/>
-                    </svg>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        ) : (
-          <div class="text-center py-24 text-white/20 text-sm">No saved links yet.</div>
-        )}
-      </div>
-
-      <!-- Shuffle skeleton (shown while loading new cards) -->
-      <div id="shuffle-loading" class="hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {[...Array(5)].map((_, i) => (
-            <div class={`rounded-3xl bg-white/[0.03] animate-pulse ${i === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px]" : "min-h-[160px]"}`}></div>
-          ))}
-        </div>
-      </div>
-
+    <input class="search" id="q" type="search" placeholder="Search the whole collection…" autocomplete="off" />
+    <div class="rail" id="rail">
+      <button class="chip on" data-topic="">All</button>
+      {TOPICS.map((t) => <button class="chip" data-topic={t}>{t}</button>)}
     </div>
 
-    <!-- Search results (replaces discover section) -->
-    <div id="home-results" class="hidden">
-      <div class="flex items-center justify-between mb-4">
-        <p class="text-white/20 text-xs tracking-widest uppercase">
-          <span id="results-count">0</span> results
-        </p>
-        <span id="results-page-label" class="text-white/15 text-xs"></span>
-      </div>
-      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"></div>
-      <div id="results-empty" class="hidden text-center py-20">
-        <p class="text-white/20 text-sm">Nothing found.</p>
-      </div>
-      <!-- Pagination -->
-      <div id="results-pagination" class="hidden flex items-center justify-center gap-3 mt-8">
-        <button id="page-prev" class="liquid-glass rounded-full px-5 py-2 text-white/40 hover:text-white/80 text-xs transition-colors disabled:opacity-20 disabled:pointer-events-none">
-          &larr; Prev
-        </button>
-        <span id="page-indicator" class="text-white/25 text-xs tabular-nums"></span>
-        <button id="page-next" class="liquid-glass rounded-full px-5 py-2 text-white/40 hover:text-white/80 text-xs transition-colors disabled:opacity-20 disabled:pointer-events-none">
-          Next &rarr;
-        </button>
-      </div>
+    <div class="headrow">
+      <h2 id="head">Five from the vault</h2>
+      <button class="btn" id="shuffle">🔀 Shuffle</button>
     </div>
 
+    <div class="sqgrid" id="grid" data-initial={JSON.stringify(cards)}></div>
+    <button class="btn more" id="more" hidden>Show 10 more</button>
+
+    <footer>
+      <span class="mono">curated by subhash · devops → ai</span>
+      <a href="/archive">blog archive →</a>
+    </footer>
   </div>
-</div>
 
-</HomeLayout>
+  <style is:global>
+    * { margin: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--sans); color: var(--ink); min-height: 100vh;
+      background:
+        radial-gradient(55% 40% at 12% 0%, oklch(0.32 0.1 300 / .45), transparent 65%),
+        radial-gradient(45% 35% at 92% 15%, oklch(0.32 0.09 150 / .35), transparent 65%),
+        radial-gradient(50% 35% at 55% 105%, oklch(0.3 0.09 60 / .35), transparent 65%),
+        oklch(0.09 0.01 285);
+    }
+    body::before { /* film grain */
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 99; opacity: .04;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>');
+    }
+    .shell { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
 
-<script>
-  const TYPE_STYLE: Record<string, { gradient: string; accent: string; badge: string }> = {
-    Article:      { gradient: "from-blue-950 via-blue-900/60 to-transparent",       accent: "#60a5fa", badge: "bg-blue-500/20 text-blue-300" },
-    Repository:   { gradient: "from-emerald-950 via-emerald-900/60 to-transparent", accent: "#34d399", badge: "bg-emerald-500/20 text-emerald-300" },
-    YouTubeVideo: { gradient: "from-red-950 via-red-900/60 to-transparent",         accent: "#f87171", badge: "bg-red-500/20 text-red-300" },
-    WebPage:      { gradient: "from-violet-950 via-violet-900/60 to-transparent",   accent: "#a78bfa", badge: "bg-violet-500/20 text-violet-300" },
-    Document:     { gradient: "from-amber-950 via-amber-900/60 to-transparent",     accent: "#fbbf24", badge: "bg-amber-500/20 text-amber-300" },
-    Note:         { gradient: "from-pink-950 via-pink-900/60 to-transparent",       accent: "#f472b6", badge: "bg-pink-500/20 text-pink-300" },
-  };
-  const DEFAULT_STYLE = { gradient: "from-zinc-900 via-zinc-800/60 to-transparent", accent: "#a1a1aa", badge: "bg-zinc-500/20 text-zinc-300" };
+    .hero {
+      position: relative; overflow: hidden; border-radius: var(--r-card); color: white;
+      padding: 22px 20px; margin-bottom: 18px;
+      background: linear-gradient(135deg, oklch(0.6 0.2 300), oklch(0.55 0.2 265) 45%, oklch(0.66 0.19 150));
+      background-size: 220% 220%; animation: heroshift 9s ease infinite;
+    }
+    @keyframes heroshift { 0%,100% { background-position: 0% 50% } 50% { background-position: 100% 50% } }
+    .hero::after { content: ""; position: absolute; inset: -60%; pointer-events: none;
+      background: radial-gradient(circle at 72% 15%, rgb(255 255 255 / .3), transparent 42%); }
+    .kicker { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: oklch(0.93 0.09 150); margin-bottom: 8px; }
+    .hero h1 { font-size: clamp(19px, 3.2vw, 26px); font-weight: 900; line-height: 1.25; letter-spacing: -.3px; }
 
-  function domainOf(url: string | null) {
-    if (!url) return "";
-    try { return new URL(url).hostname.replace("www.", ""); } catch { return ""; }
-  }
-  function yearOf(str: string) {
-    try { return new Date(str).getFullYear().toString(); } catch { return ""; }
-  }
-  function esc(s: unknown) {
-    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  }
+    .search { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      border-radius: var(--r-btn); padding: 14px 18px; font: 700 15px var(--sans); margin-bottom: 12px; }
+    .search:focus { outline: 2px solid oklch(0.65 0.15 250 / .7); outline-offset: 1px; }
 
-  function buildCard(link: any, isHero = false): HTMLAnchorElement {
-    const style = TYPE_STYLE[link.type as string] ?? DEFAULT_STYLE;
-    const domain = domainOf(link.url);
-    const year = yearOf(link.created_at);
-    const a = document.createElement("a");
-    a.href = link.url ?? "#";
-    if (link.url) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
-    const sizeClass = isHero
-      ? "col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2 min-h-[220px] md:min-h-[300px] p-5 md:p-7"
-      : "col-span-1 min-h-[160px] md:min-h-[180px] p-5";
-    a.className = `group relative rounded-3xl overflow-hidden flex flex-col justify-between no-underline cursor-pointer transition-transform duration-300 hover:scale-[1.02] ${sizeClass}`;
-    a.style.background = "rgb(10,10,10)";
-    const titleSize = isHero ? "text-xl md:text-2xl" : "text-sm md:text-base";
-    const summarySize = isHero ? "text-sm line-clamp-2" : "text-xs line-clamp-1";
-    a.innerHTML = `
-      <div class="absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-80"></div>
-      <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl transition-opacity duration-500 group-hover:opacity-40" style="background:${esc(style.accent)}"></div>
-      <div class="absolute inset-0 rounded-3xl" style="box-shadow:inset 0 1px 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04);pointer-events:none;"></div>
-      <div class="relative z-10 flex items-start justify-between gap-2">
-        <span class="text-[10px] px-2.5 py-1 rounded-full font-medium tracking-wide ${style.badge}">${esc(link.type)}</span>
-        ${year ? `<span class="text-white/20 text-[10px] shrink-0">${esc(year)}</span>` : ""}
-      </div>
-      <div class="relative z-10">
-        ${domain ? `<p class="text-xs mb-2 group-hover:opacity-80 transition-opacity" style="color:${esc(style.accent)};opacity:0.6">${esc(domain)}</p>` : ""}
-        <p class="text-white font-medium leading-snug ${titleSize}" style="font-family:'Instrument Serif',serif;">${esc(link.title ?? link.url ?? "Untitled")}</p>
-        ${link.summary ? `<p class="text-white/35 mt-2 leading-relaxed ${summarySize}">${esc(link.summary)}</p>` : ""}
-      </div>
-      <div class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-        <svg class="w-4 h-4" style="color:${esc(style.accent)}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M7 17 17 7M7 7h10v10"/>
-        </svg>
-      </div>`;
-    return a;
-  }
+    .rail { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
+    .chip { flex: none; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 8px 14px;
+      border-radius: 999px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
+    .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
-  function initHome() {
-    const searchInput     = document.getElementById("home-search") as HTMLInputElement | null;
-    const clearBtn        = document.getElementById("search-clear");
-    const discoverSection = document.getElementById("discover-section");
-    const cardsEl         = document.getElementById("home-cards");
-    const cardsGrid       = document.getElementById("cards-grid");
-    const shuffleLoading  = document.getElementById("shuffle-loading");
-    const shuffleBtn      = document.getElementById("shuffle-btn");
-    const resultsPanel    = document.getElementById("home-results");
-    const resultsGrid     = document.getElementById("results-grid");
-    const resultsCount    = document.getElementById("results-count");
-    const resultsEmpty    = document.getElementById("results-empty");
+    .headrow { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 16px; }
+    .headrow h2 { font-size: 18px; font-weight: 900; }
 
-    if (!searchInput) return;
+    .btn { appearance: none; border: 0; border-radius: var(--r-btn); font: 800 14px var(--sans);
+      padding: 11px 16px; min-height: 44px; cursor: pointer; color: var(--ink);
+      background: var(--surface); box-shadow: 0 4px 0 var(--line); transition: transform .06s, box-shadow .06s; }
+    .btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--line); }
+    .btn:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+    .btn.more { width: 100%; margin-top: 6px; }
 
-    const PAGE_SIZE = 20;
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    let lastQuery = "";
-    let currentPage = 0;
-    let totalResults = 0;
+    /* ── 3D bento tiles ── */
+    .sqgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 18px; perspective: 1100px; padding: 6px 4px 18px; }
+    .sq { position: relative; aspect-ratio: 1; border-radius: 22px; padding: 14px; color: white;
+      display: flex; flex-direction: column; cursor: pointer; text-decoration: none;
+      will-change: transform; transform: var(--tilt, none); transform-style: preserve-3d;
+      transition: transform .2s ease, box-shadow .25s ease; }
+    .sq:nth-child(3n+1) { --tilt: rotateY(-8deg) rotateX(5deg); }
+    .sq:nth-child(3n+2) { --tilt: rotateX(7deg); }
+    .sq:nth-child(3n)   { --tilt: rotateY(8deg) rotateX(5deg); }
+    .sq::before, .sq::after { content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: inherit; z-index: -1; }
+    .sq::before { transform: translate(7px, 8px); filter: brightness(.8); opacity: .5; }
+    .sq::after  { transform: translate(14px, 16px); filter: brightness(.6); opacity: .25; }
+    .sq:hover { box-shadow: 0 0 0 1px rgb(255 255 255 / .15), 0 18px 44px rgb(0 0 0 / .55); }
+    .sq .ico { font-size: 26px; margin-bottom: auto; }
+    .sq h3 { font-size: 13px; font-weight: 800; line-height: 1.3; margin: 8px 0; color: white;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .sq .meta { display: flex; justify-content: space-between; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10.5px; font-weight: 700; opacity: .9; }
+    .sq .meta span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sq .tag { flex: none; background: rgb(255 255 255 / .25); border-radius: 999px; padding: 3px 8px; }
+    .sq .hook { display: none; }
+    .sqgrid .sq:first-child { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; padding: 20px; }
+    .sqgrid .sq:first-child h3 { font-size: 19px; -webkit-line-clamp: 4; }
+    .sqgrid .sq:first-child .ico { font-size: 36px; }
+    .sqgrid .sq:first-child .hook { display: block; font-family: var(--mono); font-size: 11.5px;
+      color: rgb(255 255 255 / .8); margin-bottom: 8px; }
+    .glare { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+      transition: opacity .25s;
+      background: radial-gradient(170px circle at var(--gx, 50%) var(--gy, 40%), rgb(255 255 255 / .32), transparent 65%); }
+    .sq:hover .glare { opacity: 1; }
+    .g-purple { background: linear-gradient(135deg, oklch(0.62 0.2 300), oklch(0.5 0.22 270)); }
+    .g-green  { background: linear-gradient(135deg, oklch(0.7 0.19 150), oklch(0.55 0.17 175)); }
+    .g-blue   { background: linear-gradient(135deg, oklch(0.62 0.16 250), oklch(0.5 0.17 275)); }
+    .g-sky    { background: linear-gradient(135deg, oklch(0.68 0.14 230), oklch(0.55 0.15 255)); }
+    .g-orange { background: linear-gradient(135deg, oklch(0.75 0.16 60),  oklch(0.62 0.18 35)); }
+    .g-pink   { background: linear-gradient(135deg, oklch(0.65 0.21 350), oklch(0.55 0.22 20)); }
+    .g-teal   { background: linear-gradient(135deg, oklch(0.7 0.14 190),  oklch(0.55 0.13 220)); }
+    .sq { animation: pop .5s cubic-bezier(.34,1.45,.64,1) backwards; }
+    .sq:nth-child(2) { animation-delay: .07s } .sq:nth-child(3) { animation-delay: .14s }
+    .sq:nth-child(4) { animation-delay: .21s } .sq:nth-child(5) { animation-delay: .28s }
+    .sq:nth-child(n+6) { animation-delay: .34s }
+    @keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.96) } }
 
-    const pageLabel     = document.getElementById("results-page-label");
-    const pagination    = document.getElementById("results-pagination");
-    const pageIndicator = document.getElementById("page-indicator");
-    const pagePrev      = document.getElementById("page-prev") as HTMLButtonElement | null;
-    const pageNext      = document.getElementById("page-next") as HTMLButtonElement | null;
+    footer { display: flex; justify-content: space-between; align-items: center; margin-top: 26px;
+      font-size: 12.5px; color: var(--ink-2); }
+    footer .mono { font-family: var(--mono); }
+    footer a { color: var(--ink-2); font-weight: 700; }
 
-    function showDiscover() {
-      discoverSection?.classList.remove("hidden");
-      resultsPanel?.classList.add("hidden");
-      pagination?.classList.add("hidden");
-      clearBtn?.classList.add("hidden");
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+
+  <script>
+    const grid = document.getElementById("grid")!;
+    const head = document.getElementById("head")!;
+    const more = document.getElementById("more") as HTMLButtonElement;
+    const shuffle = document.getElementById("shuffle") as HTMLButtonElement;
+    const input = document.getElementById("q") as HTMLInputElement;
+
+    type Row = { id: string; type: string; title: string; url: string; tags: string; created_at: string };
+
+    const GRADS: Record<string, string> = {
+      "ai-agents": "g-purple", llms: "g-green", rag: "g-blue", azure: "g-sky",
+      kubernetes: "g-teal", devops: "g-orange", security: "g-pink",
+      "learning-resources": "g-orange", "machine-learning": "g-green",
+    };
+    const CYCLE = ["g-purple", "g-green", "g-blue", "g-orange", "g-pink", "g-teal"];
+    const ICONS: Record<string, string> = {
+      YouTubeVideo: "▶️", Repository: "📦", Article: "📄", Document: "📑", WebPage: "🌐", Note: "📝",
+    };
+
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+    function tile(l: Row, g: string): string {
+      let tags: string[] = [];
+      try { tags = JSON.parse(l.tags || "[]"); } catch {}
+      const topic = tags[0] ?? l.type.toLowerCase();
+      const domain = (() => { try { return new URL(l.url).hostname.replace(/^www\./, ""); } catch { return ""; } })();
+      const year = (l.created_at || "").slice(0, 4);
+      return `<a class="sq ${g}" href="${esc(l.url)}" target="_blank" rel="noopener">
+        <div class="ico">${ICONS[l.type] ?? "🌐"}</div>
+        <h3>${esc(l.title ?? domain)}</h3>
+        <div class="hook">from the ${esc(topic)} collection · ${year}</div>
+        <div class="meta"><span>${esc(domain)} · ${year}</span><span class="tag">${esc(topic)}</span></div>
+        <i class="glare"></i></a>`;
     }
 
-    function showResults(links: any[], total: number, page: number) {
-      discoverSection?.classList.add("hidden");
-      resultsPanel?.classList.remove("hidden");
-      totalResults = total;
-      currentPage = page;
+    function render(rows: Row[]) {
+      let last = "";
+      grid.innerHTML = rows.map((l, i) => {
+        let tags: string[] = [];
+        try { tags = JSON.parse(l.tags || "[]"); } catch {}
+        let g = GRADS[tags[0]] ?? CYCLE[i % CYCLE.length];
+        if (g === last) g = CYCLE[(CYCLE.indexOf(g) + 1) % CYCLE.length];
+        last = g;
+        return tile(l, g);
+      }).join("");
+    }
 
-      if (resultsCount) resultsCount.textContent = total.toLocaleString("en-US");
-      const totalPages = Math.ceil(total / PAGE_SIZE);
-      if (pageLabel) pageLabel.textContent = totalPages > 1 ? `page ${page + 1} of ${totalPages}` : "";
+    let topic = "", offset = 0, rows: Row[] = [];
 
-      resultsGrid?.replaceChildren();
-      if (!links.length) {
-        resultsEmpty?.classList.remove("hidden");
-        pagination?.classList.add("hidden");
+    async function load(append = false) {
+      const q = [input.value.trim(), topic].filter(Boolean).join(" ").trim();
+      const searching = q.length > 0;
+      shuffle.hidden = searching;
+      if (!append) offset = 0;
+      const res = await fetch(`/api/landing/?q=${encodeURIComponent(q)}&offset=${offset}`);
+      const data = await res.json();
+      rows = append ? rows.concat(data.links) : data.links;
+      render(rows);
+      if (searching) {
+        head.textContent = `${data.total.toLocaleString()} result${data.total === 1 ? "" : "s"}`;
+        more.hidden = rows.length >= data.total;
       } else {
-        resultsEmpty?.classList.add("hidden");
-        links.forEach(l => resultsGrid?.appendChild(buildCard(l)));
-
-        if (totalPages > 1) {
-          pagination?.classList.remove("hidden");
-          if (pageIndicator) pageIndicator.textContent = `${page + 1} / ${totalPages}`;
-          if (pagePrev) pagePrev.disabled = page === 0;
-          if (pageNext) pageNext.disabled = page >= totalPages - 1;
-        } else {
-          pagination?.classList.add("hidden");
-        }
+        head.textContent = "Five from the vault";
+        more.hidden = true;
       }
     }
 
-    async function doSearch(q: string, page = 0) {
-      discoverSection?.classList.add("hidden");
-      resultsPanel?.classList.add("hidden");
-      try {
-        const offset = page * PAGE_SIZE;
-        const res = await fetch(`/api/links?q=${encodeURIComponent(q)}&limit=${PAGE_SIZE}&offset=${offset}`);
-        const { links, total } = await res.json() as { links: any[]; total: number };
-        showResults(links ?? [], total ?? 0, page);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } catch {
-        showResults([], 0, 0);
-      }
+    render(JSON.parse(grid.dataset.initial || "[]"));
+    grid.removeAttribute("data-initial");
+
+    let t: ReturnType<typeof setTimeout>;
+    input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => load(), 250); });
+    shuffle.addEventListener("click", () => load());
+    more.addEventListener("click", () => { offset += 10; load(true); });
+    document.querySelectorAll<HTMLButtonElement>(".chip").forEach((c) =>
+      c.addEventListener("click", () => {
+        topic = c.dataset.topic ?? "";
+        document.querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === c));
+        load();
+      }),
+    );
+
+    /* 3D tilt + glare (fine pointers only) */
+    const fine = matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (fine) {
+      document.addEventListener("pointermove", (e) => {
+        const el = (e.target as Element).closest<HTMLElement>(".sq");
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = `perspective(700px) rotateY(${x * 14}deg) rotateX(${-y * 14}deg) translateY(-3px)`;
+        el.style.setProperty("--gx", `${(x + 0.5) * 100}%`);
+        el.style.setProperty("--gy", `${(y + 0.5) * 100}%`);
+      });
+      document.addEventListener("pointerout", (e) => {
+        const el = (e.target as Element).closest<HTMLElement>(".sq");
+        if (el && !el.contains(e.relatedTarget as Node)) el.style.transform = "";
+      });
     }
-
-    pagePrev?.addEventListener("click", () => {
-      if (currentPage > 0) doSearch(lastQuery, currentPage - 1);
-    });
-    pageNext?.addEventListener("click", () => {
-      if ((currentPage + 1) * PAGE_SIZE < totalResults) doSearch(lastQuery, currentPage + 1);
-    });
-
-    // Shuffle
-    shuffleBtn?.addEventListener("click", async () => {
-      if (!cardsEl || !shuffleLoading) return;
-      cardsEl.classList.add("hidden");
-      shuffleLoading.classList.remove("hidden");
-
-      const types = ["WebPage", "Article", "Repository", "YouTubeVideo", "Document"];
-      try {
-        const results = await Promise.all(
-          types.map(t => fetch(`/api/links?type=${t}&limit=1&random=1`).then(r => r.json()))
-        );
-        const newCards = results.map((r: any) => r.links?.[0]).filter(Boolean);
-
-        if (cardsGrid) {
-          cardsGrid.replaceChildren();
-          newCards.forEach((card: any, i: number) => cardsGrid.appendChild(buildCard(card, i === 0)));
-        } else if (cardsEl) {
-          const grid = document.createElement("div");
-          grid.id = "cards-grid";
-          grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4";
-          newCards.forEach((card: any, i: number) => grid.appendChild(buildCard(card, i === 0)));
-          cardsEl.replaceChildren(grid);
-        }
-      } catch {
-        // silently keep existing cards on error
-      }
-
-      shuffleLoading.classList.add("hidden");
-      cardsEl.classList.remove("hidden");
-    });
-
-    // Search
-    searchInput.addEventListener("input", () => {
-      const q = searchInput.value.trim();
-      clearBtn?.classList.toggle("hidden", !q);
-      if (debounceTimer) clearTimeout(debounceTimer);
-      if (!q) { lastQuery = ""; showDiscover(); return; }
-      if (q === lastQuery) return;
-      lastQuery = q;
-      currentPage = 0;
-      debounceTimer = setTimeout(() => doSearch(q, 0), 320);
-    });
-
-    clearBtn?.addEventListener("click", () => {
-      if (searchInput) searchInput.value = "";
-      lastQuery = "";
-      showDiscover();
-      searchInput?.focus();
-    });
-  }
-
-  initHome();
-
-  function setupSwup() {
-    (window as any).swup?.hooks?.on("page:view", initHome);
-  }
-  if ((window as any).swup) setupSwup();
-  else document.addEventListener("swup:enable", setupSwup);
-</script>
+  </script>
+</body>
+</html>
