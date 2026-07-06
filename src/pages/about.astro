@@ -1,94 +1,138 @@
 ---
-import HomeLayout from "@layouts/HomeLayout.astro";
+import AirLayout from "../layouts/AirLayout.astro";
+
+export const prerender = true;
+
+const ARC = [
+  {
+    when: "1995",
+    what: "Programmer analyst. A decade of building business software for whoever needed it — printers, financial firms, perfume makers, coaching classes, car-rental agencies. Visual Basic, FoxPro, SQL, and a lot of listening to users.",
+  },
+  {
+    when: "2007",
+    what: "Enterprise consulting: document management and .NET systems for European government and industry clients. Requirement analysis, estimation, and shipping across a portfolio of thirty-odd applications.",
+  },
+  {
+    when: "2014",
+    what: "Solutions architect for a very large UK retail estate — architectural governance, technology roadmaps, cloud and app migration measured in millions, and bringing DevOps to a legacy estate.",
+  },
+  {
+    when: "2023",
+    what: "The pivot. Site reliability engineering, large language models, and agentic AI — keeping big systems healthy, and wiring AI agents into how systems are run and how I learn.",
+  },
+];
+
+const INTERESTS = [
+  { label: "SRE & observability", slug: "sre-and-observability" },
+  { label: "LLMs", slug: "llms" },
+  { label: "AI agents", slug: "ai-agents" },
+  { label: "RAG", slug: "rag" },
+  { label: "Azure", slug: "azure" },
+  { label: "Kubernetes", slug: "kubernetes" },
+  { label: "DevOps", slug: "devops" },
+  { label: "Platform engineering", slug: "platform-engineering" },
+  { label: "Prompt engineering", slug: "prompt-engineering" },
+  { label: "MLOps", slug: "mlops" },
+];
 ---
 
-<HomeLayout title="About — Subhash Kumar" description="SRE practitioner working on AI, Cloud and DevOps">
+<AirLayout
+  title="About — Subhash Kumar"
+  description="Subhash Kumar — Mumbai-based solutions architect working on site reliability engineering, LLMs, and agentic AI."
+  active="about"
+>
+  <header class="head">
+    <h1 class="display">Subhash <em>Kumar</em></h1>
+    <p class="annot">thirty years in, still shipping · mumbai</p>
+  </header>
 
-  <div class="min-h-screen bg-black px-6 pb-24">
-    <div class="max-w-2xl mx-auto pt-14">
+  <section class="card lede">
+    <p class="big">
+      I'm a solutions architect whose career started with Visual Basic and currently
+      runs on Kubernetes and LLM agents. For the past three years my work has centred
+      on <strong>site reliability engineering</strong>, <strong>large language
+      models</strong>, and <strong>agentic AI</strong>.
+    </p>
+    <p>
+      I'm a perennial learner — physics degree, self-taught programmer, and a
+      knowledge base of nearly twenty thousand curated links to prove the habit
+      never stopped. This site is where that learning lives in public.
+    </p>
+  </section>
 
-      <h1
-        class="text-5xl md:text-7xl text-white tracking-tight leading-none mb-3"
-        style="font-family:'Instrument Serif',serif;"
-      >
-        Subhash <em class="italic text-white/35">Kumar</em>
-      </h1>
-      <p class="text-white/30 text-sm tracking-widest uppercase mb-14">
-        SRE &middot; AI &middot; Cloud
-      </p>
-
-      <!-- Bio -->
-      <div class="liquid-glass rounded-3xl p-8 md:p-10 mb-6">
-        <p class="text-white/70 text-base md:text-lg leading-relaxed mb-6"
-           style="font-family:'Instrument Serif',serif;">
-          I'm an SRE practitioner building reliable systems at scale. I work across
-          Site Reliability Engineering, AI infrastructure, and Cloud — and I've been
-          collecting links that matter since 2012.
-        </p>
-        <p class="text-white/50 text-sm leading-relaxed">
-          This site is my personal knowledge base — 19,752+ curated links across
-          DevOps, AI, Cloud, and SRE, plus writing on what I'm learning and building.
-        </p>
-      </div>
-
-      <!-- Links / Contact -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-
-        <a
-          href="mailto:subhashkp@hotmail.com"
-          class="liquid-glass rounded-2xl px-6 py-5 flex items-center gap-4 no-underline group transition-all hover:bg-white/[0.06]"
-        >
-          <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,0.06)">
-            <svg class="w-4 h-4 text-white/60 group-hover:text-white transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect width="20" height="16" x="2" y="4" rx="2"/>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-white/80 text-sm font-medium group-hover:text-white transition-colors">Send a mail</p>
-            <p class="text-white/30 text-xs mt-0.5">subhashkp@hotmail.com</p>
-          </div>
-        </a>
-
-        <a
-          href="https://github.com/subhashkumarBabu"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="liquid-glass rounded-2xl px-6 py-5 flex items-center gap-4 no-underline group transition-all hover:bg-white/[0.06]"
-        >
-          <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,0.06)">
-            <svg class="w-4 h-4 text-white/60 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-white/80 text-sm font-medium group-hover:text-white transition-colors">GitHub</p>
-            <p class="text-white/30 text-xs mt-0.5">subhashkumarBabu</p>
-          </div>
-        </a>
-
-      </div>
-
-      <!-- What I'm building -->
-      <div class="liquid-glass rounded-3xl p-8 md:p-10">
-        <p class="text-white/20 text-xs tracking-widest uppercase mb-5">Currently building</p>
-        <div class="flex flex-col gap-4">
-          <div class="flex items-start gap-4">
-            <div class="w-1 h-1 rounded-full mt-2 shrink-0" style="background:rgba(99,102,241,0.8)"></div>
-            <div>
-              <p class="text-white/70 text-sm">LLM-powered wiki on DevOps &amp; AI topics, generated from my saved links library</p>
-            </div>
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="w-1 h-1 rounded-full mt-2 shrink-0" style="background:rgba(52,211,153,0.8)"></div>
-            <div>
-              <p class="text-white/70 text-sm">Spaced-repetition review system on top of 19,752+ curated links</p>
-            </div>
-          </div>
+  <section class="sect">
+    <h2 class="display h2">The arc</h2>
+    <div class="arc">
+      {ARC.map((row) => (
+        <div class="row">
+          <span class="when">{row.when}</span>
+          <p class="what">{row.what}</p>
         </div>
+      ))}
+      <div class="row">
+        <span class="when edu">BSc</span>
+        <p class="what">Physics, University of Mumbai.</p>
       </div>
-
     </div>
-  </div>
+  </section>
 
-</HomeLayout>
+  <section class="sect">
+    <h2 class="display h2">What I'm into</h2>
+    <p class="annot">each chip opens the wiki page built from my saves</p>
+    <div class="rail wrap chips">
+      {INTERESTS.map((t) => (
+        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label}</a>
+      ))}
+    </div>
+  </section>
+
+  <section class="card sect">
+    <h2 class="display h2 inkhead">This site</h2>
+    <p>
+      devopsmantra is my knowledge engine: 19,700+ links saved since 2012, classified
+      by an LLM pipeline into a living <a href="/wiki/">wiki</a>, searchable in the
+      <a href="/library/">library</a>, and resurfaced daily by a spaced-repetition
+      queue. It's the proof of work for everything above.
+    </p>
+  </section>
+
+  <section class="sect connect">
+    <h2 class="display h2">Say hello</h2>
+    <div class="ctas">
+      <a class="btn accent" href="mailto:subhashkp@hotmail.com">subhashkp@hotmail.com</a>
+      <a class="btn" href="https://github.com/subhashkumarBabu" target="_blank" rel="noopener noreferrer">GitHub — subhashkumarBabu</a>
+    </div>
+  </section>
+
+  <style>
+    .head { margin-bottom: 34px; }
+    .head h1 { font-size: clamp(44px, 8vw, 84px); }
+    .head .annot { margin-top: 8px; }
+
+    .lede { max-width: 720px; }
+    .lede .big { font-size: clamp(17px, 2.4vw, 21px); line-height: 1.45; font-weight: 500; margin-bottom: 14px; }
+    .lede p:not(.big) { color: var(--ink-2); }
+
+    .sect { margin-top: var(--gap-section); max-width: 720px; }
+    .h2 { font-size: clamp(22px, 3.5vw, 30px); margin-bottom: 16px; }
+    .inkhead { color: var(--ink); }
+    .card.sect p { color: var(--ink-2); }
+    .card.sect a { text-decoration: underline; text-underline-offset: 3px; }
+
+    .arc { display: flex; flex-direction: column; }
+    .arc .row {
+      display: grid; grid-template-columns: 64px 1fr; gap: 16px;
+      padding: 14px 0; border-top: 1px solid var(--hairline);
+    }
+    .arc .row:last-child { border-bottom: 1px solid var(--hairline); }
+    .when { font-family: var(--display); font-size: 17px; color: var(--signal); letter-spacing: .5px; }
+    .when.edu { color: var(--twilight); }
+    .what { color: var(--mist); font-size: 14.5px; }
+
+    .chips { margin-top: 14px; }
+    .rail.wrap { flex-wrap: wrap; }
+
+    .connect .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+    .connect .btn { display: inline-flex; align-items: center; }
+  </style>
+</AirLayout>

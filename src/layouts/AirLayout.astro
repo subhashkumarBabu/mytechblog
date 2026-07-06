@@ -6,7 +6,7 @@ import "../styles/app-tokens.css";
 interface Props {
   title: string;
   description?: string;
-  active?: "home" | "wiki" | "library" | "today" | "stats" | "blog" | "save";
+  active?: "home" | "wiki" | "library" | "today" | "stats" | "blog" | "about" | "save";
 }
 const { title, description = "", active = "home" } = Astro.props;
 
@@ -17,6 +17,7 @@ const NAV: { key: string; label: string; href: string }[] = [
   { key: "today", label: "Today", href: "/today/" },
   { key: "stats", label: "Stats", href: "/stats/" },
   { key: "blog", label: "Blog", href: "/archive/" },
+  { key: "about", label: "About", href: "/about/" },
   { key: "save", label: "+ Save", href: "/save/" },
 ];
 ---
