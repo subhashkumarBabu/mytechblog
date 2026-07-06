@@ -3,42 +3,64 @@ import AirLayout from "../layouts/AirLayout.astro";
 
 export const prerender = true;
 
-const ARC = [
+const BUILDING = [
   {
-    when: "1995",
-    what: "Programmer analyst. A decade of building business software for whoever needed it — printers, financial firms, perfume makers, coaching classes, car-rental agencies. Visual Basic, FoxPro, SQL, and a lot of listening to users.",
+    title: "Agentic incident management",
+    what: "Autonomous agents that triage, route, and recover incidents — reasoning, tool calls, memory, and a policy engine, event-driven and observable end to end.",
   },
   {
-    when: "2007",
-    what: "Enterprise consulting: document management and .NET systems for European government and industry clients. Requirement analysis, estimation, and shipping across a portfolio of thirty-odd applications.",
+    title: "Agent tooling & AI economics",
+    what: "Claude Code power user — agent harnesses, hooks, skills, and the craft of a good CLAUDE.md. Equally obsessed with the bill: token economics, cache costs, and picking the right model for the job.",
   },
   {
-    when: "2014",
-    what: "Solutions architect for a very large UK retail estate — architectural governance, technology roadmaps, cloud and app migration measured in millions, and bringing DevOps to a legacy estate.",
-  },
-  {
-    when: "2023",
-    what: "The pivot. Site reliability engineering, large language models, and agentic AI — keeping big systems healthy, and wiring AI agents into how systems are run and how I learn.",
+    title: "This site — an AI mentor in training",
+    what: "devopsmantra ingests my bookmarks, builds the wiki, and nags me with spaced repetition. 19,700+ links saved since 2012, classified by an LLM pipeline.",
   },
 ];
 
+const ARC = [
+  {
+    when: "1995",
+    what: "Programmer analyst. Built software for whoever walked in the door — printers, perfume makers, financial firms, coaching classes, car-rental agencies. Visual Basic, FoxPro, SQL, and a lot of listening.",
+  },
+  {
+    when: "2007",
+    what: "Enterprise consulting for European government and industry: document management, .NET, and a thirty-application portfolio that taught me estimation the hard way.",
+  },
+  {
+    when: "2014",
+    what: "Solutions architect for a very large UK retail estate. Nine years of teaching a legacy estate new tricks: pipelines in Azure DevOps, infrastructure written down in Terraform and Bicep instead of clicked into existence, migrations measured in millions — and technology roadmaps that occasionally survived contact with reality.",
+  },
+  {
+    when: "2023",
+    what: "The pivot. From keeping big systems boring — the highest compliment in SRE — to teaching them to fix themselves: large language models, agentic AI, and platforms that reason about their own operations.",
+  },
+];
+
+const HOW = [
+  "Layers before code. Capability, semantic, orchestration, governance — get the layers right and the code almost writes itself.",
+  "Cloud-agnostic by reflex, even though Azure is home turf. Portable, configuration-driven, allergic to lock-in.",
+  "Architecture doc first, diagrams included. If it can't be drawn, it isn't understood yet.",
+];
+
 const INTERESTS = [
-  { label: "SRE & observability", slug: "sre-and-observability" },
-  { label: "LLMs", slug: "llms" },
-  { label: "AI agents", slug: "ai-agents" },
-  { label: "RAG", slug: "rag" },
-  { label: "Azure", slug: "azure" },
-  { label: "Kubernetes", slug: "kubernetes" },
-  { label: "DevOps", slug: "devops" },
-  { label: "Platform engineering", slug: "platform-engineering" },
-  { label: "Prompt engineering", slug: "prompt-engineering" },
-  { label: "MLOps", slug: "mlops" },
+  { label: "LLMs", slug: "llms", n: "3,267" },
+  { label: "Azure", slug: "azure", n: "2,437" },
+  { label: "AI agents", slug: "ai-agents", n: "1,891" },
+  { label: "Machine learning", slug: "machine-learning", n: "1,417" },
+  { label: "DevOps", slug: "devops", n: "1,195" },
+  { label: "RAG", slug: "rag", n: "674" },
+  { label: "Infrastructure as code", slug: "infrastructure-as-code", n: "626" },
+  { label: "Prompt engineering", slug: "prompt-engineering", n: "499" },
+  { label: "Kubernetes", slug: "kubernetes", n: "490" },
+  { label: "SRE & observability", slug: "sre-and-observability", n: "378" },
+  { label: "Platform engineering", slug: "platform-engineering", n: "207" },
 ];
 ---
 
 <AirLayout
   title="About — Subhash Kumar"
-  description="Subhash Kumar — Mumbai-based solutions architect working on site reliability engineering, LLMs, and agentic AI."
+  description="Subhash Kumar — Mumbai-based enterprise AI architect working on agentic AI, site reliability engineering, and LLM platforms."
   active="about"
 >
   <header class="head">
@@ -48,16 +70,27 @@ const INTERESTS = [
 
   <section class="card lede">
     <p class="big">
-      I'm a solutions architect whose career started with Visual Basic and currently
-      runs on Kubernetes and LLM agents. For the past three years my work has centred
-      on <strong>site reliability engineering</strong>, <strong>large language
-      models</strong>, and <strong>agentic AI</strong>.
+      I design enterprise AI platforms — the kind that have to survive production,
+      not just a demo.
     </p>
     <p>
-      I'm a perennial learner — physics degree, self-taught programmer, and a
-      knowledge base of nearly twenty thousand curated links to prove the habit
-      never stopped. This site is where that learning lives in public.
+      Thirty years from Visual Basic to LLM agents. These days I work where
+      <strong>site reliability engineering</strong> meets <strong>agentic AI</strong>:
+      systems that reason, plan, call tools, remember — and still answer to
+      governance and an error budget.
     </p>
+  </section>
+
+  <section class="sect">
+    <h2 class="display h2">Now building</h2>
+    <div class="grid3">
+      {BUILDING.map((b) => (
+        <div class="card proj">
+          <h3>{b.title}</h3>
+          <p>{b.what}</p>
+        </div>
+      ))}
+    </div>
   </section>
 
   <section class="sect">
@@ -77,23 +110,21 @@ const INTERESTS = [
   </section>
 
   <section class="sect">
-    <h2 class="display h2">What I'm into</h2>
-    <p class="annot">each chip opens the wiki page built from my saves</p>
-    <div class="rail wrap chips">
-      {INTERESTS.map((t) => (
-        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label}</a>
-      ))}
-    </div>
+    <h2 class="display h2">How I think</h2>
+    <ul class="how">
+      {HOW.map((h) => <li>{h}</li>)}
+    </ul>
+    <p class="annot q">"is this the right layer?" comes before "how do I write this code?"</p>
   </section>
 
-  <section class="card sect">
-    <h2 class="display h2 inkhead">This site</h2>
-    <p>
-      devopsmantra is my knowledge engine: 19,700+ links saved since 2012, classified
-      by an LLM pipeline into a living <a href="/wiki/">wiki</a>, searchable in the
-      <a href="/library/">library</a>, and resurfaced daily by a spaced-repetition
-      queue. It's the proof of work for everything above.
-    </p>
+  <section class="sect">
+    <h2 class="display h2">What I'm into</h2>
+    <p class="annot">the obsession is documented — receipts from 19,700 saved links</p>
+    <div class="rail wrap chips">
+      {INTERESTS.map((t) => (
+        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label} <span class="n">{t.n}</span></a>
+      ))}
+    </div>
   </section>
 
   <section class="sect connect">
@@ -113,13 +144,14 @@ const INTERESTS = [
     .lede .big { font-size: clamp(17px, 2.4vw, 21px); line-height: 1.45; font-weight: 500; margin-bottom: 14px; }
     .lede p:not(.big) { color: var(--ink-2); }
 
-    .sect { margin-top: var(--gap-section); max-width: 720px; }
+    .sect { margin-top: var(--gap-section); max-width: 880px; }
     .h2 { font-size: clamp(22px, 3.5vw, 30px); margin-bottom: 16px; }
-    .inkhead { color: var(--ink); }
-    .card.sect p { color: var(--ink-2); }
-    .card.sect a { text-decoration: underline; text-underline-offset: 3px; }
 
-    .arc { display: flex; flex-direction: column; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .proj h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .5px; font-size: 15px; margin-bottom: 8px; }
+    .proj p { color: var(--ink-2); font-size: 13.5px; }
+
+    .arc { display: flex; flex-direction: column; max-width: 720px; }
     .arc .row {
       display: grid; grid-template-columns: 64px 1fr; gap: 16px;
       padding: 14px 0; border-top: 1px solid var(--hairline);
@@ -129,8 +161,14 @@ const INTERESTS = [
     .when.edu { color: var(--twilight); }
     .what { color: var(--mist); font-size: 14.5px; }
 
+    .how { list-style: none; padding: 0; max-width: 720px; display: flex; flex-direction: column; gap: 10px; }
+    .how li { color: var(--mist); font-size: 14.5px; padding-left: 18px; position: relative; }
+    .how li::before { content: "—"; position: absolute; left: 0; color: var(--signal); }
+    .annot.q { margin-top: 18px; }
+
     .chips { margin-top: 14px; }
     .rail.wrap { flex-wrap: wrap; }
+    .chip .n { opacity: .55; font-size: 12px; font-weight: 600; margin-left: 2px; }
 
     .connect .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
     .connect .btn { display: inline-flex; align-items: center; }
