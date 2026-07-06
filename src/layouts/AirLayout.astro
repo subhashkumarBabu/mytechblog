@@ -7,8 +7,11 @@ interface Props {
   title: string;
   description?: string;
   active?: "home" | "wiki" | "library" | "today" | "stats" | "blog" | "about" | "save";
+  ogImage?: string;
 }
-const { title, description = "", active = "home" } = Astro.props;
+const { title, description = "", active = "home", ogImage } = Astro.props;
+const origin = Astro.site ?? Astro.url.origin;
+const canonical = new URL(Astro.url.pathname, origin).href;
 
 const NAV: { key: string; label: string; href: string }[] = [
   { key: "home", label: "Home", href: "/" },
@@ -36,6 +39,16 @@ const NAV: { key: string; label: string; href: string }[] = [
   </script>
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
+  <link rel="canonical" href={canonical} />
+  <meta property="og:title" content={title} />
+  {description && <meta property="og:description" content={description} />}
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  {ogImage && <meta property="og:image" content={new URL(ogImage, origin).href} />}
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={title} />
+  {description && <meta name="twitter:description" content={description} />}
+  {ogImage && <meta name="twitter:image" content={new URL(ogImage, origin).href} />}
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/favicon/favicon-dark-32.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />

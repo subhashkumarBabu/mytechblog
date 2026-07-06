@@ -1,24 +1,7 @@
 ---
 import AirLayout from "../layouts/AirLayout.astro";
-import { Image } from "astro:assets";
-import avatar from "../assets/images/avatar.jpg";
 
-export const prerender = true;
-
-const BUILDING = [
-  {
-    title: "Agentic incident management",
-    what: "Autonomous agents that triage, route, and recover incidents — reasoning, tool calls, memory, and a policy engine, event-driven and observable end to end.",
-  },
-  {
-    title: "Agent tooling & AI economics",
-    what: "Claude Code power user — agent harnesses, hooks, skills, and the craft of a good CLAUDE.md. Equally obsessed with the bill: token economics, cache costs, and picking the right model for the job.",
-  },
-  {
-    title: "This site — an AI mentor in training",
-    what: "devopsmantra ingests my bookmarks, builds the wiki, and nags me with spaced repetition. 19,700+ links saved since 2012, classified by an LLM pipeline.",
-  },
-];
+export const prerender = false;
 
 const ARC = [
   {
@@ -45,32 +28,81 @@ const HOW = [
   "Architecture doc first, diagrams included. If it can't be drawn, it isn't understood yet.",
 ];
 
+// tag = classifier name in D1; slug = wiki page; fb = fallback count if D1 unreachable
 const INTERESTS = [
-  { label: "LLMs", slug: "llms", n: "3,267" },
-  { label: "Azure", slug: "azure", n: "2,437" },
-  { label: "AI agents", slug: "ai-agents", n: "1,891" },
-  { label: "Machine learning", slug: "machine-learning", n: "1,417" },
-  { label: "DevOps", slug: "devops", n: "1,195" },
-  { label: "RAG", slug: "rag", n: "674" },
-  { label: "Infrastructure as code", slug: "infrastructure-as-code", n: "626" },
-  { label: "Prompt engineering", slug: "prompt-engineering", n: "499" },
-  { label: "Kubernetes", slug: "kubernetes", n: "490" },
-  { label: "SRE & observability", slug: "sre-and-observability", n: "378" },
-  { label: "Platform engineering", slug: "platform-engineering", n: "207" },
+  { label: "LLMs", slug: "llms", tag: "llms", fb: 3267 },
+  { label: "Azure", slug: "azure", tag: "azure", fb: 2437 },
+  { label: "AI agents", slug: "ai-agents", tag: "ai-agents", fb: 1891 },
+  { label: "Machine learning", slug: "machine-learning", tag: "machine-learning", fb: 1417 },
+  { label: "DevOps", slug: "devops", tag: "devops", fb: 1195 },
+  { label: "RAG", slug: "rag", tag: "rag", fb: 674 },
+  { label: "Infrastructure as code", slug: "infrastructure-as-code", tag: "iac", fb: 626 },
+  { label: "Prompt engineering", slug: "prompt-engineering", tag: "prompt-engineering", fb: 499 },
+  { label: "SRE & observability", slug: "sre-and-observability", tag: "sre-observability", fb: 378 },
+  { label: "Platform engineering", slug: "platform-engineering", tag: "platform-engineering", fb: 207 },
 ];
+
+const env = Astro.locals.runtime?.env;
+const counts: Record<string, number> = {};
+let total = 19754;
+let recent: { title: string; url: string; created_at: string }[] = [];
+
+if (env?.DB) {
+  try {
+    const stmts = INTERESTS.map((t) =>
+      env.DB.prepare("SELECT COUNT(*) AS n FROM links WHERE tags LIKE ?").bind(`%"${t.tag}"%`)
+    );
+    stmts.push(env.DB.prepare("SELECT COUNT(*) AS n FROM links"));
+    stmts.push(env.DB.prepare("SELECT title, url, created_at FROM links ORDER BY created_at DESC LIMIT 3"));
+    const res = await env.DB.batch(stmts);
+    INTERESTS.forEach((t, i) => {
+      counts[t.tag] = (res[i].results[0] as { n: number }).n;
+    });
+    total = (res[INTERESTS.length].results[0] as { n: number }).n || total;
+    recent = res[INTERESTS.length + 1].results as typeof recent;
+  } catch {
+    // D1 hiccup — fall back to the baked-in numbers
+  }
+}
+
+const fmt = (n: number) => n.toLocaleString("en-US");
+const chipN = (t: (typeof INTERESTS)[number]) => fmt(counts[t.tag] ?? t.fb);
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
+const person = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Subhash Kumar",
+  jobTitle: "Enterprise AI Architect",
+  description:
+    "Mumbai-based enterprise AI architect working on agentic AI, site reliability engineering, and LLM platforms.",
+  url: "https://devopsmantra.com/about/",
+  image: "https://devopsmantra.com/avatar.jpg",
+  email: "mailto:subhashkp@hotmail.com",
+  sameAs: ["https://github.com/subhashkumarBabu"],
+  address: { "@type": "PostalAddress", addressLocality: "Mumbai", addressCountry: "IN" },
+  knowsAbout: [
+    "Agentic AI", "Large Language Models", "Site Reliability Engineering",
+    "Microsoft Azure", "Terraform", "Solution Architecture",
+  ],
+};
 ---
 
 <AirLayout
   title="About — Subhash Kumar"
   description="Subhash Kumar — Mumbai-based enterprise AI architect working on agentic AI, site reliability engineering, and LLM platforms."
   active="about"
+  ogImage="/avatar.jpg"
 >
+  <script type="application/ld+json" set:html={JSON.stringify(person)} />
+
   <header class="head">
     <div>
       <h1 class="display">Subhash <em>Kumar</em></h1>
       <p class="annot">thirty years in, still shipping · mumbai</p>
     </div>
-    <Image class="pic" src={avatar} alt="Subhash Kumar" width={280} height={280} />
+    <img class="pic" src="/avatar.jpg" alt="Subhash Kumar" width="280" height="280" />
   </header>
 
   <section class="card lede">
@@ -86,15 +118,38 @@ const INTERESTS = [
     </p>
   </section>
 
+  <section class="sect statband" aria-label="At a glance">
+    <div class="stat"><span class="num">30</span><span class="lbl">years shipping</span></div>
+    <div class="stat"><span class="num">{fmt(total)}</span><span class="lbl">links curated</span></div>
+    <div class="stat"><span class="num">41</span><span class="lbl">wiki topics</span></div>
+  </section>
+
   <section class="sect">
     <h2 class="display h2">Now building</h2>
     <div class="grid3">
-      {BUILDING.map((b) => (
-        <div class="card proj">
-          <h3>{b.title}</h3>
-          <p>{b.what}</p>
-        </div>
-      ))}
+      <div class="card proj">
+        <h3>Agentic incident management</h3>
+        <p>
+          Autonomous agents that triage, route, and recover incidents — reasoning,
+          tool calls, memory, and a policy engine, event-driven and observable end to end.
+        </p>
+      </div>
+      <div class="card proj">
+        <h3>Agent tooling &amp; AI economics</h3>
+        <p>
+          Claude Code power user — agent harnesses, hooks, skills, and the craft of a
+          good CLAUDE.md. Equally obsessed with the bill: token economics, cache costs,
+          and picking the right model for the job.
+        </p>
+      </div>
+      <div class="card proj">
+        <h3>This site — an AI mentor in training</h3>
+        <p>
+          devopsmantra ingests my bookmarks, builds the <a href="/wiki/">wiki</a>, and
+          nags me with spaced repetition. {fmt(total)} links saved since 2012, classified
+          by an LLM pipeline into a searchable <a href="/library/">library</a>.
+        </p>
+      </div>
     </div>
   </section>
 
@@ -124,12 +179,23 @@ const INTERESTS = [
 
   <section class="sect">
     <h2 class="display h2">What I'm into</h2>
-    <p class="annot">the obsession is documented — receipts from 19,700 saved links</p>
+    <p class="annot">the obsession is documented — live counts from {fmt(total)} saved links</p>
     <div class="rail wrap chips">
       {INTERESTS.map((t) => (
-        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label} <span class="n">{t.n}</span></a>
+        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label} <span class="n">{chipN(t)}</span></a>
       ))}
     </div>
+    {recent.length > 0 && (
+      <div class="fresh">
+        <p class="freshlbl">Fresh in the vault</p>
+        {recent.map((r) => (
+          <a class="fr" href={r.url} target="_blank" rel="noopener noreferrer">
+            <span class="d">{fmtDate(r.created_at)}</span>
+            <span class="t">{r.title}</span>
+          </a>
+        ))}
+      </div>
+    )}
   </section>
 
   <section class="sect connect">
@@ -138,6 +204,10 @@ const INTERESTS = [
       <a class="btn accent" href="mailto:subhashkp@hotmail.com">subhashkp@hotmail.com</a>
       <a class="btn" href="https://github.com/subhashkumarBabu" target="_blank" rel="noopener noreferrer">GitHub — subhashkumarBabu</a>
     </div>
+    <p class="alt">
+      Not ready for hello? Start with the <a href="/wiki/ai-agents/">AI-agents wiki</a>
+      or wander the <a href="/library/">library</a>.
+    </p>
   </section>
 
   <style>
@@ -156,9 +226,15 @@ const INTERESTS = [
     .sect { margin-top: var(--gap-section); max-width: 880px; }
     .h2 { font-size: clamp(22px, 3.5vw, 30px); margin-bottom: 16px; }
 
+    .statband { display: flex; gap: clamp(24px, 6vw, 64px); flex-wrap: wrap; }
+    .stat { display: flex; flex-direction: column; }
+    .stat .num { font-family: var(--display); font-size: clamp(36px, 6vw, 60px); color: var(--whiteout); line-height: 1.05; letter-spacing: .5px; }
+    .stat .lbl { color: var(--faint); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-top: 4px; }
+
     .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
     .proj h3 { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: .5px; font-size: 15px; margin-bottom: 8px; }
     .proj p { color: var(--ink-2); font-size: 13.5px; }
+    .proj a { text-decoration: underline; text-underline-offset: 3px; }
 
     .arc { display: flex; flex-direction: column; max-width: 720px; }
     .arc .row {
@@ -179,7 +255,19 @@ const INTERESTS = [
     .rail.wrap { flex-wrap: wrap; }
     .chip .n { opacity: .55; font-size: 12px; font-weight: 600; margin-left: 2px; }
 
+    .fresh { margin-top: 22px; display: flex; flex-direction: column; max-width: 720px; }
+    .freshlbl { color: var(--faint); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+    .fr {
+      display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: baseline;
+      padding: 9px 0; border-top: 1px solid var(--hairline);
+      color: var(--whiteout); font-size: 14px;
+    }
+    .fr:hover .t { color: var(--signal); }
+    .fr .d { color: var(--faint); font-size: 12px; }
+    .fr .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     .connect .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
     .connect .btn { display: inline-flex; align-items: center; }
+    .connect .alt { margin-top: 14px; color: var(--mist); font-size: 13.5px; }
   </style>
 </AirLayout>
