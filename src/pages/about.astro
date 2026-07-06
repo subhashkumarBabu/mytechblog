@@ -1,5 +1,7 @@
 ---
 import AirLayout from "../layouts/AirLayout.astro";
+import { Image } from "astro:assets";
+import avatar from "../assets/images/avatar.jpg";
 
 export const prerender = true;
 
@@ -64,8 +66,11 @@ const INTERESTS = [
   active="about"
 >
   <header class="head">
-    <h1 class="display">Subhash <em>Kumar</em></h1>
-    <p class="annot">thirty years in, still shipping · mumbai</p>
+    <div>
+      <h1 class="display">Subhash <em>Kumar</em></h1>
+      <p class="annot">thirty years in, still shipping · mumbai</p>
+    </div>
+    <Image class="pic" src={avatar} alt="Subhash Kumar" width={280} height={280} />
   </header>
 
   <section class="card lede">
@@ -136,9 +141,13 @@ const INTERESTS = [
   </section>
 
   <style>
-    .head { margin-bottom: 34px; }
+    .head {
+      margin-bottom: 34px; display: flex; align-items: flex-end;
+      justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    }
     .head h1 { font-size: clamp(44px, 8vw, 84px); }
     .head .annot { margin-top: 8px; }
+    .pic { width: clamp(96px, 14vw, 140px); height: auto; border-radius: var(--r-card); }
 
     .lede { max-width: 720px; }
     .lede .big { font-size: clamp(17px, 2.4vw, 21px); line-height: 1.45; font-weight: 500; margin-bottom: 14px; }
