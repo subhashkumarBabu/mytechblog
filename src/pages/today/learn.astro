@@ -1,0 +1,252 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+import { buildSession } from "../../lib/learning";
+
+export const prerender = false;
+
+const env = Astro.locals.runtime?.env;
+const session = env?.DB ? await buildSession(env.DB) : { items: [], due: 0, fresh: 0 };
+const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 0);
+---
+
+<AirLayout title="Learn — devopsmantra" description="Concept practice." active="today">
+  <header class="head">
+    <h1 class="display">Learn</h1>
+    <p class="annot">
+      {session.due} due · {session.fresh} new · {totalQuestions} questions
+    </p>
+  </header>
+
+  <div id="stage">
+    {totalQuestions === 0 && (
+      <div class="empty">
+        <p class="display em-head">Nothing due.</p>
+        <p class="annot">come back tomorrow — the ladder is resting.</p>
+        <a class="btn" href="/today/">Back to Today</a>
+      </div>
+    )}
+  </div>
+
+  <p class="note" id="note" hidden></p>
+
+  <script type="application/json" id="session-data" set:html={JSON.stringify(session)} />
+
+  <style>
+    .head { margin-bottom: 20px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+
+    .empty { text-align: center; padding: 48px 0; }
+    .empty .em-head { font-size: clamp(32px, 5vw, 52px); color: var(--whiteout); }
+    .empty .annot { margin: 10px 0 22px; }
+
+    .note { color: var(--mist); font-size: 13.5px; margin-top: 14px; text-align: center; }
+
+    :global(.progress) { display: flex; gap: 4px; margin-bottom: 22px; }
+    :global(.progress i) { flex: 1; height: 4px; border-radius: 2px; background: var(--haze); opacity: .35; }
+    :global(.progress i.done) { background: var(--signal); opacity: 1; }
+    :global(.progress i.now) { background: var(--whiteout); opacity: 1; }
+
+    :global(.qcard) {
+      background: var(--haze); color: var(--ink);
+      border-radius: var(--r-card); padding: var(--pad-card);
+    }
+    :global(.qcard .kick) {
+      display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px;
+      font-size: 11.5px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--ink-2);
+    }
+    :global(.qcard .kick .new) { color: var(--signal); }
+    :global(.qcard .primer) {
+      color: var(--ink-2); font-size: 13.5px; margin-bottom: 14px; padding-bottom: 14px;
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+    }
+    :global(.qcard .prompt) { font-size: 17px; font-weight: 600; line-height: 1.45; }
+
+    :global(.opts) { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+    :global(.opt) {
+      appearance: none; cursor: pointer; text-align: left; font-size: 14px; line-height: 1.45;
+      padding: 12px 16px; border-radius: var(--r-btn);
+      border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+      background: transparent; color: var(--ink);
+    }
+    :global(.opt:hover) { border-color: var(--ink); }
+    :global(.opt.right) { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 12%, transparent); }
+    :global(.opt.wrong) { border-color: #d4183d; background: color-mix(in srgb, #d4183d 10%, transparent); opacity: .9; }
+    :global(.opt:disabled) { cursor: default; }
+
+    :global(.shortrow) { display: flex; gap: 10px; margin-top: 18px; }
+    :global(.shortrow input) {
+      flex: 1; font-size: 15px; padding: 10px 14px; border-radius: var(--r-btn);
+      border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+      background: transparent; color: var(--ink);
+    }
+    :global(textarea.freebox) {
+      width: 100%; min-height: 110px; margin-top: 18px; font-size: 14.5px; line-height: 1.5;
+      padding: 12px 14px; border-radius: var(--r-btn); resize: vertical;
+      border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+      background: transparent; color: var(--ink); font-family: inherit;
+    }
+    :global(.rubric) {
+      margin-top: 14px; padding: 14px 16px; border-radius: var(--r-btn);
+      background: color-mix(in srgb, var(--signal) 8%, transparent);
+      font-size: 13.5px; line-height: 1.55; color: var(--ink);
+    }
+    :global(.selfrow) { display: flex; gap: 10px; margin-top: 14px; }
+
+    :global(.act) {
+      appearance: none; cursor: pointer; min-height: 40px; padding: 8px 18px;
+      border-radius: var(--r-btn); font-size: 13.5px; font-weight: 600;
+      border: 1px solid var(--ink); background: transparent; color: var(--ink);
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    :global(.act.primary) { background: var(--signal); border-color: var(--signal); color: #fff; }
+
+    :global(.fb) { margin-top: 16px; font-size: 14px; line-height: 1.5; }
+    :global(.fb .verdict) { font-weight: 700; }
+    :global(.fb .verdict.ok) { color: var(--signal); }
+    :global(.fb .verdict.no) { color: #d4183d; }
+    :global(.fb .detail) { color: var(--ink-2); margin-top: 4px; font-size: 13px; }
+    :global(.fb .next) { margin-top: 14px; }
+
+    :global(.summary) { text-align: center; padding: 40px 0; }
+    :global(.summary .em-head) { font-size: clamp(32px, 5vw, 52px); color: var(--whiteout); font-family: var(--display); }
+    :global(.summary .annot) { margin: 12px 0 24px; color: var(--faint); }
+  </style>
+
+  <script>
+    type SQ = { id: string; kind: string; difficulty: number; prompt: string; options?: string[]; rubric?: string };
+    type Item = { concept: { id: string; name: string; module: string; summary: string | null }; is_new: boolean; questions: SQ[] };
+
+    const session = JSON.parse(document.getElementById("session-data")!.textContent!) as
+      { items: Item[]; due: number; fresh: number };
+    const stage = document.getElementById("stage")!;
+
+    const flat: { item: Item; q: SQ }[] = [];
+    for (const item of session.items) for (const q of item.questions) flat.push({ item, q });
+
+    let pos = 0;
+    let right = 0;
+    let implicitTotal = 0;
+
+    function esc(s: string) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function progressBar() {
+      return `<div class="progress">${flat
+        .map((_, i) => `<i class="${i < pos ? "done" : i === pos ? "now" : ""}"></i>`)
+        .join("")}</div>`;
+    }
+
+    function render() {
+      if (pos >= flat.length) return renderSummary();
+      const { item, q } = flat[pos];
+      const kindLabel = q.kind === "mcq" ? "choose one" : q.kind === "short" ? "type the term" : "explain, then self-grade";
+      let body = "";
+      if (q.kind === "mcq") {
+        body = `<div class="opts">${q.options!
+          .map((o) => `<button class="opt" data-val="${esc(o)}">${esc(o)}</button>`)
+          .join("")}</div>`;
+      } else if (q.kind === "short") {
+        body = `<div class="shortrow">
+          <input type="text" id="short-in" autocomplete="off" placeholder="your answer" />
+          <button class="act primary" id="short-go">Check</button>
+        </div>`;
+      } else {
+        body = `<textarea class="freebox" id="free-in" placeholder="think it through out loud..."></textarea>
+          <div class="selfrow"><button class="act primary" id="reveal">Reveal rubric</button></div>
+          <div id="free-after" hidden>
+            <div class="rubric">${esc(q.rubric!)}</div>
+            <div class="selfrow">
+              <button class="act primary" data-self="1">I covered it</button>
+              <button class="act" data-self="0">I missed it</button>
+            </div>
+          </div>`;
+      }
+      stage.innerHTML = `${progressBar()}
+        <article class="qcard">
+          <div class="kick">
+            <span class="${item.is_new ? "new" : ""}">${item.is_new ? "new concept" : "review"} · ${esc(item.concept.name)}</span>
+            <span>${esc(item.concept.module)} · ${kindLabel}</span>
+          </div>
+          ${item.is_new && item.concept.summary && q === item.questions[0]
+            ? `<p class="primer">${esc(item.concept.summary)}</p>` : ""}
+          <p class="prompt">${esc(q.prompt)}</p>
+          ${body}
+          <div class="fb" id="fb" hidden></div>
+        </article>`;
+      wire(q);
+    }
+
+    async function submit(q: SQ, payload: Record<string, unknown>, chosenEl?: HTMLElement) {
+      const res = await fetch("/api/owner/learn/answer/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: q.id, ...payload }),
+      });
+      if (!res.ok) return;
+      const d = await res.json();
+      if (d.correct) right++;
+      implicitTotal += d.advanced ?? 0;
+
+      if (q.kind === "mcq") {
+        stage.querySelectorAll<HTMLButtonElement>(".opt").forEach((b) => {
+          b.disabled = true;
+          if (b.dataset.val === d.answer) b.classList.add("right");
+          else if (b === chosenEl && !d.correct) b.classList.add("wrong");
+        });
+      }
+      const fb = document.getElementById("fb")!;
+      const days = d.next_days === 1 ? "tomorrow" : `in ${d.next_days} days`;
+      const implicit = d.advanced > 0
+        ? ` ${d.advanced} foundation concept${d.advanced === 1 ? "" : "s"} advanced on implicit credit.` : "";
+      fb.innerHTML = `<span class="verdict ${d.correct ? "ok" : "no"}">${d.correct ? "Correct." : "Not quite."}</span>
+        ${!d.correct && q.kind !== "free" ? `<div class="detail">Answer: ${esc(d.answer)}</div>` : ""}
+        <div class="detail">Back ${days}.${implicit}</div>
+        <div class="next"><button class="act primary" id="next">${pos + 1 >= flat.length ? "Finish" : "Next"}</button></div>`;
+      fb.hidden = false;
+      document.getElementById("next")!.addEventListener("click", () => { pos++; render(); });
+    }
+
+    function wire(q: SQ) {
+      if (q.kind === "mcq") {
+        stage.querySelectorAll<HTMLButtonElement>(".opt").forEach((b) =>
+          b.addEventListener("click", () => submit(q, { response: b.dataset.val }, b), { once: true }),
+        );
+      } else if (q.kind === "short") {
+        const input = document.getElementById("short-in") as HTMLInputElement;
+        const go = () => {
+          if (!input.value.trim()) return;
+          input.disabled = true;
+          submit(q, { response: input.value });
+        };
+        document.getElementById("short-go")!.addEventListener("click", go, { once: true });
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+        input.focus();
+      } else {
+        document.getElementById("reveal")!.addEventListener("click", () => {
+          document.getElementById("free-after")!.hidden = false;
+          (document.getElementById("reveal") as HTMLButtonElement).disabled = true;
+        }, { once: true });
+        stage.querySelectorAll<HTMLButtonElement>("[data-self]").forEach((b) =>
+          b.addEventListener("click", () => submit(q, { self_correct: b.dataset.self === "1" }), { once: true }),
+        );
+      }
+    }
+
+    function renderSummary() {
+      const pct = flat.length ? Math.round((right / flat.length) * 100) : 0;
+      stage.innerHTML = `<div class="summary">
+        <p class="em-head">${right}/${flat.length}</p>
+        <p class="annot">${pct}% — target is ~80%. ${
+          implicitTotal > 0 ? `${implicitTotal} foundation concept${implicitTotal === 1 ? "" : "s"} advanced without ever appearing.` : ""
+        }</p>
+        <a class="act primary" href="/today/">Back to Today</a>
+      </div>`;
+    }
+
+    if (flat.length) render();
+  </script>
+</AirLayout>

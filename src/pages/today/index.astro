@@ -20,7 +20,7 @@ if (env?.DB) {
         SELECT date(d, '-1 day') FROM dates WHERE d > date('now', '-365 day')
       ),
       streak_check AS (
-        SELECT d, (SELECT 1 FROM activity WHERE date = d AND (links_saved + links_reviewed) > 0) as active
+        SELECT d, (SELECT 1 FROM activity WHERE date = d AND (links_saved + links_reviewed + COALESCE(questions_answered, 0)) > 0) as active
         FROM dates
       )
       SELECT COUNT(*) as streak FROM (
@@ -63,6 +63,7 @@ function meta(l: QueueItem) {
     <div class="stat"><em>{streak}</em><span>day streak</span></div>
     <div class="stat"><em>{dueCount}</em><span>due for review</span></div>
     <div class="stat"><em>{readTotal.toLocaleString("en-US")}</em><span>read all-time</span></div>
+    <a class="practice" href="/today/learn/">Practice concepts →</a>
   </div>
 
   <div id="queue">
@@ -104,7 +105,13 @@ function meta(l: QueueItem) {
     .head h1 { font-size: clamp(40px, 7vw, 72px); }
     .head .annot { margin-top: 8px; }
 
-    .strip { display: flex; gap: 28px; margin-bottom: var(--gap-section); flex-wrap: wrap; }
+    .strip { display: flex; gap: 28px; margin-bottom: var(--gap-section); flex-wrap: wrap; align-items: center; }
+    .practice {
+      margin-left: auto; font-size: 13.5px; font-weight: 600; color: #fff;
+      background: var(--signal); border-radius: var(--r-btn); padding: 10px 18px;
+      text-decoration: none;
+    }
+    .practice:hover { filter: brightness(1.1); }
     .stat em { font-style: normal; font-family: var(--display); font-size: 34px; color: var(--whiteout); display: block; line-height: 1; }
     .stat span { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
 
