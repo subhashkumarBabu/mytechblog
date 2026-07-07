@@ -1,4 +1,5 @@
 import type { APIContext } from "astro";
+import { fetchExtract } from "../../../lib/extract";
 
 export const prerender = false;
 
@@ -37,6 +38,11 @@ export async function GET({ request, locals }: APIContext) {
 	}
 	if (unread) {
 		conditions.push("is_read = 0");
+	}
+	if (url.searchParams.get("archived") === "1") {
+		conditions.push("archived_at IS NOT NULL");
+	} else {
+		conditions.push("archived_at IS NULL");
 	}
 
 	const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
@@ -86,9 +92,24 @@ export async function POST({ request, locals }: APIContext) {
 		.bind(id, type, title, body.url, body.note ?? null, tags, now, now)
 		.run();
 
+	// Content capture — fetch the page while the link is guaranteed alive.
+	// Stored in `extract` (page text); `content` stays reserved for tweet text
+	// and user notes from the original import. Best-effort: never fails the save.
+	let content: string | null = null;
+	try {
+		content = await fetchExtract(body.url);
+		if (content) {
+			await DB.prepare("UPDATE links SET extract = ? WHERE id = ?").bind(content, id).run();
+		}
+	} catch {
+		content = null;
+	}
+
 	// AI enrichment inline — summary + embedding
 	try {
-		const textForAI = [title, body.url, body.note ?? ""].filter(Boolean).join("\n");
+		const textForAI = [title, body.url, body.note ?? "", content?.slice(0, 4000) ?? ""]
+			.filter(Boolean)
+			.join("\n");
 
 		// Generate summary
 		const summaryRes = await (AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
@@ -96,7 +117,7 @@ export async function POST({ request, locals }: APIContext) {
 				{
 					role: "system",
 					content:
-						"You are a concise summarizer. Given a URL and title, write a 1-2 sentence summary of what this resource is about. Be specific and factual. Output only the summary, nothing else.",
+						"You are a concise summarizer. Given a URL, title, and page text, write a 1-2 sentence summary of what this resource is about. Be specific and factual. Output only the summary, nothing else.",
 				},
 				{ role: "user", content: textForAI },
 			],

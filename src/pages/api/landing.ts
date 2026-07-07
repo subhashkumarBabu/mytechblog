@@ -8,13 +8,14 @@ const COLS = "id, type, title, url, tags, created_at";
 export const RANDOM_SQL = `SELECT ${COLS} FROM links
   WHERE title IS NOT NULL AND length(title) > 25 AND tags != '[]'
     AND title NOT LIKE 'http%' AND created_at >= date('now', '-1 year')
+    AND archived_at IS NULL
   ORDER BY RANDOM() LIMIT 5`;
 
 // Same pool scoped to one topic.
 const RANDOM_TAG_SQL = `SELECT ${COLS} FROM links
   WHERE title IS NOT NULL AND length(title) > 25
     AND title NOT LIKE 'http%' AND created_at >= date('now', '-1 year')
-    AND tags LIKE ?1
+    AND tags LIKE ?1 AND archived_at IS NULL
   ORDER BY RANDOM() LIMIT 5`;
 
 export async function GET({ request, locals }: APIContext) {
@@ -32,7 +33,7 @@ export async function GET({ request, locals }: APIContext) {
 	}
 
 	const like = `%${q}%`;
-	const conditions = ["(title LIKE ?1 OR tags LIKE ?1 OR url LIKE ?1)"];
+	const conditions = ["(title LIKE ?1 OR tags LIKE ?1 OR url LIKE ?1)", "archived_at IS NULL"];
 	const params: (string | number)[] = [like];
 	if (tag) {
 		conditions.push(`tags LIKE ?${params.length + 1}`);

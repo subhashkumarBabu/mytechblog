@@ -6,7 +6,7 @@ export async function GET({ locals }: APIContext) {
 	const { DB } = locals.runtime.env;
 
 	const { results } = await DB.prepare(
-		"SELECT * FROM links ORDER BY RANDOM() LIMIT 3"
+		"SELECT * FROM links WHERE archived_at IS NULL ORDER BY RANDOM() LIMIT 3"
 	).all();
 
 	return Response.json({ links: results });

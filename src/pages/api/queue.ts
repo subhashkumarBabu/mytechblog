@@ -19,7 +19,7 @@ export async function getQueue(DB: D1Database, size = QUEUE_SIZE): Promise<Queue
 
 	const due = await DB.prepare(
 		`SELECT ${COLS} FROM links
-		 WHERE next_review_at IS NOT NULL AND next_review_at <= ?
+		 WHERE next_review_at IS NOT NULL AND next_review_at <= ? AND archived_at IS NULL
 		 ORDER BY next_review_at ASC LIMIT ?`,
 	)
 		.bind(today, size)
@@ -34,7 +34,7 @@ export async function getQueue(DB: D1Database, size = QUEUE_SIZE): Promise<Queue
 		const excluded = dueLinks.map((l) => `'${l.id}'`).join(",") || "''";
 		const res = await DB.prepare(
 			`SELECT ${COLS} FROM links
-			 WHERE is_read = 0 AND next_review_at IS NULL
+			 WHERE is_read = 0 AND next_review_at IS NULL AND archived_at IS NULL
 			   AND title IS NOT NULL AND length(title) > 25 AND title NOT LIKE 'http%'
 			   AND id NOT IN (${excluded})
 			 ORDER BY RANDOM() LIMIT ?`,

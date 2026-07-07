@@ -42,6 +42,7 @@ const TOPICS = [
   <header class="head">
     <h1 class="display">Library</h1>
     <p class="annot">{totalFmt} saves, 2012 → today</p>
+    <button class="manage-toggle" id="manage">Manage</button>
   </header>
 
   <input class="input" id="q" type="search" placeholder="Search titles, summaries, tags…" autocomplete="off" />
@@ -61,9 +62,16 @@ const TOPICS = [
   <button class="btn more" id="more">Load 50 more</button>
 
   <style>
-    .head { margin-bottom: 34px; }
+    .head { margin-bottom: 34px; position: relative; }
     .head h1 { font-size: clamp(40px, 7vw, 72px); }
     .head .annot { margin-top: 8px; }
+    .manage-toggle {
+      position: absolute; right: 0; top: 12px; appearance: none; cursor: pointer;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .5px;
+      padding: 7px 14px; border-radius: var(--r-btn);
+      border: 1px solid var(--hairline); background: transparent; color: var(--faint);
+    }
+    .manage-toggle.on { border-color: var(--signal); color: var(--signal); }
     .input { margin-bottom: 12px; }
     #types { margin-bottom: 8px; }
     .count { color: var(--faint); font-size: 12.5px; margin: 16px 0 6px; }
@@ -86,6 +94,16 @@ const TOPICS = [
     .row .rt { color: var(--whiteout); font-size: 15.5px; font-weight: 500; line-height: 1.4; }
     .row .rs { color: var(--mist); font-size: 13px; margin-top: 3px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .row .rowacts { display: none; gap: 8px; margin-top: 8px; }
+    #list.managing .rowacts { display: flex; }
+    .row .ra {
+      appearance: none; cursor: pointer; font-size: 12px; font-weight: 600;
+      padding: 5px 12px; border-radius: var(--r-btn);
+      border: 1px solid var(--hairline); background: transparent; color: var(--faint);
+    }
+    .row .ra:hover { border-color: var(--whiteout); color: var(--whiteout); }
+    .row .ra.danger:hover { border-color: #d4183d; color: #d4183d; }
+    .row.gone { opacity: 0; transition: opacity .25s; }
   </style>
 
   <script>
@@ -112,6 +130,10 @@ const TOPICS = [
         }</div>
         <div class="rt">${esc(l.title ?? l.url ?? "Untitled")}</div>
         ${l.summary ? `<div class="rs">${esc(l.summary)}</div>` : ""}
+        <span class="rowacts">
+          <button class="ra" data-manage="archive" data-id="${esc(l.id)}">Archive</button>
+          <button class="ra danger" data-manage="delete" data-id="${esc(l.id)}">Delete</button>
+        </span>
       </a>`;
     }
 
@@ -154,6 +176,27 @@ const TOPICS = [
       }
       load();
     }
+
+    // Manage mode: archive/delete rows via the Access-protected owner endpoints.
+    const manageBtn = document.getElementById("manage")!;
+    manageBtn.addEventListener("click", () => {
+      manageBtn.classList.toggle("on");
+      list.classList.toggle("managing");
+    });
+    list.addEventListener("click", async (e) => {
+      const btn = (e.target as Element).closest<HTMLElement>("[data-manage]");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const act = btn.dataset.manage!;
+      const id = btn.dataset.id!;
+      if (act === "delete" && !confirm("Delete this save for good? The vault note gets pruned on next sync.")) return;
+      const res = await fetch(`/api/owner/links/${id}/${act}/`, { method: "POST" });
+      if (!res.ok) { alert(act === "delete" ? "Delete failed." : "Archive failed."); return; }
+      const row = btn.closest<HTMLElement>(".row")!;
+      row.classList.add("gone");
+      setTimeout(() => row.remove(), 260);
+    });
 
     let t: ReturnType<typeof setTimeout>;
     input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => load(), 250); });
