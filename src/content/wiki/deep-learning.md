@@ -1,58 +1,67 @@
 ---
 title: "Deep Learning"
 topic: "deep-learning"
-draft: true
-generated: "2026-07-05"
-sources: "390 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "390 tagged links, curated from the 200 most recent (2023\u20132026)"
 ---
 
-**390 saved links**, 2017–2026 (peak year: 2023). Types: 221 WebPage, 80 Article, 43 Repository, 40 YouTubeVideo, 6 Document. Top sources: github.com, youtube.com, deeplearning.ai, towardsdatascience.com, medium.com.
+**390 saved links**, 2017–2026 (peak: 2023). The theory shelf of your AI transition: canonical courses and free books, an unusually deep reinforcement-learning thread that suddenly became career-relevant when RLHF and agent-training arrived, and a running subscription to deeplearning.ai's short-course machine. Less newsy than your other AI tags — most of what's here stays true.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [Machine Learning](/wiki/machine-learning/) · [LLMs](/wiki/llms/) · [NLP](/wiki/nlp/) · [Data Science](/wiki/data-science/) · [Python](/wiki/python/)
 
-**Related:** [AI (General)](/wiki/ai-general/) · [Learning Resources](/wiki/learning-resources/) · [Machine Learning](/wiki/machine-learning/) · [Data Science](/wiki/data-science/)
+---
 
-## Recent saves
+## The canon — courses
 
-- 2026-06-06 — [¡Nuevo curso gratuito de Anthropic! Agent Skills paso a paso y desde cero ✓ Crear una skill y buenas prácticas](https://www.deeplearning.ai/courses/agent-skills-with-anthropic)
-- 2026-05-23 — [10 completely free tools to learn AI agents inside and out (bookmark this): Hugging Face AI Agents Course — AI](https://www.deeplearning.ai/courses/ai-agents-in-langgraph)
-- 2026-05-18 — [No more words needed. Learn spec-driven development with coding agents now:](https://www.deeplearning.ai/courses/spec-driven-development-with-coding-agents?utm_campaign=42497884-jetbrains-launch&utm_content=378173325&utm_medium=social&utm_source=twitter&hss_channel=tw-992153930095251456)
-- 2026-03-23 — [learn.deeplearning.ai](https://learn.deeplearning.ai/)
-- 2026-03-23 — [Reinforcement Learning from Human Feedback by Nathan Lambert Book: Video: This is one of the best resources to](https://rlhfbook.com/c/06-policy-gradients)
-- 2026-03-10 — [The code for Experiential Reinforcement Learning is now available: A step toward agents that can truly learn f](https://github.com/microsoft/experiential_rl)
-- 2026-03-01 — [Anthropic and DeepLearning have come together to launch Free, simple and easy-to-learn Agentic AI Skills with](https://www.deeplearning.ai/courses)
-- 2026-02-01 — [Never knew about this. Physics based Deep Learning pdf available in arxiv.](https://arxiv.org/pdf/2109.05237)
-- 2025-12-30 — [Infrastructure for agent reinforcement learning](https://github.com/inclusionAI/AEnvironment/)
-- 2025-12-26 — [🐹 Building a GPT from scratch in Go. Fully commented, and following Andrej Karpathy’s legendary Neural Network](https://github.com/zakirullin/gpt-go)
-- 2025-12-17 — [You can now fine-tune LLMs and deploy them directly on your phone! 🚀 We collabed with PyTorch so you can expor](https://unsloth.ai/docs/get-started/install/vs-code)
-- 2025-11-28 — [deeplearningwithpython.io](https://deeplearningwithpython.io/)
-- 2025-11-20 — [An interactive deep learning book with code, math, &amp; visualizations☺](https://github.com/d2l-ai/d2l-en)
-- 2025-11-09 — [15 courses for understanding neural networks, v/@tut_ml:](https://shorturl.at/60Se8)
-- 2025-11-06 — [Over the last year I have gathered lots of debug tech notes, so I'm expanding The Art of Debugging Open Book.](https://github.com/stas00/the-art-of-debugging/tree/master/pytorch#fast-debug-of-pytorch-models)
-- 2025-10-08 — [Deep Learning Vision Architectures Explained – Python Course on CNNs and Vision Transformers](https://www.youtube.com/watch?v=tfpGS_doPvY)
-- 2025-09-18 — [Buy the book from Amazon: Buy the book from the publisher: Read the free website: The new edition has a ton mo](https://www.manning.com/books/deep-learning-with-python-third-edition)
-- 2025-08-27 — [I am getting ready to teach my first Deep Learning lecture this semester. You are welcome to join:](https://luma.com/byhand)
-- 2025-07-29 — [*Flow Matching Guide and Code* by @lipmanya @itai_gat et al. Great introduction to flow matching (with PyTorch](https://arxiv.org/abs/2605.23904)
-- 2025-07-24 — [Finally! Andrew Ng :) "Born to be agentic"](https://info.deeplearning.ai/power-moves-in-ai-coding-moonshots-agentic-llm-how-to-comply-with-eu-ai-regs-ai-agents-evolve-1)
-- 2025-07-09 — [MIT Deep Learning 6.S191](https://introtodeeplearning.com/)
-- 2025-06-24 — [Fantastic work by @JonnyCoook and @silviasapora on "Programming by Backprop: LLMs Acquire Reusable Algorithmic](https://arxiv.org/abs/2506.18777)
-- 2025-04-23 — [Dive into the challenges and promises of deep learning for outlier detection, including self-supervised learni](https://towardsdatascience.com/deep-learning-for-outlier-detection-on-tabular-and-image-data-90ae518a27b3/)
-- 2025-04-14 — [FREE Kindle ! Deep Learning with Python for Beginners: Mastering Neural Networks and Building Intelligent Appl](https://www.amazon.com/dp/B0F4KVN1NM?&linkCode=sl1&tag=12308d41-20&linkId=f19ff890a1c28218d3fc9505bac98d56&language=en_US&ref_=as_li_ss_tl)
-- 2025-04-09 — [𝗖𝗮𝗺𝗲 𝗮𝗰𝗿𝗼𝘀𝘀 𝗻𝗮𝗻𝗼𝗚𝗣𝗧 𝗯𝘆 𝗞𝗮𝗿𝗽𝗮𝘁𝗵𝘆 — 𝗮 𝘁𝗶𝗻𝘆 𝘆𝗲𝘁 𝗽𝗼𝘄𝗲𝗿𝗳𝘂𝗹 GPT 𝗿𝗲𝗶𝗺𝗽𝗹𝗲𝗺𝗲𝗻𝘁𝗮𝘁𝗶𝗼𝗻 𝗶𝗻 PyTorch 🤖. 𝗣𝗲𝗿𝗳𝗲𝗰𝘁 𝗳𝗼𝗿 𝗹𝗲𝗮𝗿𝗻𝗶𝗻𝗴](https://github.com/karpathy/nanoGPT)
+- [MIT 6.S191 — Introduction to Deep Learning](https://www.youtube.com/watch?si=M0l-1rNHn8ooL9O_&v=alfdI7S6wCY&feature=youtu.be) — refreshed yearly, saved yearly.
+- [fast.ai's Practical Deep Learning for Coders](https://www.youtube.com/watch?v=0oyCUWLL_fU) — the top-down classic.
+- [Karpathy's Neural Networks: Zero to Hero](https://karpathy.ai/zero-to-hero.html) — and its fan tributes: [nanoGPT](https://github.com/karpathy/nanoGPT) and [a GPT from scratch in Go, fully commented](https://github.com/zakirullin/gpt-go).
+- [Stanford CS230](https://www.youtube.com/playlist?list=PLoROMvodv4rOABXSygHTsbvUz4G_YQhOb) · [CMU 11-785](https://deeplearning.cs.cmu.edu/F23/index.html) · [Berkeley CS182](https://www.youtube.com/playlist?list=PL_iWQOsE6TfVmKkQHucjPAoRtIJYt8a5A) — the lecture-video shelf.
+- [Learn PyTorch in a day — literally](https://www.youtube.com/watch?v=Z_ikDlimN6A&feature=youtu.be) (video).
 
-## Notable repositories
+## The canon — books
 
-- 2026-03-10 — [The code for Experiential Reinforcement Learning is now available: A step toward agents that can truly learn f](https://github.com/microsoft/experiential_rl)
-- 2025-12-30 — [Infrastructure for agent reinforcement learning](https://github.com/inclusionAI/AEnvironment/)
-- 2025-12-26 — [🐹 Building a GPT from scratch in Go. Fully commented, and following Andrej Karpathy’s legendary Neural Network](https://github.com/zakirullin/gpt-go)
-- 2025-11-20 — [An interactive deep learning book with code, math, &amp; visualizations☺](https://github.com/d2l-ai/d2l-en)
-- 2025-11-06 — [Over the last year I have gathered lots of debug tech notes, so I'm expanding The Art of Debugging Open Book.](https://github.com/stas00/the-art-of-debugging/tree/master/pytorch#fast-debug-of-pytorch-models)
-- 2025-04-09 — [𝗖𝗮𝗺𝗲 𝗮𝗰𝗿𝗼𝘀𝘀 𝗻𝗮𝗻𝗼𝗚𝗣𝗧 𝗯𝘆 𝗞𝗮𝗿𝗽𝗮𝘁𝗵𝘆 — 𝗮 𝘁𝗶𝗻𝘆 𝘆𝗲𝘁 𝗽𝗼𝘄𝗲𝗿𝗳𝘂𝗹 GPT 𝗿𝗲𝗶𝗺𝗽𝗹𝗲𝗺𝗲𝗻𝘁𝗮𝘁𝗶𝗼𝗻 𝗶𝗻 PyTorch 🤖. 𝗣𝗲𝗿𝗳𝗲𝗰𝘁 𝗳𝗼𝗿 𝗹𝗲𝗮𝗿𝗻𝗶𝗻𝗴](https://github.com/karpathy/nanoGPT)
-- 2025-03-24 — [My course lecture on building Transformers from first principles: The PyTorch notebooks also demonstrate how t](https://github.com/xbresson/CS5242_2025/tree/main/labs_lecture07)
-- 2025-03-01 — [LlamaGym Fine-tune LLM agents with online reinforcement learning](https://github.com/KhoomeiK/LlamaGym)
-- 2025-01-06 — [aie-book/resources.md at main · chiphuyen/aie-book #AI #MachineLearning #DeepLearning #LLMs #DataScience](https://github.com/chiphuyen/aie-book/blob/main/resources.md?utm_source=substack&utm_medium=email)
-- 2024-08-12 — [for the book "Deep Learning with Python" — @fchollet posted #beginner step-by-step #notebook tutorials (highes](https://github.com/fchollet/deep-learning-with-python-notebooks?tab=readme-ov-file)
-- 2024-08-12 — [In the beginning, ML was RL. And here is a very nice book on the mathematical foundation of reinforcement lear](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning)
-- 2024-05-31 — [This repository contains everything you need to become proficient in Tensorflow and Keras — with 100+ implemen](https://github.com/Coder-World04/Complete-Tensorflow-and-Keras-with-Projects-Series)
+- [Dive into Deep Learning](https://github.com/d2l-ai/d2l-en) — interactive, code + math + visualizations; its [math appendix](https://d2l.ai/chapter_appendix-mathematics-for-deep-learning/index.html) is the best math-for-DL resource you've saved.
+- [Understanding Deep Learning](https://udlbook.github.io/udlbook/) (Simon Prince) — the free 541-page PDF.
+- [deeplearningbook.org](https://www.deeplearningbook.org/) — Goodfellow, Bengio, Courville; the original.
+- [Deep Learning with Python — Chollet's step-by-step notebooks](https://github.com/fchollet/deep-learning-with-python-notebooks?tab=readme-ov-file) ("highest quality I've seen anywhere") and [the book's free web edition](https://deeplearningwithpython.io/).
+- [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf) · [Grokking Deep Learning](https://cdn.ttgtmedia.com/rms/pdf/grokking_deep_learning.pdf) — the compact companions.
+
+## Transformers & attention, visually
+
+- [3Blue1Brown: Transformers](https://www.youtube.com/watch?v=wjZofJX0v4M&feature=youtu.be) and [attention, step by step](https://www.youtube.com/watch?v=eMlx5fFNoYc) — the visual intuition, chapters 5 and 6.
+- [implementing "Attention Is All You Need" from scratch](https://towardsdatascience.com/paper-walkthrough-attention-is-all-you-need-80399cdc59e1) · [transformers by hand ✍](https://towardsdatascience.com/deep-dive-into-transformers-by-hand-%EF%B8%8E-68b8be4bd813) · [the well-explained Transformer guide with Keras code](https://www.interdb.jp/dl/index.html).
+- [building Transformers from first principles — course lecture + PyTorch notebooks](https://github.com/xbresson/CS5242_2025/tree/main/labs_lecture07).
+- [Vision Transformers, explained](https://towardsdatascience.com/vision-transformers-explained-a9d07147e4c8) · [CNNs and vision architectures course](https://www.youtube.com/watch?v=tfpGS_doPvY).
+- [CNN Explainer — interactive visualization for non-experts](https://github.com/poloclub/transformer-explainer).
+- [Shreya Rao's "Deep Learning Illustrated" series](https://towardsdatascience.com/deep-learning-illustrated-part-2-how-does-a-neural-network-learn-481f70c1b474) — how a network learns, patiently drawn.
+
+## Reinforcement learning — the thread that came back
+
+- [Nathan Lambert's RLHF book](https://rlhfbook.com/c/06-policy-gradients) — "one of the best resources"; where classic RL meets modern LLMs.
+- [David Silver's RL course](https://www.youtube.com/watch?v=2pWv7GOvuf0&list=PLzuuYNsE1EZAXYR4FJ75jcJseBmo4KQ9-) and [Stanford CS234](https://www.youtube.com/playlist?list=PLoROMvodv4rN4wG6Nk6sNpTEbuOSosZdX) — the foundations.
+- [the mathematical foundation of RL book](https://github.com/MathFoundationRL/Book-Mathematical-Foundation-of-Reinforcement-Learning) — "in the beginning, ML was RL."
+- [the hands-on RL course](https://www.realworldml.net/the-hands-on-reinforcement-learning-course) · [Hugging Face's deep RL course](https://huggingface.co/learn/llm-course/chapter3/1) · [10 repos to master RL](https://www.kdnuggets.com/10-github-repositories-master-reinforcement-learning).
+- [Pearl — Meta's production-ready RL agent library](https://github.com/facebookresearch/llm-transparency-tool/).
+- The agent era: [Experiential Reinforcement Learning — agents that learn from experience](https://github.com/microsoft/experiential_rl) · [infrastructure for agent RL](https://github.com/inclusionAI/AEnvironment/) · [LlamaGym — fine-tune LLM agents with online RL](https://github.com/KhoomeiK/LlamaGym).
+
+## The deeplearning.ai subscription
+
+Andrew Ng's short-course machine — the tag's steady drip.
+
+- [the Attention course](https://www.deeplearning.ai/courses) · [Pretraining LLMs](https://www.deeplearning.ai/courses/agent-skills-with-anthropic) · [Finetuning LLMs](https://www.deeplearning.ai/courses/finetuning-large-language-models) · [Improving Accuracy of LLM Applications](https://www.deeplearning.ai/courses/spec-driven-development-with-coding-agents?utm_campaign=42497884-jetbrains-launch&utm_content=378173325&utm_medium=social&utm_source=twitter&hss_channel=tw-992153930095251456).
+- Agent-flavored: [long-term agentic memory (from the MemGPT authors)](https://www.deeplearning.ai/courses) · [Practical Multi AI Agents with crewAI](https://www.deeplearning.ai/courses/ai-agents-in-langgraph) · [Anthropic's Agent Skills course](https://www.deeplearning.ai/courses/agent-skills-with-anthropic).
+- [The Batch](https://www.deeplearning.ai/the-batch/better-teachers-make-better-students?utm_campaign=The%20Batch&utm_content=296558949&utm_medium=social&utm_source=twitter&hss_channel=tw-992153930095251456) — the newsletter thread running through the whole tag.
+
+## Practice & production
+
+- [Stas Bekman's Art of Debugging — the ML debugging open book](https://github.com/stas00/the-art-of-debugging/tree/master/pytorch#fast-debug-of-pytorch-models).
+- [slaying OOMs with FSDP and torchao](https://www.youtube.com/watch?v=UvRl4ansfCg&feature=youtu.be) (video) · [Unsloth: fine-tune and deploy LLMs on your phone](https://unsloth.ai/docs/get-started/install/vs-code).
+- [the Flow Matching guide with PyTorch code](https://arxiv.org/abs/2605.23904) — "great introduction, fantastic visualizations."
+- [deep learning in production — deployment notes and references](https://github.com/ahkarami/Deep-Learning-in-Production).
+- [from zero to training state-of-the-art OSS models in a year](https://www.vikas.sh/post/how-i-got-into-deep-learning) — proof the ramp is climbable.
+
+---
 
 ## All links on this topic

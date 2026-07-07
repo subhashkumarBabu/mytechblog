@@ -1,58 +1,72 @@
 ---
 title: "AWS"
 topic: "aws"
-draft: true
-generated: "2026-07-05"
-sources: "278 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "278 tagged links, curated from the 200 most recent (2021\u20132026)"
 ---
 
-**278 saved links**, 2017–2026 (peak year: 2023). Types: 193 WebPage, 42 Article, 20 YouTubeVideo, 19 Repository, 4 Document. Top sources: aws.amazon.com, github.com, youtube.com, dev.to, medium.com.
+**278 saved links**, 2017–2026 (peak: 2023) — the other cloud. Where your [Azure](/wiki/azure/) tag is a career, the AWS tag is a curriculum: Well-Architected, serverless-first thinking, EKS-with-Terraform plumbing, and an unusually strong architecture-writing tradition (Let's Architect, the whitepapers, re:Invent talks). Then the same pivot as everywhere else: from 2025 the saves are Strands, AgentCore, and agent SOPs — Amazon's answer to the agentic moment.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [Azure](/wiki/azure/) · [Google Cloud](/wiki/google-cloud/) · [Infrastructure as Code](/wiki/infrastructure-as-code/) · [Kubernetes](/wiki/kubernetes/) · [AI Agents](/wiki/ai-agents/)
 
-**Related:** [Infrastructure as Code](/wiki/infrastructure-as-code/) · [Azure](/wiki/azure/) · [AI (General)](/wiki/ai-general/) · [Learning Resources](/wiki/learning-resources/)
+---
 
-## Recent saves
+## Agents on AWS
 
-- 2026-06-11 — [Google & AWS Veteran: What Top Tier Software Architects Do Differently](https://www.youtube.com/watch?v=F8X9_Dp3ZUk&feature=youtu.be)
-- 2026-06-04 — [You don't need to memorize a dozen Git commands on day one. Start with the visual tools in VS Code, learn what](https://github.blog/developer-skills/github/github-for-beginners-getting-started-with-git-and-github-in-vs-code/?utm_source=youtube-episode-8&utm_medium=video&utm_campaign=gfb-s3-2026)
-- 2026-05-19 — [SRE (Site Reliability Engineer) vs Platform Engineer Read more:](https://aws.plainenglish.io/sre-site-reliability-engineer-vs-platform-engineer-2d4bc10b8e97)
-- 2026-05-16 — [Manage AWS, Azure, GCP, Hetzner, OVH, DO from one CLI. Auto cleanup, FinOps. Cut costs 60-75%.](https://github.com/nutcas3/the-engine)
-- 2026-04-18 — ["Architecting for agentic AI development on AWS". In this post, we demonstrate how to architect AWS systems th](https://aws.amazon.com/de/blogs/architecture/architecting-for-agentic-ai-development-on-aws/)
-- 2026-03-26 — [Wow, this is an excellent guide on what the heck Kubernetes is, how it works, and how to do stuff with it. Wis](https://aws.plainenglish.io/kubernetes-still-feels-weird-what-i-wish-i-knew-sooner-dd61b90463db)
-- 2026-03-14 — [AWS introduced Strands Labs - a new #GitHub organization for experimental projects focused on agent-based AI d](https://www.infoq.com/news/2026/03/aws-strands-agents/?utm_source=twitter&utm_medium=link&utm_campaign=calendar)
-- 2026-03-13 — ["Evaluating AI agents: Real-world lessons from building agentic systems at Amazon".](https://aws.amazon.com/de/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/)
-- 2026-03-08 — [A guide to remembering everything you read: v/@CuriousMindsHub](https://readwise-assets.s3.amazonaws.com/media/wisereads/articles/how-to-remember-everything-you/1031.pdf)
-- 2026-03-07 — [AWS re/Start Programme 2026 AWS re/Start is a free, 12-week, full-time skills development programme that prepa](https://opportunitydesk.org/2026/03/05/aws-re-start-programme-2026/)
-- 2026-03-06 — [Still Not Durable Agents 🤔 How Microsoft Agent Framework and AWS Strands Agents Repeat the Same Mistakes](https://www.diagrid.io/blog/still-not-durable-how-microsoft-agent-framework-and-strands-agents-repeat-the-same-mistake)
-- 2026-01-08 — ["Architecting conversational observability for cloud applications". We walk through building a generative AI–p](https://aws.amazon.com/de/blogs/architecture/architecting-conversational-observability-for-cloud-applications/)
-- 2025-11-22 — [Really excited about this new Agent SOPs open source project! We use this structured agent prompt format a LOT](https://aws.amazon.com/blogs/opensource/introducing-strands-agent-sops-natural-language-workflows-for-ai-agents/)
-- 2025-11-05 — [How do AI agents actually work? Amazon VP @MarcJBrooker breaks down the core components of agentic systems and](https://www.amazon.science/blog/building-commonsense-knowledge-graphs-to-aid-product-recommendation)
-- 2025-08-02 — [✅ Building Strands Agents with a few lines of code: Custom Tools and MCP Integration #StrandsAgents #AWSDevelo](https://dev.to/aws/building-strands-agents-with-a-few-lines-of-code-custom-tools-and-mcp-integration-3c1c)
-- 2025-07-30 — [Cloud DevOps Learning Resources This repository includes Books and important notes related to GCP, Azure, AWS,](https://github.com/ahmedtariq01/Cloud-DevOps-Learning-Resources)
-- 2025-07-14 — [Getting started with AWS MCPs and putting them to work as a solutions architect](https://pub.towardsai.net/getting-started-with-aws-mcps-and-putting-them-to-work-as-a-solutions-architect-ebeaa8678b74?source=rss----98111c9905da---4)
-- 2025-07-14 — [AWS offers free training &amp; certs for Cloud Practitioner, Solutions Architect, Developer Associate, SysOps](https://skillbuilder.aws/learn)
-- 2025-07-13 — [AI DevOps Agent: Simple Prompts to Autonomous Infrastructure Creation](https://aws.plainenglish.io/ai-devops-agent-from-prompts-to-autonomous-infrastructure-creation-9b0c6562cdcb)
-- 2025-07-13 — [Open Protocols for Agent Interoperability Part 3: Strands Agents & MCP](https://aws.amazon.com/de/blogs/opensource/open-protocols-for-agent-interoperability-part-3-strands-agents-mcp/)
-- 2025-03-14 — [AWS is providing FREE CERTIFICATIONS! Cloud Practitioner, AI Practitioner, Solutions Architect, SysOps Adminis](https://builder.aws.com/content/2tm12rQPFomu2bKOP1rIWWtsAAx/opportunity-to-earn-free-aws-certification-vouchers)
-- 2025-02-16 — [llm-twin-course](https://github.com/decodingml/llm-twin-course)
-- 2025-01-30 — ["We are thrilled to announce the collaboration between Google Cloud, AWS, and Azure on Kube Resource Orchestra](https://cloud.google.com/blog/products/containers-kubernetes/introducing-kube-resource-orchestrator/)
-- 2024-12-17 — [🌟🚀Get started today with KaneAI by @LambdaTesting — the world’s first end-to-end software testing agent… lever](https://www.testmuai.com/kane-ai/?utm_source=twitter&utm_medium=kirk_borne&utm_id=kaneai)
-- 2024-11-03 — [AWSArchitecture - a Hugging Face Space by yasserrmd](https://huggingface.co/spaces/yasserrmd/AWSArchitecture)
+- [Marc Brooker breaks down the core components of agentic systems and Bedrock AgentCore](https://www.amazon.science/blog/building-commonsense-knowledge-graphs-to-aid-product-recommendation) — start here.
+- [Agent SOPs — the structured agent-prompt format used heavily inside Amazon](https://aws.amazon.com/blogs/opensource/introducing-strands-agent-sops-natural-language-workflows-for-ai-agents/), open-sourced.
+- Strands: [Strands Labs — AWS's experimental agent-development GitHub org](https://www.infoq.com/news/2026/03/aws-strands-agents/?utm_source=twitter&utm_medium=link&utm_campaign=calendar) · [building Strands agents: custom tools and MCP integration](https://dev.to/aws/building-strands-agents-with-a-few-lines-of-code-custom-tools-and-mcp-integration-3c1c) · [Strands & MCP in the open-protocols series](https://aws.amazon.com/de/blogs/opensource/open-protocols-for-agent-interoperability-part-3-strands-agents-mcp/) · ["Still Not Durable Agents" — the sharp critique of Strands and Agent Framework](https://www.diagrid.io/blog/still-not-durable-how-microsoft-agent-framework-and-strands-agents-repeat-the-same-mistake).
+- [architecting for agentic AI development on AWS](https://aws.amazon.com/de/blogs/architecture/architecting-for-agentic-ai-development-on-aws/) · [evaluating AI agents: real-world lessons from Amazon](https://aws.amazon.com/de/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/) · [a conversational troubleshooting assistant for K8s workloads](https://aws.amazon.com/de/blogs/architecture/architecting-conversational-observability-for-cloud-applications/).
+- [AWS MCP servers, put to work as a solutions architect](https://pub.towardsai.net/getting-started-with-aws-mcps-and-putting-them-to-work-as-a-solutions-architect-ebeaa8678b74?source=rss----98111c9905da---4).
+- Earlier gen-AI plumbing: [serverless prompt chaining with Bedrock and Step Functions](https://github.com/aws-samples/amazon-bedrock-serverless-prompt-chaining/) · [few-shot prompting and fine-tuning in Bedrock](https://aws.amazon.com/de/blogs/architecture/architecting-for-agentic-ai-development-on-aws/).
 
-## Notable repositories
+## Well-Architected & the architecture tradition
 
-- 2026-05-16 — [Manage AWS, Azure, GCP, Hetzner, OVH, DO from one CLI. Auto cleanup, FinOps. Cut costs 60-75%.](https://github.com/nutcas3/the-engine)
-- 2025-07-30 — [Cloud DevOps Learning Resources This repository includes Books and important notes related to GCP, Azure, AWS,](https://github.com/ahmedtariq01/Cloud-DevOps-Learning-Resources)
-- 2025-02-16 — [llm-twin-course](https://github.com/decodingml/llm-twin-course)
-- 2024-07-06 — [DONE! Finished every single lab from the repository. Through this project, I learnt a ton of super cool things](https://github.com/AdminTurnedDevOps/agentic-demo-repo/blob/main/agentevals/demo.md)
-- 2024-05-30 — [I just published a complete guide to serverless Gen AI prompt chaining with Bedrock and Step Functions 🚀 Write](https://github.com/aws-samples/amazon-bedrock-serverless-prompt-chaining/)
-- 2024-02-12 — [📦 Simulator: A Kubernetes security training platform Creates a Kubernetes cluster in your AWS account; runs sc](https://github.com/controlplaneio/simulator)
-- 2023-09-01 — [🔎 6 underrated #DevOps open-source projects: 1️⃣ Serverless Icebreaker 2️⃣ Terraform template built for AWS 3️](https://github.com/christranv/aws-terrajet)
-- 2023-06-16 — [A curated list of awesome #DevOps platforms, tools, practices and resources. #terraform #kubernetes #aws](https://github.com/wmariuss/awesome-devops)
-- 2023-06-11 — [👨‍💻some more epic #devops resources 🚀 DevOps resources - #Linux, Jenkins, AWS, SRE, Prometheus, Docker, Python](https://github.com/bregman-arie/devops-resources)
-- 2023-06-09 — [Great AWS Elastic Kubernetes Service (EKS) resource for getting ideas on how to implement EKS in production. #](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/main/examples)
-- 2023-03-23 — [A few months ago I launched a scheme where I pay people to create #AWS technical mini projects ( ) on my mini](https://github.com/acantril/learn-cantrill-io-labs)
-- 2023-03-23 — [A few months ago I launched a scheme where I pay people to create #AWS technical mini projects ( ) on my mini](https://github.com/acantril/learn-cantrill-io-labs/blob/master/get-paid-to-create-projects.md)
+- [the Well-Architected Framework as a map](https://wa.aws.amazon.com/wat.map.en.html) — "also usable for other cloud providers," per your save. There's even [a coloring book](https://jenlooper.gumroad.com/l/wa-color).
+- [Let's Architect!](https://aws.amazon.com/blogs/machine-learning/improving-air-quality-with-generative-ai/) — the series you kept saving: [multi-tenancy](https://aws.amazon.com/blogs/architecture/lets-architect-multi-tenant-saas-architectures/) · [serverless solutions](https://aws.amazon.com/blogs/architecture/lets-architect-designing-serverless-solutions/) · [resiliency patterns and trade-offs](https://aws.amazon.com/blogs/architecture/understand-resiliency-patterns-and-trade-offs-to-architect-efficiently-in-the-cloud/) · [DevOps best practices](https://aws.amazon.com/blogs/architecture/lets-architect-devops-best-practices-on-aws/).
+- [the AWS Fault Isolation Boundaries whitepaper](https://docs.aws.amazon.com/whitepapers/latest/aws-fault-isolation-boundaries/abstract-and-introduction.html) — "don't let the boring title fool you."
+- [The Architect Elevator — connecting IT and the boardroom](https://www.youtube.com/watch?v=nNbnXTl2VFQ) (Gregor Hohpe, re:Invent) and [what top-tier software architects do differently](https://www.youtube.com/watch?v=F8X9_Dp3ZUk&feature=youtu.be).
+- [the decision guides — "which service do I actually need?"](https://docs.aws.amazon.com/decision-guides/latest/containers-on-aws-how-to-choose/choosing-aws-container-service.html) · [the Architecture Center as a hands-on gym](https://aws.amazon.com/architecture/).
+- [20 questions asked in every AWS Solutions Architect interview](https://towardsaws.com/top-20-technical-questions-i-ask-in-all-aws-solutions-architect-interviews-b59c902df5c0) · [the solution-architect mindset](https://dev.to/aws-builders/how-to-become-a-solution-architect-2-mindset-150p).
+
+## Serverless-first
+
+- ["the only code you will have to write is business logic" — becoming a serverless-first engineer](https://link.medium.com/cH5PsFgaJpb) · [the serverless-first mindset as a delivery advantage](https://dev.to/serverlessedge/adrian-cockcroft-aws-on-the-project-to-product-podcast-3cij).
+- [Yan Cui's serverless school](https://school.theburningmonk.com/) · [Serverless Picks of the Week](https://www.readysetcloud.io/newsletter/66/) — the two subscriptions.
+- [the pragmatic serverless Python developer](https://www.youtube.com/watch?v=52W3Qyg242Y) and [refactoring to serverless](https://www.youtube.com/watch?v=RfeVmXNRqDc) (videos).
+- [structuring a real-life serverless application](https://articles.merapar.com/serverless-project-structure-beyond-monorepo) — beyond the hello-world Lambda.
+- [advanced integration patterns for loosely coupled systems](https://www.youtube.com/watch?v=FGKGdUiZKto) · [event-driven architecture on AWS](https://aws.amazon.com/blogs/industries/engineering-resilient-systems-bmw-groups-chaos-engineering-journey-and-insights/) · [GoDaddy's multi-region event-driven platform](https://aws.amazon.com/blogs/aws/how-godaddy-implemented-a-multi-region-event-driven-platform-at-scale/).
+- [states-language.net](https://states-language.net/) — the Step Functions state-language spec, bookmarked like the standard it is.
+
+## EKS & Kubernetes
+
+- [EKS Blueprints](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/main/examples) — the production-ideas repo, plus [the walkthrough](https://itnext.io/efficient-kubernetes-cluster-deployment-accelerating-setup-with-eks-blueprints-68324b582ec9).
+- [scaling an EKS cluster to 1,000 pods — lessons learned](https://devopslearning.medium.com/lesson-learned-while-scaling-kubernetes-cluster-to-1000-pods-in-aws-eks-d2d399152bc2) · [what a production EKS cluster actually looks like](https://jeewansooriyaarachchi.medium.com/what-does-kubernetes-eks-production-cluster-look-like-efb82d145c36).
+- The comparison shelf: [EKS vs. AKS vs. GKE](https://medium.com/@bijit211987/eks-vs-aks-vs-gke-which-is-the-right-kubernetes-platform-for-you-62a5501cb66f) and [McKinsey deploys the same app to all three and measures](https://medium.com/digital-mckinsey/platform-as-code-reference-architectures-to-simplify-developer-platforms-f2fb48e0c874).
+- [halving EKS costs in 15 minutes](https://aws.plainenglish.io/how-to-reduce-your-amazon-eks-costs-by-half-in-15-minutes-cast-ai-1172b794a388) — the FinOps quick win.
+
+## Terraform on AWS
+
+- [Clare Liguori: how Amazon does CI/CD](https://builder.aws.com/content/2gYsT6Vc7qaqEAmEH59RksvQRKd/genai-under-the-hood-part-6---temperature-is-not-creativity) — the essential read; branch management, deployments, and all.
+- [best practices for Terraform state in CI/CD pipelines](https://aws.amazon.com/blogs/opensource/introducing-strands-agent-sops-natural-language-workflows-for-ai-agents/) · [Terraform state management, explained](https://build5nines.com/terraform-state-management-explained/).
+- [Terragrunt for multi-environment management](https://medium.com/@chidubemchinwuba01/terragrunt-how-to-manage-multiple-environments-in-terraform-and-aws-cc0e83e8f732) · [terragrunt run-all in CI/CD](https://levelup.gitconnected.com/using-terragrunt-run-all-in-aws-ci-cd-df2877bad198).
+- [how Slack uses Terraform](https://slack.engineering/how-we-use-terraform-at-slack/) — across AWS, DigitalOcean, NS1, and GCP.
+- [scaling IaC pipelines with Terraform, GitHub Actions, and Proton](https://aws.amazon.com/blogs/containers/scaling-iac-and-ci-cd-pipelines-with-terraform-github-actions-and-aws-proton/).
+
+## Resilience & chaos
+
+- [how Amazon uses chaos engineering to handle 84K requests per second](https://builder.aws.com/content/2tm12rQPFomu2bKOP1rIWWtsAAx/opportunity-to-earn-free-aws-certification-vouchers).
+- [BMW's chaos-engineering journey](https://aws.amazon.com/blogs/industries/engineering-resilient-systems-bmw-groups-chaos-engineering-journey-and-insights/) · [London Stock Exchange Group's chaos practice](https://aws.amazon.com/blogs/architecture/london-stock-exchange-group-uses-chaos-engineering-on-aws-to-improve-resilience/) · [chaos engineering in incident response](https://aws.amazon.com/blogs/machine-learning/improving-air-quality-with-generative-ai/).
+- The counterweight: [DHH's cloud exit — $1M/year saved leaving AWS](https://world.hey.com/dhh/commit-to-competence-in-this-coming-year-feb7d7c5) · [a multi-cloud FinOps CLI claiming 60–75% cost cuts](https://github.com/nutcas3/the-engine).
+
+## Learning & certs
+
+- [Skill Builder's free training and cert prep](https://skillbuilder.aws/learn) · [the free-certification rounds](https://builder.aws.com/content/2tm12rQPFomu2bKOP1rIWWtsAAx/opportunity-to-earn-free-aws-certification-vouchers) · [CloudQuest — learn the fundamentals as a game](https://aws.amazon.com/training/digital/?trk=04f07ce8-5bab-40dc-b57b-0ddc76de7277&sc_channel=el).
+- [Adrian Cantrill's courses](https://learn.cantrill.io/l/products?courseCategory=bundle) + [the paid-community mini-projects repo](https://github.com/acantril/learn-cantrill-io-labs/blob/master/get-paid-to-create-projects.md).
+- [The Big IAM Challenge — an IAM CTF](https://bigiamchallenge.com/challenge/1) — learn the scariest service by attacking it.
+- [the official workshop catalog](https://catalog.us-east-1.prod.workshops.aws/workshops/9586a55a-1f61-456c-ace9-b24f505d44a4/en-US) · [AWS re/Start — the free 12-week program](https://opportunitydesk.org/2026/03/05/aws-re-start-programme-2026/).
+
+---
 
 ## All links on this topic

@@ -1,58 +1,53 @@
 ---
 title: "Linux & CLI"
 topic: "linux"
-draft: true
-generated: "2026-07-05"
-sources: "308 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "308 tagged links, curated from the 200 most recent (2023\u20132026)"
 ---
 
-**308 saved links**, 2018–2026 (peak year: 2023). Types: 177 WebPage, 83 Repository, 27 Article, 21 YouTubeVideo. Top sources: github.com, youtube.com, medium.com, training.linuxfoundation.org, dev.to.
+**308 saved links** with a plot twist: the 2023 layer is classic Linux self-study, but from 2024 on the tag documents the terminal's second life — the command line as the natural habitat of AI agents. Your Windows day job notwithstanding, the shell is clearly where you think.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [Containers & Docker](/wiki/containers-and-docker/) · [DevOps](/wiki/devops/) · [AI Agents](/wiki/ai-agents/) · [Azure](/wiki/azure/)
 
-**Related:** [Learning Resources](/wiki/learning-resources/) · [LLMs](/wiki/llms/) · [Programming](/wiki/programming/) · [DevOps](/wiki/devops/)
+---
 
-## Recent saves
+## Linux fundamentals
 
-- 2026-06-19 — [There's a new release of Power BI agentic development skills. New paginated report skill, updates for pbir-cli](https://lnkd.in/eJHYvvYU)
-- 2026-06-11 — [Had a great time talking about Copilot CLI today on the @ApexSystems webinar series (multi-session series we s](https://www.apexsystems.com/event/toolbox-talk/github-copilot-cli-hands-part-1-first-steps-context-and-conversations)
-- 2026-06-11 — [ICYMI: We launched Data Agent Kit, a unified, open-source collection of data engineering and data science skil](https://cloud.google.com/blog/products/data-analytics/data-agent-kit-brings-data-skills-and-tools-to-your-ide-or-cli?utm_source=twitter&utm_medium=unpaidsoc&utm_campaign=fy26q2-googlecloudtech-blog-ai-in_feed-no-brand-global&utm_content=-&utm_term=-&linkId=62282673)
-- 2026-06-10 — [If you have installed the new Foundry Local CLI the Rest API change #AI #FoundryLocal Check it here](https://github.com/microsoft/Foundry-Local/releases/tag/cli-preview-0.10.0)
-- 2026-06-10 — [If you have installed the new Foundry Local CLI the Rest API change #AI #FoundryLocal Check it here](https://github.com/omiossec/pwsh-foundry/tree/api-web-server#api-endpoint-changes-v0100)
-- 2026-06-10 — [A new feature of your favorite language, framework, or service just dropped but your LLM keeps giving you stal](https://medium.com/google-cloud/building-with-the-developer-knowledge-api-and-antigravity-cli-36ef94901108)
-- 2026-06-05 — [curl.md](https://curl.md/)
-- 2026-05-31 — [Agentic Workflows for #Azure — A Practical Guide with GitHub Copilot CLI and Azure MCP Server #MachineLearning](https://levelup.gitconnected.com/agentic-workflows-for-azure-a-practical-guide-with-github-copilot-cli-and-azure-mcp-server-95d291527eda)
-- 2026-05-29 — [waza: Go CLI for AI agent skill evals. v0.9.0 adds A/B baselines, pairwise judging, tool-constraint graders, a](https://github.com/microsoft/waza)
-- 2026-05-27 — [Another trend in coding agents: sandboxes. VS Code has a built-in agent sandbox for Copilot: Devs can also use](https://docs.docker.com/reference/cli/sbx/)
-- 2026-05-27 — [AI Agent 协作编排层：Alook @alook_ai Alook 把 Claude Code、Codex、OpenCode 等本地 CLI agent 组织成一支「可管理的 AI 团队」——有角色、邮箱、任务板、](https://github.com/alookai/alook)
-- 2026-05-20 — [Really nice GitHub Copilot CLI cheat sheet site created by @prasadhonrao! 📋 Covers commands, what they are, wh](https://prasadhonrao.github.io/ghcp-cli-cheatsheet/)
-- 2026-05-16 — [Manage AWS, Azure, GCP, Hetzner, OVH, DO from one CLI. Auto cleanup, FinOps. Cut costs 60-75%.](https://github.com/nutcas3/the-engine)
-- 2026-05-12 — [Google 公式 Skills が来た 13個のスキルが公開。Claude Code / Antigravity / Gemini CLI / Cursor / GitHub Copilot ほか主要エージェントが対応](https://github.com/google/skills)
-- 2026-05-11 — [Automating #Azure Cost Calculations with GitHub Copilot CLI Custom agents #MachineLearning #ChatGPT](https://cloudtips.nl/automating-azure-cost-calculations-with-github-copilot-cli-custom-agents-%EF%B8%8F-168eba966a54)
-- 2026-05-10 — [newsletter.systemdesign.one](https://newsletter.systemdesign.one/)
-- 2026-04-27 — [Tired of re-explaining your stack to every AI coding agent from scratch? This dev built a shell script that ge](https://dev.to/shad_tech/i-built-a-shell-script-that-sets-up-your-entire-ai-coding-agent-workspace-in-2-minutes-13ep)
-- 2026-04-24 — [📢Introducing GitHub Quick Review (ghqr) A free, open-source CLI that scans your GitHub orgs &amp; repos agains](https://github.com/microsoft/ghqr)
-- 2026-04-23 — [Introducing Agents CLI in Agent Platform: create to production in one CLI! Agents CLI gives your AI assistant](https://developers.googleblog.com/agents-cli-in-agent-platform-create-to-production-in-one-cli/?utm_source=twitter&utm_medium=unpaidsoc&utm_campaign=fy26q2-googlecloudtech-blog-ai-in_feed-no-brand-global&utm_content=-&utm_term=-&linkId=61562170)
-- 2026-04-23 — [Here's a native skill for Codex/Claude Code that installs a CLI using Apple's included dictation. It's incredi](https://github.com/mweinbach/max-skills/tree/main/apple-native-transcribe)
-- 2026-04-22 — [Learn how Agents CLI in Agent Platform gets you from idea to production in hours 🛠️ ✨ Bundled skill injection](https://github.com/google/agents-cli)
-- 2026-04-18 — [10 best open-source repos to try this weekend : 🔸ClawLess — 🔸Paperclip — 🔸TimesFM — 🔸Lark CLI — 🔸ST](https://github.com/larksuite/cli)
-- 2026-04-17 — [Want a little Site Reliability Engineering help from your agentic CLI? @palladius just open sourced a new SRE](https://github.com/gemini-cli-extensions/sre)
-- 2026-04-16 — [GitHub Copilot CLI Hands-On: Development Workflows and Specialized AI Assistants](https://www.youtube.com/watch?v=AB1o8ZbGS4Q)
-- 2026-04-16 — [Tonight I am leading a working session for @GitHub Copilot CLI for Houston AI Club. In that session, we'll be](https://github.com/github/copilot-cli-for-beginners)
+- [the classic Linux HOWTO collection](https://tldp.org/HOWTO/Unix-and-Internet-Fundamentals-HOWTO/) — "linux abc," per the save.
+- [The Linux Command Line — the free book](https://linuxcommand.org/tlcl.php) · [linuxhandbook.com](https://linuxhandbook.com/) · [Linux Journey and the six-site learning list](https://labex.io/linuxjourney).
+- [systemd-by-example.com](https://systemd-by-example.com/) — the init system, hands-on.
+- [the SRE deep dive into the Linux page cache](https://biriukov.dev/docs/page-cache/0-linux-page-cache-for-sre/) — where fundamentals meet your profession.
+- [the Linux Foundation's free intro courses](https://training.linuxfoundation.org/training/introduction-to-nodejs-lfw111/) · [Linux in 8 self-paced hours](https://www.netacad.com/courses/linux-unhatched) · [sysadmin test questions to check yourself](https://github.com/trimstray/test-your-sysadmin-skills).
+- [Linux Directories Explained in 100 Seconds](https://www.youtube.com/watch?v=42iQKuQodW4&feature=youtu.be) and [the crash course](https://www.youtube.com/watch?v=ROjZy1WbCIA&feature=youtu.be) (videos).
+- [overthewire.org](https://overthewire.org/) — learn the shell by playing wargames; also [ohmygit.org](https://ohmygit.org/) and [devops.games](https://devops.games/).
 
-## Notable repositories
+## Command-line craft
 
-- 2026-06-10 — [If you have installed the new Foundry Local CLI the Rest API change #AI #FoundryLocal Check it here](https://github.com/microsoft/Foundry-Local/releases/tag/cli-preview-0.10.0)
-- 2026-06-10 — [If you have installed the new Foundry Local CLI the Rest API change #AI #FoundryLocal Check it here](https://github.com/omiossec/pwsh-foundry/tree/api-web-server#api-endpoint-changes-v0100)
-- 2026-05-29 — [waza: Go CLI for AI agent skill evals. v0.9.0 adds A/B baselines, pairwise judging, tool-constraint graders, a](https://github.com/microsoft/waza)
-- 2026-05-27 — [AI Agent 协作编排层：Alook @alook_ai Alook 把 Claude Code、Codex、OpenCode 等本地 CLI agent 组织成一支「可管理的 AI 团队」——有角色、邮箱、任务板、](https://github.com/alookai/alook)
-- 2026-05-16 — [Manage AWS, Azure, GCP, Hetzner, OVH, DO from one CLI. Auto cleanup, FinOps. Cut costs 60-75%.](https://github.com/nutcas3/the-engine)
-- 2026-05-12 — [Google 公式 Skills が来た 13個のスキルが公開。Claude Code / Antigravity / Gemini CLI / Cursor / GitHub Copilot ほか主要エージェントが対応](https://github.com/google/skills)
-- 2026-04-24 — [📢Introducing GitHub Quick Review (ghqr) A free, open-source CLI that scans your GitHub orgs &amp; repos agains](https://github.com/microsoft/ghqr)
-- 2026-04-23 — [Here's a native skill for Codex/Claude Code that installs a CLI using Apple's included dictation. It's incredi](https://github.com/mweinbach/max-skills/tree/main/apple-native-transcribe)
-- 2026-04-22 — [Learn how Agents CLI in Agent Platform gets you from idea to production in hours 🛠️ ✨ Bundled skill injection](https://github.com/google/agents-cli)
-- 2026-04-18 — [10 best open-source repos to try this weekend : 🔸ClawLess — 🔸Paperclip — 🔸TimesFM — 🔸Lark CLI — 🔸ST](https://github.com/larksuite/cli)
-- 2026-04-17 — [Want a little Site Reliability Engineering help from your agentic CLI? @palladius just open sourced a new SRE](https://github.com/gemini-cli-extensions/sre)
-- 2026-04-16 — [Tonight I am leading a working session for @GitHub Copilot CLI for Houston AI Club. In that session, we'll be](https://github.com/github/copilot-cli-for-beginners)
+- [The Book of Secret Knowledge](https://github.com/trimstray/the-book-of-secret-knowledge) — the legendary collection of CLI tools, one-liners, and hacks.
+- [command-line tools can be 235x faster than your Hadoop cluster](https://adamdrake.com/command-line-tools-can-be-235x-faster-than-your-hadoop-cluster.html) — the eternal reminder.
+- [the tricky tasks: long directory listings and friends](https://www.freecodecamp.org/news/command-line-tricks-you-can-learn-quickly/) · [onefetch — git repo info in the terminal](https://github.com/o2sh/onefetch).
+
+## The agentic terminal
+
+The command line as agent cockpit — the densest modern thread in the tag.
+
+- ["Start using Claude Code or Codex CLI — one of the biggest capability jumps you'll experience"](https://aiiq.substack.com/p/start-using-claude-code-or-codex) — the thesis.
+- [why people building real agent systems reach for the command line](https://www.the-main-thread.com/p/ai-agents-cli-tools-jbang-java-architects?r=17bggb&utm_medium=ios&shareImageVariant=title&triedRedirect=true) — simpler beats frameworks.
+- Simon Willison's CLI-LLM lineage: [the LLM CLI tool](https://simonwillison.net/2023/Jul/12/llm/) → ["Language models on the command-line" — the annotated talk](https://simonwillison.net/2024/Jun/17/cli-language-models/) → [notes on OpenAI Codex CLI](https://simonwillison.net/2025/Apr/16/openai-codex/).
+- GitHub Copilot CLI: [the launch](https://docs.github.com/en/copilot/concepts/prompting/prompt-engineering?utm_campaign=image4&utm_source=twitter&utm_medium=social&utm_content=1752260703) · [a DevOps engineer's practical guide](https://dev.to/pwd9000/github-copilot-cli-a-devops-engineers-practical-guide-to-ai-powered-terminal-automation-1jh0) · [the cheat sheet site](https://prasadhonrao.github.io/ghcp-cli-cheatsheet/) · [tracing a single Copilot CLI request end-to-end](https://medium.com/microsoftazure/under-the-hood-tracing-a-single-copilot-cli-request-end-to-end-afeb1baad5d5) · [the Copilot engine as a programmable SDK](https://github.blog/news-insights/company-news/build-an-agent-into-any-app-with-the-github-copilot-sdk/?utm_source=mario-twitter-blog-cli-sdk&utm_medium=social&utm_campaign=cli-sdk-jan-2026).
+- Gemini CLI: [the launch — Gemini in your terminal, 1M context, open source](https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-cli-open-source-ai-agent/) · [research, build, deploy: one journey through the Gemini CLI](https://seroter.com/2025/06/26/the-gemini-cli-might-change-how-i-work-here-are-four-prompts-that-prove-it/) · [Conductor — the standout extension](https://github.com/gemini-cli-extensions/conductor).
+- Utilities born agent-first: [a Google Calendar CLI that works well with agents](https://github.com/badlogic/gccli) · [diagrams from text at the command line](https://github.com/mermaid-js/mermaid-cli/) · [Playwright CLI — skill-friendly browser automation](https://github.com/microsoft/playwright-cli) · [waza — a Go CLI for agent-skill evals](https://github.com/microsoft/waza) · [Shell AI — natural language to terminal commands](https://github.com/ricklamers/shell-ai).
+- [Cursor CLI's system prompt, leaked and annotated](https://gist.github.com/gregce/9b45c563affa191caa748f699eeb9d95) — how the other cockpits are built.
+
+## Azure at the command line
+
+- [AZD for beginners — the Azure Developer CLI guide](https://github.com/microsoft/agent-governance-toolkit) and [awesome-azd templates](https://azure.github.io/awesome-azd/).
+- [az vs. azd — the difference explained](https://dev.to/liamchampton/what-is-the-difference-between-the-azure-command-line-interface-and-azure-developer-command-line-interface-5cl3) · [the azd-app extension for local runs](https://jongio.github.io/azd-app/).
+- [azqr — Azure Quick Review, recommendations from one command](https://github.com/Azure/enterprise-azureai).
+- [azure-cli-mcp](https://github.com/jdubois/azure-cli-mcp) and [talking to Azure via MCP](https://www.youtube.com/watch?v=NZxTr32A9lY) (video) — your cloud, addressable by agents.
+- [AKS gets an AI sidekick: the agentic CLI deep dive](https://itnext.io/aks-gets-an-ai-sidekick-a-deep-dive-into-the-agentic-cli-b4a9970a7ddd?source=rss----5b301f10ddcd---4).
+
+---
 
 ## All links on this topic
