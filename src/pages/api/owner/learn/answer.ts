@@ -22,16 +22,45 @@ export async function POST({ request, locals }: APIContext) {
 	if (!q) return Response.json({ error: "Not found" }, { status: 404 });
 
 	let correct: boolean;
+	let feedback: string | null = null;
 	if (q.kind === "mcq") {
 		correct = (body.response ?? "") === q.answer;
 	} else if (q.kind === "short") {
 		correct = gradeShort(body.response ?? "", q.answer);
-	} else {
-		// free: self-graded against the rubric in P3a (AI grading lands in P3b)
-		if (typeof body.self_correct !== "boolean") {
-			return Response.json({ error: "self_correct is required for free questions" }, { status: 400 });
-		}
+	} else if (typeof body.self_correct === "boolean") {
+		// fallback path: self-graded against the rubric when AI grading fails
 		correct = body.self_correct;
+	} else {
+		// free: Workers AI grades the response against the stored rubric
+		if (!body.response?.trim()) {
+			return Response.json({ error: "response is required" }, { status: 400 });
+		}
+		const { AI } = locals.runtime.env;
+		try {
+			const res = await (AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+				messages: [
+					{
+						role: "system",
+						content:
+							"You grade a learner's free-text answer against a rubric. The rubric lists " +
+							"points a correct answer must cover, separated by semicolons. Mark correct " +
+							"if the answer covers the majority of rubric points in substance (wording " +
+							"may differ). Reply with ONLY minified JSON: " +
+							'{"correct":true|false,"feedback":"one specific sentence on what was strong or missing"}',
+					},
+					{ role: "user", content: `RUBRIC: ${q.answer}\n\nANSWER: ${body.response.slice(0, 3000)}` },
+				],
+				max_tokens: 200,
+			});
+			const m = String(res?.response ?? "").match(/\{[\s\S]*\}/);
+			const verdict = JSON.parse(m![0]);
+			if (typeof verdict.correct !== "boolean") throw new Error("bad verdict");
+			correct = verdict.correct;
+			feedback = typeof verdict.feedback === "string" ? verdict.feedback : null;
+		} catch {
+			// AI grading unavailable — tell the client to fall back to self-report
+			return Response.json({ needs_self_report: true, rubric: q.answer });
+		}
 	}
 
 	const result = await applyResult(DB, q.concept_id, correct);
@@ -49,6 +78,7 @@ export async function POST({ request, locals }: APIContext) {
 	return Response.json({
 		correct,
 		answer: q.kind === "mcq" ? q.answer : q.answer.split("|")[0],
+		feedback,
 		ladder_idx: result.ladder_idx,
 		next_days: result.next_days,
 		credited: result.credited,

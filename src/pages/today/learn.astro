@@ -6,6 +6,9 @@ export const prerender = false;
 
 const env = Astro.locals.runtime?.env;
 const session = env?.DB ? await buildSession(env.DB) : { items: [], due: 0, fresh: 0 };
+const masteryCount = env?.DB
+  ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM mastery").first<{ n: number }>())?.n ?? 0)
+  : 0;
 const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 0);
 ---
 
@@ -29,7 +32,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
 
   <p class="note" id="note" hidden></p>
 
-  <script type="application/json" id="session-data" set:html={JSON.stringify(session)} />
+  <script type="application/json" id="session-data" set:html={JSON.stringify({ ...session, mastery_count: masteryCount })} />
 
   <style>
     .head { margin-bottom: 20px; }
@@ -118,7 +121,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     type Item = { concept: { id: string; name: string; module: string; summary: string | null }; is_new: boolean; questions: SQ[] };
 
     const session = JSON.parse(document.getElementById("session-data")!.textContent!) as
-      { items: Item[]; due: number; fresh: number };
+      { items: Item[]; due: number; fresh: number; mastery_count: number };
     const stage = document.getElementById("stage")!;
 
     const flat: { item: Item; q: SQ }[] = [];
@@ -127,6 +130,100 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     let pos = 0;
     let right = 0;
     let implicitTotal = 0;
+
+    // ── placement diagnostic ─────────────────────────────────────────────
+    type Probe = { concept: { id: string; name: string; module: string }; closure: string[]; question: SQ };
+    let probes: Probe[] = [];
+    let granted = new Set<string>();
+    let diagPos = 0;
+    let diagGrantedTotal = 0;
+    let diagAsked = 0;
+    let diagRight = 0;
+
+    function renderPlacementOffer() {
+      stage.innerHTML = `<div class="summary">
+        <p class="em-head">First time here.</p>
+        <p class="annot">A short placement quiz (~12 questions) maps what you already know,<br/>
+          so practice starts at your level instead of the basics.</p>
+        <div class="selfrow" style="justify-content:center">
+          <button class="act primary" id="diag-start">Take the placement</button>
+          <button class="act" id="diag-skip">Start from scratch</button>
+        </div>
+      </div>`;
+      document.getElementById("diag-start")!.addEventListener("click", startDiag, { once: true });
+      document.getElementById("diag-skip")!.addEventListener("click", () => {
+        if (flat.length) render(); else location.href = "/today/";
+      }, { once: true });
+    }
+
+    async function startDiag() {
+      stage.innerHTML = `<p class="annot">building your placement…</p>`;
+      const res = await fetch("/api/owner/learn/diagnostic/");
+      if (!res.ok) { render(); return; }
+      const data = await res.json();
+      probes = data.probes;
+      granted = new Set(data.already_mastered);
+      diagPos = 0;
+      renderDiag();
+    }
+
+    function renderDiag() {
+      while (diagPos < probes.length && granted.has(probes[diagPos].concept.id)) diagPos++;
+      if (diagPos >= probes.length) {
+        stage.innerHTML = `<div class="summary">
+          <p class="em-head">${diagGrantedTotal}</p>
+          <p class="annot">concepts placed as already-known (${diagRight}/${diagAsked} probes correct).<br/>
+            They'll surface as light reviews instead of lessons. Practice now starts at your frontier.</p>
+          <a class="act primary" href="/today/learn/">Start practicing</a>
+        </div>`;
+        return;
+      }
+      const p = probes[diagPos];
+      stage.innerHTML = `<div class="progress">${probes
+        .map((_, i) => `<i class="${i < diagPos ? "done" : i === diagPos ? "now" : ""}"></i>`).join("")}</div>
+        <article class="qcard">
+          <div class="kick">
+            <span class="new">placement · ${esc(p.concept.name)}</span>
+            <span>${esc(p.concept.module)}</span>
+          </div>
+          <p class="prompt">${esc(p.question.prompt)}</p>
+          <div class="opts">${p.question.options!
+            .map((o) => `<button class="opt" data-val="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+          <div class="fb" id="fb" hidden></div>
+        </article>`;
+      stage.querySelectorAll<HTMLButtonElement>(".opt").forEach((b) =>
+        b.addEventListener("click", () => answerDiag(p, b), { once: true }),
+      );
+    }
+
+    async function answerDiag(p: Probe, chosen: HTMLButtonElement) {
+      const res = await fetch("/api/owner/learn/diagnostic/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: p.question.id, response: chosen.dataset.val, closure: p.closure }),
+      });
+      if (!res.ok) return;
+      const d = await res.json();
+      diagAsked++;
+      if (d.correct) {
+        diagRight++;
+        diagGrantedTotal += d.granted;
+        p.closure.forEach((c) => granted.add(c));
+      }
+      stage.querySelectorAll<HTMLButtonElement>(".opt").forEach((b) => {
+        b.disabled = true;
+        if (b.dataset.val === d.answer) b.classList.add("right");
+        else if (b === chosen && !d.correct) b.classList.add("wrong");
+      });
+      const fb = document.getElementById("fb")!;
+      fb.innerHTML = `<span class="verdict ${d.correct ? "ok" : "no"}">${
+        d.correct ? `Known. ${d.granted} concept${d.granted === 1 ? "" : "s"} placed (this one + prerequisites).`
+                  : "We'll teach this one properly."
+      }</span>
+        <div class="next"><button class="act primary" id="diag-next">Next</button></div>`;
+      fb.hidden = false;
+      document.getElementById("diag-next")!.addEventListener("click", () => { diagPos++; renderDiag(); }, { once: true });
+    }
 
     function esc(s: string) {
       const d = document.createElement("div");
@@ -156,13 +253,11 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
         </div>`;
       } else {
         body = `<textarea class="freebox" id="free-in" placeholder="think it through out loud..."></textarea>
-          <div class="selfrow"><button class="act primary" id="reveal">Reveal rubric</button></div>
-          <div id="free-after" hidden>
-            <div class="rubric">${esc(q.rubric!)}</div>
-            <div class="selfrow">
-              <button class="act primary" data-self="1">I covered it</button>
-              <button class="act" data-self="0">I missed it</button>
-            </div>
+          <div class="selfrow"><button class="act primary" id="free-go">Submit for grading</button></div>
+          <div class="rubric" id="rubric-box" hidden>${esc(q.rubric!)}</div>
+          <div class="selfrow" id="self-btns" hidden>
+            <button class="act primary" data-self="1">I covered it</button>
+            <button class="act" data-self="0">I missed it</button>
           </div>`;
       }
       stage.innerHTML = `${progressBar()}
@@ -188,6 +283,17 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
       });
       if (!res.ok) return;
       const d = await res.json();
+      if (d.needs_self_report) {
+        // AI grading unavailable — fall back to rubric self-grade
+        document.getElementById("rubric-box")!.hidden = false;
+        document.getElementById("self-btns")!.hidden = false;
+        return;
+      }
+      if (q.kind === "free") {
+        document.getElementById("rubric-box")!.hidden = false;
+        const sb = document.getElementById("self-btns");
+        if (sb) sb.hidden = true;
+      }
       if (d.correct) right++;
       implicitTotal += d.advanced ?? 0;
 
@@ -203,6 +309,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
       const implicit = d.advanced > 0
         ? ` ${d.advanced} foundation concept${d.advanced === 1 ? "" : "s"} advanced on implicit credit.` : "";
       fb.innerHTML = `<span class="verdict ${d.correct ? "ok" : "no"}">${d.correct ? "Correct." : "Not quite."}</span>
+        ${d.feedback ? `<div class="detail">${esc(d.feedback)}</div>` : ""}
         ${!d.correct && q.kind !== "free" ? `<div class="detail">Answer: ${esc(d.answer)}</div>` : ""}
         <div class="detail">Back ${days}.${implicit}</div>
         <div class="next"><button class="act primary" id="next">${pos + 1 >= flat.length ? "Finish" : "Next"}</button></div>`;
@@ -226,10 +333,15 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
         input.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
         input.focus();
       } else {
-        document.getElementById("reveal")!.addEventListener("click", () => {
-          document.getElementById("free-after")!.hidden = false;
-          (document.getElementById("reveal") as HTMLButtonElement).disabled = true;
-        }, { once: true });
+        const ta = document.getElementById("free-in") as HTMLTextAreaElement;
+        const go = document.getElementById("free-go") as HTMLButtonElement;
+        go.addEventListener("click", () => {
+          if (!ta.value.trim() || go.disabled) return;
+          ta.disabled = true;
+          go.disabled = true;
+          go.textContent = "Grading…";
+          submit(q, { response: ta.value });
+        });
         stage.querySelectorAll<HTMLButtonElement>("[data-self]").forEach((b) =>
           b.addEventListener("click", () => submit(q, { self_correct: b.dataset.self === "1" }), { once: true }),
         );
@@ -247,6 +359,9 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
       </div>`;
     }
 
-    if (flat.length) render();
+    const wantPlacement = new URLSearchParams(location.search).get("placement") === "1";
+    if (wantPlacement) startDiag();
+    else if (session.mastery_count === 0) renderPlacementOffer();
+    else if (flat.length) render();
   </script>
 </AirLayout>
