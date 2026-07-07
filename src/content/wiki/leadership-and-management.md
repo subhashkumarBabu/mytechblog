@@ -1,58 +1,67 @@
 ---
 title: "Leadership & Management"
 topic: "leadership"
-draft: true
-generated: "2026-07-05"
-sources: "1066 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "1066 tagged links, curated from the 220 most recent (2023\u20132026)"
 ---
 
-**1,066 saved links**, 2016–2026 (peak year: 2023). Types: 677 Article, 339 WebPage, 24 Repository, 23 YouTubeVideo, 3 Document. Top sources: inc.com, hbr.org, s.hbr.org, infoq.com, github.com.
+**1,066 saved links** — one of your oldest habits (the HBR/inc.com self-management library runs to hundreds of pieces) colliding with your newest question: *what does leading look like when agents do the work?* The 2025–26 saves suggest you think the answer is "engineering management, applied to machines" — and several of your best finds argue exactly that.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [Career](/wiki/career/) · [Productivity & Learning](/wiki/productivity-and-learning/) · [Psychology & Self-Improvement](/wiki/psychology-and-self-improvement/) · [Startups & Business](/wiki/startups-and-business/)
 
-**Related:** [JavaScript & Web](/wiki/javascript-and-web/) · [AI (General)](/wiki/ai-general/) · [Productivity & Learning](/wiki/productivity-and-learning/) · [Psychology & Self-Improvement](/wiki/psychology-and-self-improvement/)
+---
 
-## Recent saves
+## Start here
 
-- 2026-06-23 — [AI-Native Leaders: The Organizational Playbook for Engineering Transformation at Scale](https://blog.bytebytego.com/p/ai-native-leaders-the-organizational?r=57j98&utm_campaign=post-expanded-share&utm_medium=web&triedRedirect=true)
-- 2026-06-23 — [My job would be significantly easier if I could remember things. Since that doesn’t appear to be happening, I](https://github.blog/developer-skills/github/i-automated-my-job-and-it-made-me-a-better-leader/)
-- 2026-06-09 — [The Only Managers Who Survive AI Do This One Thing. - Ft.Sidu Ponnappa, RealFast AI - Episode 24](https://www.youtube.com/watch?v=0zt7iP03x0w&t=3893s)
-- 2026-06-01 — [The future of EA is AI-augmented 🤖 See how top leaders are leveraging AI to accelerate delivery, improve outco](https://www.gartner.com/en/webinar/820752/1827491-heads-of-enterprise-architecture-must-rewire-ea-for-ai?utm_term=1779350419&utm_campaign=SM_GB_YOY_GTR_SOC_SF1_SM-WB-GTS-IT-OD&utm_source=facebook,twitter&utm_medium=social&utm_content=Gartner,Gartner_inc)
-- 2026-06-01 — [You: Executive or AI Consultant Every: Releases the definitive guide on how to implement AI You🤝Every](https://every.to/guides/an-executive-s-guide-to-implementing-ai)
-- 2026-05-30 — [As AI transforms leadership, three futures are taking shape: ➡️ AI as mentor ➡️ AI as reviewer ➡️ AI as soundi](https://www.gartner.com/en/articles/the-future-of-leadership-with-ai?utm_term=1778057925&utm_campaign=SM_GB_YOY_GTR_SOC_SF1_SM-SWG-AP-CF&utm_source=twitter&utm_medium=social&utm_content=Gartner_inc)
-- 2026-05-29 — [If you have 5 minutes this weekend! Read this article, Agentic AI is not the end-game, AI agents are a "practi](https://www.axios.com/2026/05/26/deepmind-ceo-demis-hassabis)
-- 2026-05-28 — [SkillOpt: Executive Strategy for Self-Evolving Agent Skills Dropped from Microsoft Train agent skills like you](https://github.com/microsoft/SkillOpt)
-- 2026-05-27 — [Building an Enterprise AI Gateway with Azure API Management and Azure AI Foundry #MachineLearning #ChatGPT](https://medium.com/@17nagh/building-an-enterprise-ai-gateway-with-azure-api-management-and-azure-ai-foundry-504e1d5e6e97)
-- 2026-05-25 — [SkillOpt: Executive Strategy for Self-Evolving Agent Skills Good Read:](https://arxiv.org/abs/2605.23904)
-- 2026-05-24 — [new aithy website - better secure sandbox - artifact management - tons of built in skills - new multi-service](https://github.com/dosco/aithy)
-- 2026-05-21 — [Persuasion is an ancient art—but we do it every day. This formula from Aristotle can be applied in the modern](https://hbr.org/2019/07/the-art-of-persuasion-hasnt-changed-in-2000-years?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=facebook,linkedin,twitter)
-- 2026-05-21 — [SPONSORED: Agentic AI research from @Deloitte](https://hbr.org/sponsored/2026/05/agentic-ai?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter)
-- 2026-05-20 — [Hired an SRE. Renewed Datadog. Still having the same incidents. Confused screaming intensifies. SRE ≠ observab](https://www.shankuehn.io/post/hiring-an-sre-does-not-magically-fix-reliability)
-- 2026-05-20 — [It may surprise you how easy it is to refocus your concentration when you get intentional about it.](https://hbr.org/2019/02/how-to-stop-obsessing-over-your-mistakes?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=facebook,linkedin,twitter)
-- 2026-05-19 — ["Using Agents is literally engineering management". by Jack Danger](https://jackdanger.com/using-agents-is-literally-engineering-management/)
-- 2026-05-15 — [I use AI for a lot of things, but this is a pretty bonkers anecdote from Nat Friedman, the former CEO of GitHu](https://www.theatlantic.com/technology/2026/05/too-much-happening-too-fast/687177/?utm_source=twitter&utm_campaign=ntatl&utm_medium=social)
-- 2026-05-13 — [The future of EA is AI-augmented. See how top leaders are leveraging AI to accelerate delivery, improve outcom](https://www.gartner.com/en/webinar/820752/1827491-heads-of-enterprise-architecture-must-rewire-ea-for-ai?utm_term=1778493162&utm_campaign=SM_GB_YOY_GTR_SOC_SF1_SM-WB-GTS-IT-OD&utm_source=facebook,twitter&utm_medium=social&utm_content=Gartner,Gartner_inc)
-- 2026-05-11 — [Should tech managers and leaders run the same engineering playbook with AI in the mix? The ideas might be the](https://www.infoq.com/presentations/ai-assisted-engineering/)
-- 2026-05-10 — [Lot of prompts in the book "AI Driven Leaders " are various permutations and combinations of the prompt "Talk](https://contrarianvalueedge.substack.com/p/pre-prompt-protocol-talk-before-you)
-- 2026-05-10 — [(GitHub Repo) #Azure Resource Manager MCP server #MachineLearning #ChatGPT](https://github.com/Azure/Azure-Resource-Manager-MCP)
-- 2026-04-23 — [Thanks @lennysan for a great conversation about how Claude Code maintains product velocity, how the product ma](https://open.spotify.com/episode/7wTqD5zwl8ZitUeplapvBG)
-- 2026-04-23 — [4-23-2026 An Interview with Google Cloud CEO Thomas Kurian About the Agentic Moment](https://stratechery.com/2026/an-interview-with-google-cloud-ceo-thomas-kurian-about-the-agentic-moment/)
-- 2026-04-17 — [This week's newsletter sponsor is @floxdevelopment! Flox is a pkg + env manager that keeps your local dev, CI,](https://flox.dev/blog/a-turnkey-toolkit-for-agentic-development-with-flox/?utm_source=twitter&utm_medium=fnf&utm_campaign=2026q1_tofu_awa_influ_devs_floxhub_gl_cwilliams&utm_content=landing_page)
-- 2026-04-13 — [last monday, my manager asked me "so what'd you do last week" and i completely blanked. "uhh.. stuff?" this we](https://github.com/pamelafox/recap-my-week)
+- ["Using agents is literally engineering management"](https://jackdanger.com/using-agents-is-literally-engineering-management/) — the one-line thesis of this whole page.
+- [designing an effective AI agent is not so different from becoming a better leader](https://hbr.org/2025/01/how-much-supervision-should-companies-give-ai-agents?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter).
+- [AI-native leaders: the organizational playbook for engineering transformation at scale](https://blog.bytebytego.com/p/ai-native-leaders-the-organizational?r=57j98&utm_campaign=post-expanded-share&utm_medium=web&triedRedirect=true).
+- [HBR: only ~5% of employees do sophisticated work with AI — treating it as a reasoning partner](https://hbr.org/2026/03/what-the-best-ai-users-do-differently-and-how-to-level-up-all-of-your-employees) — the bar to clear.
+- [how to become a supermanager with AI](https://www.lennysnewsletter.com/p/everyone-should-be-using-claude-code?r=57j98&utm_campaign=post&utm_medium=web&showWelcomeOnShare=false) — if AI makes "super ICs," what about managers?
 
-## Notable repositories
+## Leading in the agentic era
 
-- 2026-05-28 — [SkillOpt: Executive Strategy for Self-Evolving Agent Skills Dropped from Microsoft Train agent skills like you](https://github.com/microsoft/SkillOpt)
-- 2026-05-24 — [new aithy website - better secure sandbox - artifact management - tons of built in skills - new multi-service](https://github.com/dosco/aithy)
-- 2026-05-10 — [(GitHub Repo) #Azure Resource Manager MCP server #MachineLearning #ChatGPT](https://github.com/Azure/Azure-Resource-Manager-MCP)
-- 2026-04-13 — [last monday, my manager asked me "so what'd you do last week" and i completely blanked. "uhh.. stuff?" this we](https://github.com/pamelafox/recap-my-week)
-- 2026-03-26 — [Voice interviewer for hiring](https://github.com/FoloUp/FoloUp)
-- 2026-03-16 — [The CEO of Y Combinator, Garry Tan, just open-sourced his personal AI setup called GStack It transforms Claude](https://github.com/garrytan/gstack)
-- 2026-03-02 — [Open-source, community-driven dependency manager for AI agents.](https://github.com/microsoft/apm)
-- 2025-12-31 — [Prompts for product management tasks](https://github.com/deanpeters/product-manager-prompts/)
-- 2025-12-24 — [Personal knowledge management system with AI agents and hooks](https://github.com/ballred/obsidian-claude-pkm/)
-- 2025-05-27 — [The little open source repo of my AI dev task management system is starting to pick up steam. Guess a lot of f](https://github.com/snarktank/ralph)
-- 2023-11-26 — [An LLM Selector which is smart enough to delegate an incoming user query to the appropriate local LLMs install](https://github.com/PromptEngineer48/LLM_Selector)
-- 2023-11-02 — [Around two years ago, @last9io started advocating using SLOs to achieve effective SRE culture. One of the bigg](https://github.com/last9/slo-computer)
+- [the only managers who survive AI do this one thing](https://www.youtube.com/watch?v=0zt7iP03x0w&t=3893s) (video).
+- [what is agentic AI and how will it change work?](https://hbr.org/2024/12/what-is-agentic-ai-and-how-will-it-change-work?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [a guide to managing interconnected AI systems](https://hbr.org/2024/12/a-guide-to-managing-interconnected-ai-systems?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [designing a successful agentic AI system](https://hbr.org/2025/10/designing-a-successful-agentic-ai-system).
+- [Dwarkesh on "AI management" — future organizations will be much better run](https://www.dwarkesh.com/p/ai-firm).
+- [Mollick's problem with the Shopify & Duolingo AI memos: urgency without vision](https://www.oneusefulthing.org/p/making-ai-work-leadership-lab-and?triedRedirect=true).
+- ["I went all-in on AI. The MIT study is right." — the thin line between augmentation and abdication](https://leadershiplighthouse.substack.com/p/i-went-all-in-on-ai-the-mit-study).
+- The costs: [AI doesn't reduce work — it intensifies it](https://hbr.org/2026/02/ai-doesnt-reduce-work-it-intensifies-it) · [the new mental fatigue of intensive AI oversight](https://hbr.org/2026/03/when-using-ai-leads-to-brain-fry) · [stop forcing AI tools on your engineers](https://newsletter.manager.dev/p/stop-forcing-ai-tools-on-your-engineers).
+- Culture: [what an AI engineering culture looks like — structured content, tiered rigor, smaller PRs](https://cjroth.com/blog/2026-02-18-building-an-elite-engineering-culture).
+- Field reports: [the Google exec spending 20 hrs/week experimenting with AI](https://www.businessinsider.com/google-executive-spends-20-hours-a-week-experimenting-with-ai-2026-2) · [managers who can ship code again, thanks to agents](https://simonwillison.net/2025/Jan/4/llms-and-cursor/) · [Garry Tan's open-sourced personal AI setup](https://github.com/garrytan/gstack) · [an agent skill that answers "so what did you do last week?"](https://github.com/pamelafox/recap-my-week).
+- [Stratechery interviews Google Cloud's CEO about the agentic moment](https://stratechery.com/2026/an-interview-with-google-cloud-ceo-thomas-kurian-about-the-agentic-moment/) · [how CEOs use GenAI for strategic planning](https://hbr.org/2024/09/how-ceos-are-using-gen-ai-for-strategic-planning?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [The AI-Savvy Leader: nine actions](https://www.amazon.com/AI-Savvy-Leader-Nine-Ways-Control/dp/1647826233).
+
+## Engineering leadership, the human kind
+
+- [from invisible to indispensable: an EM's guide to showing impact](https://medium.com/engineering-managers-journal/from-invisible-to-indispensable-an-engineering-managers-guide-to-showing-impact-6b1936061f84).
+- [is now a good time to become an engineering manager?](https://newsletter.manager.dev/p/dont-become-an-engineering-manager) and [when, why, and how to stop coding as your day job](https://kevingoldsmith.substack.com/p/when-why-and-how-to-stop-coding-as) — the two sides of the fork you know well.
+- [different styles of engineering leadership](https://blog.practicalengineering.management/different-styles-of-engineering-leadership-8f376ee6a406) · [a framework for matching coaching style to situation](https://hbr.org/2025/03/4-styles-of-coaching-and-when-to-use-them).
+- [are you ready for a leadership position?](https://code.likeagirl.io/how-to-determine-if-you-are-ready-for-a-leadership-position-436299ce0a14) · [imposter syndrome: fix the environment, not the person](https://hbr.org/2021/02/stop-telling-women-they-have-impostor-syndrome?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit).
+- [convincing your product manager to prioritize technical debt](https://newsletter.eng-leadership.com/p/engineers-guide-to-convincing-your).
+- [how Netflix empowers engineers with incident management](https://netflixtechblog.com/empowering-netflix-engineers-with-incident-management-ebb967871de4) — leadership meets your SRE work.
+- [evidence that World of Warcraft leadership translates to the real world](https://hbr.org/2008/02/does-your-leadership-developme) — saved, presumably, with a smile.
+
+## The presentation masterclass
+
+Your single most-collected leadership skill — a full curriculum's worth.
+
+- [Aristotle's persuasion formula, applied to the modern workplace](https://hbr.org/2019/07/the-art-of-persuasion-hasnt-changed-in-2000-years?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=facebook,linkedin,twitter) — logos, pathos, ethos.
+- [presentations rise or fall on idea, narrative, passion — substance over style](https://hbr.org/2013/06/how-to-give-a-killer-presentation?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit).
+- [how to present to an audience that knows more than you](https://hbr.org/2024/05/how-to-present-to-an-audience-that-knows-more-than-you) and [the goal is being understood and remembered, not admired](https://hbr.org/2024/04/how-to-make-a-good-presentation-great?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter).
+- [make presentations memorable with storytelling structure](https://www.inc.com/carmine-gallo/the-mindset-shift-i-teach-at-harvard-to-create-captivating-presentations/91249998?utm_campaign=freeform&utm_medium=social&utm_source=twitter) · [how much deck design shapes how executives' strategy lands](https://hbr.org/2025/07/you-should-be-able-to-boil-your-strategy-down-to-a-single-clear-visualization?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter).
+- Delivery mechanics: ["confidently humble and humbly confident"](https://hbr.org/2018/02/5-ways-to-get-over-your-fear-of-public-speaking?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [six body stances for confidence](https://hbr.org/2017/04/6-ways-to-look-more-confident-during-a-presentation?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [using notes like a pro](https://hbr.org/2024/12/nervous-about-public-speaking-heres-how-to-use-notes-like-a-pro?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [why overpreparing doesn't make you stilted](https://hbr.org/2020/02/dont-just-memorize-your-next-presentation-know-it-cold?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [three areas to teach yourself clear, confident delivery](https://hbr.org/2024/11/to-become-a-better-presenter-look-inward?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter).
+- [lowering the anxiety of speaking up and sharing ideas](https://news.theuncommonexecutive.com/p/how-to-lower-your-anxiety-to-speaking?utm_campaign=post-expanded-share&utm_medium=web&triedRedirect=true).
+
+## The self-management shelf
+
+The long-running HBR habit — the greatest hits:
+
+- **Attention:** ["recognize the value of your attention, and choose how you allocate it"](https://hbr.org/2025/02/7-habits-to-stay-focused-in-a-world-full-of-distractions?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [you have less focused time than you think](https://hbr.org/2019/02/how-to-stop-obsessing-over-your-mistakes?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=facebook,linkedin,twitter) · [don't let distractions derail your intentions](https://hbr.org/2018/03/to-control-your-life-control-what-you-pay-attention-to?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit).
+- **Purpose & strategy:** [without a clear purpose you fritter effort on short-term wins](https://hbr.org/2010/07/how-will-you-measure-your-life?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [strategic-thinking principles, applied to your personal life](https://hbr.org/2023/10/10-ways-to-prove-youre-a-strategic-thinker?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [follow your blisters, not your passion](https://hbr.org/2020/11/what-you-should-follow-instead-of-your-passion?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter).
+- **Anxiety & resilience:** [the mental traps of anxiety: catastrophizing, mind-reading, overgeneralizing](https://hbr.org/2020/01/how-anxiety-traps-us-and-how-we-can-break-free?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [meditation as a resilience practice](https://hbr.org/2017/08/can-10-minutes-of-meditation-make-you-more-creative?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [take stock of your positivity regularly](https://hbr.org/2016/06/how-to-evaluate-manage-and-strengthen-your-resilience?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit).
+- **Working style:** [ending "toxic productivity"](https://hbr.org/2024/11/lets-end-toxic-productivity?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) · [shorter deadlines make you more productive](https://hbr.org/2018/08/why-we-procrastinate-when-we-have-long-deadlines?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [prioritize what reduces future urgent-but-unimportant work](https://hbr.org/2018/07/how-to-focus-on-whats-important-not-just-whats-urgent?utm_medium=social&utm_campaign=hbr&utm_source=twitter&tpcc=orgsocial_edit) · [continuous learning is the key to lasting influence](https://hbr.org/2024/09/how-to-keep-learning-at-work-even-when-you-feel-fried?tpcc=orgsocial_edit&utm_campaign=hbr&utm_medium=social&utm_source=twitter) — the line your whole vault exists to prove.
+
+---
 
 ## All links on this topic

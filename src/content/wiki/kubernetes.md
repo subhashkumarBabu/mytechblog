@@ -1,58 +1,72 @@
 ---
 title: "Kubernetes"
 topic: "kubernetes"
-draft: true
-generated: "2026-07-05"
-sources: "489 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "489 tagged links, curated from the 220 most recent (2023\u20132026)"
 ---
 
-**489 saved links**, 2017–2026 (peak year: 2023). Types: 275 WebPage, 113 Article, 59 Repository, 41 YouTubeVideo, 1 Document. Top sources: medium.com, github.com, youtube.com, dev.to, itnext.io.
+**489 saved links**, peaking in 2023 — the year of the great K8s learning wave in your saves. The recent corpus tells the next chapter: AI moving into the cluster, both as workload (LLMs on GKE/AKS) and as operator (K8sGPT, AI on-call). Per one of your saved reports, ML-on-Kubernetes job demand grew 180% while classic roles flattened.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [Containers & Docker](/wiki/containers-and-docker/) · [DevOps](/wiki/devops/) · [Platform Engineering](/wiki/platform-engineering/) · [Azure](/wiki/azure/) · [GitOps](/wiki/gitops/)
 
-**Related:** [DevOps](/wiki/devops/) · [Containers & Docker](/wiki/containers-and-docker/) · [Learning Resources](/wiki/learning-resources/) · [Azure](/wiki/azure/)
+---
 
-## Recent saves
+## Start here: the right mental model
 
-- 2026-04-10 — [codepip.com](https://codepip.com/)
-- 2026-04-10 — [k8sgames.com](https://k8sgames.com/)
-- 2026-04-02 — [AI-driven DevOps learning game](https://github.com/ericboy0224/learn-docker-and-k8s)
-- 2026-03-26 — [Wow, this is an excellent guide on what the heck Kubernetes is, how it works, and how to do stuff with it. Wis](https://aws.plainenglish.io/kubernetes-still-feels-weird-what-i-wish-i-knew-sooner-dd61b90463db)
-- 2025-12-18 — [This article describes how the author built an intelligent alert-handling system using Prometheus, n8n and Ope](https://medium.com/@kopp0510/how-i-made-kubernetes-monitoring-smarter-with-ai-b16ff3888e41)
-- 2025-11-08 — [Deploy an agentic AI application on GKE with ADK and a self-hosted LLM. This tutorial walks you through the en](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/agentic-adk-vllm?utm_campaign=cloud-ix-social-media-post_448997792utm_source%3Dtwitterutm_medium%3Dunpaidsoc&linkId=17573357)
-- 2025-07-30 — [🖥️ a-devops-girl/k8s-observability-stack Prod-ready #observability stack for #Kubernetes, built using #FluentB](https://github.com/a-devops-girl/k8s-observability-stack)
-- 2025-05-05 — [New Kube Careers report: Platform Engineering is rising while SRE roles decline The biggest surprise? Machine](https://kube.careers/state-of-kubernetes-jobs-2025-q1)
-- 2025-05-05 — [Crash course on Kubernetes for ML engineers ⬇️⬇️⬇️](https://github.com/Paulescu/kubernetes-for-ml-engineers)
-- 2025-04-21 — [Want to use LLMs in your company without sharing your proprietary data? Do this: 1. Get a GPU node (for exampl](https://docs.nvidia.com/nim/large-language-models/latest/deploy-helm.html)
-- 2025-03-20 — [Check out this @InfoQ interview with @yaronschneider on AI Agents: Scalable AI Workflows with LLMs, Kubernetes](https://www.infoq.com/news/2026/02/evals-agent-interop/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=dotnet)
-- 2025-03-10 — [Checklist for Kubernetes in Production: Best Practices for SREs by Utku Darilmaz, reviewed by Renato Losio](https://www.infoq.com/articles/checklist-kubernetes-production/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops)
-- 2025-02-20 — [AI/ML orchestration on GKE](https://docs.cloud.google.com/kubernetes-engine/docs/integrations/ai-infra)
-- 2025-02-13 — [Transitioning from a monolith to microservices with Core and Kubernetes. Exploring scalability and automation](https://dev.to/paulotorrestech/building-scalable-e-commerce-systems-a-journey-through-microservices-with-aspnet-core-and-35gd)
-- 2025-02-08 — [Kubernetes Hands-on Lab (for Beginners) - Official Tutorial ⬇️⬇️ 1. Minikube ( This is an official Kubernetes](https://kubernetes.io/docs/tutorials/hello-minikube/)
-- 2025-01-30 — ["We are thrilled to announce the collaboration between Google Cloud, AWS, and Azure on Kube Resource Orchestra](https://cloud.google.com/blog/products/containers-kubernetes/introducing-kube-resource-orchestrator/)
-- 2024-11-22 — [DevOps tip: labctl - start remote Linux, Docker, and Kubernetes playgrounds from the command line. Use cases:](https://github.com/iximiuz/labctl)
-- 2024-09-21 — [Modern .Net Serverless Stack for Azure: Aspire + Dapr + Radius + Kubernetes](https://staslebedenko.medium.com/azure-serverless-applications-3311f16970ac)
-- 2024-09-17 — [Check a box, get some Ray action in your Kubernetes cluster. This Python and AI framework is hot, and I like h](https://cloud.google.com/blog/products/gaming/how-gen-ai-powers-up-multiplayer-games)
-- 2024-08-24 — [Internal Developer Platforms: A Real Thing or Just a Trend? #kubernetes](https://itnext.io/internal-developer-platforms-a-real-thing-or-just-a-trend-ee9c97870dcc)
-- 2024-08-23 — [Fine tune your generative AI models on AKS with KAITO (Kubernetes AI Toolchain Operator). New blog post with t](http://blog.aks.azure.com/2024/08/23/fine-tuning-language-models-with-kaito)
-- 2024-08-23 — [Building a 3-Tier Web Application with Kubernetes: The Blueprint You Need! #kubernetes](https://medium.com/@meklereran/building-a-3-tier-web-application-with-kubernetes-bced670cf0be)
-- 2024-08-23 — [Day 22: Terraform Modules — Best Practices #kubernetes](https://medium.com/@vinoji2005/day-22-terraform-modules-best-practices-30eb4cee2d30)
-- 2024-08-14 — [The crew at Intuit run 325+ Kubernetes clusters and host 7000+ app/services. They wondered if generative AI co](https://medium.com/intuit-engineering/genai-experiments-monitoring-and-debugging-kubernetes-cluster-health-e8597454a85c)
-- 2024-07-30 — [(Share) Azure-Samples/aks-platform-engineering Building a Platform Engineering Environment on Azure Kubernetes](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/e2e_samples/fabric_dataops_sample/README.md)
+- ["Let's stop calling Kubernetes a container orchestrator"](https://home.robusta.dev/blog/kubernetes-is-a-cloud-operating-system) — the reframing that makes everything else click.
+- [How Kubernetes reinvented virtual machines](https://labs.iximiuz.com/tutorials/kubernetes-vs-virtual-machines) — one of the most-shared K8s explainers ever, deservedly.
+- [Kubernetes is great — if you know what 90% of it not to use](https://paulbutler.org/2024/the-haters-guide-to-kubernetes/).
+- ["Kubernetes still feels weird" — what I wish I knew sooner](https://aws.plainenglish.io/kubernetes-still-feels-weird-what-i-wish-i-knew-sooner-dd61b90463db) ("wish I had it years ago" — your own note).
+- [architecture explained: etcd, kubelet, container runtime, component by component](https://devopscube.com/kubernetes-architecture-explained/).
+- [the Borg papers — where it all comes from, 20 years on](https://research.google/pubs/developer-productivity-in-the-age-of-generative-ai-a-psychological-perspective/).
+- [Why does Kubernetes exist?](https://www.youtube.com/watch?v=228XgLK1I8A) (video).
 
-## Notable repositories
+## AI meets the cluster
 
-- 2026-04-02 — [AI-driven DevOps learning game](https://github.com/ericboy0224/learn-docker-and-k8s)
-- 2025-07-30 — [🖥️ a-devops-girl/k8s-observability-stack Prod-ready #observability stack for #Kubernetes, built using #FluentB](https://github.com/a-devops-girl/k8s-observability-stack)
-- 2025-05-05 — [Crash course on Kubernetes for ML engineers ⬇️⬇️⬇️](https://github.com/Paulescu/kubernetes-for-ml-engineers)
-- 2024-11-22 — [DevOps tip: labctl - start remote Linux, Docker, and Kubernetes playgrounds from the command line. Use cases:](https://github.com/iximiuz/labctl)
-- 2024-07-30 — [(Share) Azure-Samples/aks-platform-engineering Building a Platform Engineering Environment on Azure Kubernetes](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/e2e_samples/fabric_dataops_sample/README.md)
-- 2024-04-23 — [This repository contains a modern set of Grafana dashboards for Kubernetes ➜](https://github.com/dotdc/grafana-dashboards-kubernetes)
-- 2024-03-19 — [@wilfriedwoivre Good to hear that. We can’t share that exact lab but we’re working on a self guided version of](https://github.com/Azure/kubernetes-hackfest)
-- 2024-02-23 — [kubernetes-chatgpt-bot is a ChatGPT bot for Kubernetes issues You can ask the bot how to solve your Prometheus](https://github.com/robusta-dev/kubernetes-chatgpt-bot)
-- 2024-02-12 — [📦 Simulator: A Kubernetes security training platform Creates a Kubernetes cluster in your AWS account; runs sc](https://github.com/controlplaneio/simulator)
-- 2023-12-05 — [How they SRE by @upgundecha #devops #devsecops #kubernetes #cicd #k8s #linux #docker #sysadmin #automation #Az](https://github.com/upgundecha/howtheysre?utm_content=buffer9c1c9&utm_medium=social&utm_source=twitter.com&utm_campaign=buffer)
-- 2023-12-03 — [Learn Kubernetes with Labs for FREE](https://github.com/omerbsezer/Fast-Kubernetes)
-- 2023-10-29 — [🖥️ kubefirst/kubefirst GitOps Infrastructure &amp; Application Delivery Platform #Kubernetes #DevOps #Git #Git](https://github.com/konstructio/kubefirst)
+- **AI as operator:** [K8sGPT — AI superpowers for Kubernetes SREs](https://github.com/k8sgpt-ai/k8sgpt) ([+ the Backstage integration](https://k8sgpt.ai/blog/post-5/)) · [a ChatGPT bot that answers your Prometheus alerts](https://github.com/robusta-dev/kubernetes-chatgpt-bot) · [the kubectl OpenAI plugin](https://collabnix.com/the-rise-of-kubernetes-and-ai-kubectl-openai-plugin/).
+- [Intuit: GenAI for on-call across 325+ clusters and 7,000 services](https://medium.com/intuit-engineering/genai-experiments-monitoring-and-debugging-kubernetes-cluster-health-e8597454a85c) — the enterprise-scale case study closest to your incident-management platform.
+- [an intelligent alert-handling system with Prometheus, n8n, and OpenAI](https://medium.com/@kopp0510/how-i-made-kubernetes-monitoring-smarter-with-ai-b16ff3888e41).
+- **AI as workload:** [deploying an agentic AI app on GKE with ADK and a self-hosted LLM](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/agentic-adk-vllm?utm_campaign=cloud-ix-social-media-post_448997792utm_source%3Dtwitterutm_medium%3Dunpaidsoc&linkId=17573357) · [fine-tuning GenAI models on AKS with KAITO](http://blog.aks.azure.com/2024/08/23/fine-tuning-language-models-with-kaito) · [private LLMs with NVIDIA NIM on a GPU node](https://docs.nvidia.com/nim/large-language-models/latest/deploy-helm.html) · [one-checkbox Ray on GKE](https://cloud.google.com/blog/products/gaming/how-gen-ai-powers-up-multiplayer-games).
+- [scalable AI workflows: LLMs, Kubernetes, and multi-agent coordination](https://www.infoq.com/news/2026/02/evals-agent-interop/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=dotnet) · [Kubernetes as the secret behind NVIDIA's AI factories](https://www.youtube.com/watch?si=uPaId5TvGhZEN9i9&v=KrmqURibQB8&feature=youtu.be) (video).
+- [the jobs report: platform engineering up, ML-on-K8s up 180%](https://kube.careers/state-of-kubernetes-jobs-2025-q1).
+
+## Running it in production
+
+- [the production checklist: best practices for SREs](https://www.infoq.com/articles/checklist-kubernetes-production/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops) — the single most practical link in the tag.
+- [building a reliability foundation: crawl, walk, run](https://www.fairwinds.com/blog/building-a-strong-reliability-foundation-in-kubernetes-from-crawl-to-run).
+- Observability: [Prometheus + Grafana setup guide](https://blog.devgenius.io/ultimate-guide-setting-up-prometheus-and-grafana-for-kubernetes-monitoring-accd92a3fb70) · [a modern set of Grafana dashboards for K8s](https://github.com/dotdc/grafana-dashboards-kubernetes) · [K8s log monitoring with OpenTelemetry](https://signoz.io/blog/kubernetes-logging/) · [SLOs for cluster resource utilization](https://www.dynatrace.com/news/blog/optimize-resource-utilization-of-your-kubernetes-clusters-with-slos/) · [Retina — cloud-agnostic network observability](https://retina.sh/docs/intro/?WT.mc_id=modinfra-134234-pierrer).
+- Deploy patterns: [deployment strategies: rolling, recreate, canary, blue/green](https://blog.devops.dev/kubernetes-deployment-strategies-part-1-f4a7b959c5e5) · [canary releases with Istio, Kiali, and the Gateway API](https://dev.to/danielepolencic/traffic-shaping-with-istio-and-kubernetes-4pcf) · [blue/green vs. canary, compared](https://hardeeppsinghh725.medium.com/blue-green-deployment-vs-canary-deployment-a7cd62ad608a).
+- Networking: [how pod-to-pod communication actually works](https://dev.to/danielepolencic/tracing-pod-to-pod-network-traffic-in-kubernetes-434k) · [understanding K8s networking end to end](https://learncloudnative.com/blog/2023-05-31-kubeproxy-iptables).
+- Security: [OWASP Kubernetes — prioritizing risks](https://www.sysdig.com/blog/top-owasp-kubernetes) · [Simulator: a K8s security-training platform that misconfigures clusters for you](https://github.com/controlplaneio/simulator).
+- [the State of Kubernetes Cost Optimization report](https://cloud.google.com/blog/products/databases/build-rag-applications-with-langchain-and-google-cloud/) — tangible advice, per your note.
+
+## Kubernetes on Azure
+
+- [building a platform-engineering environment on AKS](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/e2e_samples/fabric_dataops_sample/README.md) — the reference sample.
+- [Kubernetes in Azure: the 7 service options, compared](https://www.netapp.com/learn/azure-anf-blg-kubernetes-in-azure-architecture-and-service-options/).
+- [External Secrets + AKS integration](https://medium.com/@artem_lajko/unlocking-the-potential-external-secrets-and-azure-kubernetes-service-integration-f562c58d7472) · [Azure DevOps self-hosted agents on K8s](https://medium.com/@muppedaanvesh/azure-devops-self-hosted-agents-on-kubernetes-part-3-6658d741b369).
+- [AKS networking essentials](https://www.youtube.com/watch?v=kLBLaCC_dNs&feature=youtu.be) and [microservices CI/CD with Azure DevOps + AKS](https://www.youtube.com/watch?v=0jzxRJkPJbA&feature=youtu.be) (videos).
+- [deploying intelligent apps with OpenAI on AKS](https://www.youtube.com/live/g9MFhvdwQPU?si=LlxF9azwJ_-ceo7f) (video).
+
+## Hands-on
+
+- [the official Minikube hands-on tutorial](https://kubernetes.io/docs/tutorials/hello-minikube/) — still the canonical first cluster.
+- [200+ Kubernetes labs and tutorials](https://collabnix.github.io/kubelabs/) · [free K8s labs](https://github.com/omerbsezer/Fast-Kubernetes) · [labs.play-with-k8s.com](https://labs.play-with-k8s.com/) · [helm-playground.com](https://helm-playground.com/) · [k8sgames.com](https://k8sgames.com/).
+- [iximiuz: learning Kubernetes by fixing failing pods](https://labs.iximiuz.com/tutorials/container-networking-from-scratch) and [labctl — disposable K8s playgrounds from the CLI](https://github.com/iximiuz/labctl).
+- [CKA exam prep — plus the concepts the exam skips](https://github.com/alifiroozi80/CKA).
+- [the Kubernetes Resume Challenge](https://medium.com/@rogmer.bulaclac/the-kubernetes-resume-challenge-64658ee62c80) — prove it in public.
+- Home-lab route: [Talos + K8s + Prometheus + Grafana on a Raspberry Pi 4](https://blog.devops.dev/talos-os-raspberry-fc5f327b7026) · [why David runs K8s for personal stuff](https://david.coffee/why-and-how-i-use-k8s-for-personal-stuff/).
+
+## War stories & scale
+
+- [k8s.af](https://k8s.af/) — Kubernetes failure stories; the best ops education per hour spent.
+- [Kubernetes at Uber scale](https://www.youtube.com/watch?si=Paoa4gsFji6ow7na&v=JxNysEES308&feature=youtu.be) and [Uber's batch-compute resource story](https://www.youtube.com/watch?si=gqTt8wnLfBQpDBwH&v=mmLD5GcUcec&feature=youtu.be) (videos).
+- [Agoda: moving 3 million CI jobs from VMs to Kubernetes](https://medium.com/agoda-engineering/governance-as-code-an-innovative-approach-to-software-architecture-verification-d93f95443662).
+- [Monzo's architecture lessons — what worked and what didn't](https://www.infoq.com/articles/cassandra-kubernetes-microservices/?utm_source=twitter&utm_medium=link&utm_campaign=calendar).
+- [Firefly: migrating from serverless *to* Kubernetes](https://www.infoq.com/articles/eclipse-lmos-ai-agents/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=ai-ml-data-eng) — the counter-current worth knowing.
+- [how the Kubernetes project coordinates 3,000 contributors](https://www.cncf.io/blog/2023/06/14/version-after-version-how-the-open-source-project-kubernetes-releases-its-software/).
+
+---
 
 ## All links on this topic
