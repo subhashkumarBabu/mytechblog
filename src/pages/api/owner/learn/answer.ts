@@ -27,8 +27,11 @@ export async function POST({ request, locals }: APIContext) {
 		correct = (body.response ?? "") === q.answer;
 	} else if (q.kind === "short") {
 		correct = gradeShort(body.response ?? "", q.answer);
-	} else if (typeof body.self_correct === "boolean") {
-		// fallback path: self-graded against the rubric when AI grading fails
+	} else if (q.kind === "card" || typeof body.self_correct === "boolean") {
+		// flashcards are always self-graded on flip; free falls back here when AI fails
+		if (typeof body.self_correct !== "boolean") {
+			return Response.json({ error: "self_correct is required" }, { status: 400 });
+		}
 		correct = body.self_correct;
 	} else {
 		// free: Workers AI grades the response against the stored rubric

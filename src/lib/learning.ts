@@ -11,12 +11,12 @@ export const DAILY_NEW = 3;
 export const SESSION_CAP = 15;
 
 export type QuestionRow = {
-	id: string; concept_id: string; kind: "mcq" | "short" | "free";
+	id: string; concept_id: string; kind: "mcq" | "short" | "free" | "card";
 	prompt: string; answer: string; distractors: string | null; difficulty: number;
 };
 
 export type SessionQuestion = {
-	id: string; kind: "mcq" | "short" | "free"; difficulty: number;
+	id: string; kind: "mcq" | "short" | "free" | "card"; difficulty: number;
 	prompt: string; options?: string[]; rubric?: string;
 };
 
@@ -64,7 +64,8 @@ function toSessionQuestion(q: QuestionRow): SessionQuestion {
 		try { distractors = JSON.parse(q.distractors || "[]"); } catch {}
 		out.options = shuffle([q.answer, ...distractors]);
 	}
-	if (q.kind === "free") out.rubric = q.answer; // self-graded in P3a; AI-graded in P3b
+	if (q.kind === "free") out.rubric = q.answer; // AI-graded, rubric shown after
+	if (q.kind === "card") out.rubric = q.answer; // flashcard back, shown on flip
 	return out;
 }
 

@@ -16,7 +16,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
   <header class="head">
     <h1 class="display">Learn</h1>
     <p class="annot">
-      {session.due} due · {session.fresh} new · {totalQuestions} questions
+      {session.due} due · {session.fresh} new · {totalQuestions} questions · <a href="/today/map/" class="maplink">mastery map</a>
     </p>
   </header>
 
@@ -38,6 +38,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     .head { margin-bottom: 20px; }
     .head h1 { font-size: clamp(40px, 7vw, 72px); }
     .head .annot { margin-top: 8px; }
+    .maplink { color: var(--signal); }
 
     .empty { text-align: center; padding: 48px 0; }
     .empty .em-head { font-size: clamp(32px, 5vw, 52px); color: var(--whiteout); }
@@ -240,9 +241,17 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     function render() {
       if (pos >= flat.length) return renderSummary();
       const { item, q } = flat[pos];
-      const kindLabel = q.kind === "mcq" ? "choose one" : q.kind === "short" ? "type the term" : "explain, then self-grade";
+      const kindLabel = q.kind === "mcq" ? "choose one" : q.kind === "short" ? "type the term"
+        : q.kind === "card" ? "recall, then flip" : "explain, then self-grade";
       let body = "";
-      if (q.kind === "mcq") {
+      if (q.kind === "card") {
+        body = `<div class="selfrow"><button class="act primary" id="flip">Show answer</button></div>
+          <div class="rubric" id="card-back" hidden>${esc(q.rubric!)}</div>
+          <div class="selfrow" id="card-btns" hidden>
+            <button class="act primary" data-self="1">Got it</button>
+            <button class="act" data-self="0">Missed it</button>
+          </div>`;
+      } else if (q.kind === "mcq") {
         body = `<div class="opts">${q.options!
           .map((o) => `<button class="opt" data-val="${esc(o)}">${esc(o)}</button>`)
           .join("")}</div>`;
@@ -318,6 +327,17 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     }
 
     function wire(q: SQ) {
+      if (q.kind === "card") {
+        document.getElementById("flip")!.addEventListener("click", () => {
+          document.getElementById("card-back")!.hidden = false;
+          document.getElementById("card-btns")!.hidden = false;
+          (document.getElementById("flip") as HTMLButtonElement).disabled = true;
+        }, { once: true });
+        stage.querySelectorAll<HTMLButtonElement>("[data-self]").forEach((b) =>
+          b.addEventListener("click", () => submit(q, { self_correct: b.dataset.self === "1" }), { once: true }),
+        );
+        return;
+      }
       if (q.kind === "mcq") {
         stage.querySelectorAll<HTMLButtonElement>(".opt").forEach((b) =>
           b.addEventListener("click", () => submit(q, { response: b.dataset.val }, b), { once: true }),

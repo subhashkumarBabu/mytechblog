@@ -85,6 +85,7 @@ function meta(l: QueueItem) {
           <div class="acts">
             <a class="act read" href={l.url} target="_blank" rel="noopener" data-act="read">Read</a>
             <button class="act" data-act="snooze">Snooze</button>
+            <button class="act" data-act="cards">Cards</button>
             <button class="act ghost" data-act="letgo">Let go</button>
           </div>
         </article>
@@ -192,6 +193,24 @@ function meta(l: QueueItem) {
         await fetch(`/api/owner/links/${id}/snooze/`, { method: "POST" });
         say("Snoozed — back tomorrow.");
         dismiss(card);
+        return;
+      }
+      if (act === "cards") {
+        const btn = el as HTMLButtonElement;
+        btn.disabled = true;
+        btn.textContent = "Mining…";
+        const res = await fetch(`/api/owner/links/${id}/cards/`, { method: "POST" });
+        const d = await res.json();
+        if (!res.ok) {
+          say(d.error ?? "Card extraction failed.");
+          btn.disabled = false;
+          btn.textContent = "Cards";
+          return;
+        }
+        say(d.created > 0
+          ? `${d.created} flashcard${d.created === 1 ? "" : "s"} minted — they'll appear in practice.`
+          : "Nothing card-worthy found in this one.");
+        btn.textContent = d.created > 0 ? `+${d.created} cards` : "No cards";
         return;
       }
       if (act === "letgo") {

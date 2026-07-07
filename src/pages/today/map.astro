@@ -1,0 +1,123 @@
+---
+import AirLayout from "../../layouts/AirLayout.astro";
+import { UNLOCK_GATE } from "../../lib/learning";
+
+export const prerender = false;
+
+type C = { id: string; name: string; module: string };
+type M = { concept_id: string; ladder_idx: number; provisional: number };
+
+const env = Astro.locals.runtime?.env;
+let concepts: C[] = [];
+let prereqs = new Map<string, string[]>();
+let mastery = new Map<string, M>();
+
+if (env?.DB) {
+  const [cs, es, ms] = await Promise.all([
+    env.DB.prepare("SELECT id, name, module FROM concepts WHERE track = 'agentic-ai' ORDER BY rowid").all<C>(),
+    env.DB.prepare("SELECT concept_id, prereq_id FROM concept_prereqs").all<{ concept_id: string; prereq_id: string }>(),
+    env.DB.prepare("SELECT concept_id, ladder_idx, provisional FROM mastery").all<M>(),
+  ]);
+  concepts = cs.results ?? [];
+  for (const e of es.results ?? []) {
+    if (!prereqs.has(e.concept_id)) prereqs.set(e.concept_id, []);
+    prereqs.get(e.concept_id)!.push(e.prereq_id);
+  }
+  mastery = new Map((ms.results ?? []).map((m) => [m.concept_id, m]));
+}
+
+function statusOf(c: C): string {
+  const m = mastery.get(c.id);
+  if (m) {
+    if (m.ladder_idx >= 2) return m.provisional ? "placed" : "mastered";
+    return "learning";
+  }
+  const ready = (prereqs.get(c.id) ?? []).every(
+    (p) => (mastery.get(p)?.ladder_idx ?? 0) >= UNLOCK_GATE,
+  );
+  return ready ? "frontier" : "locked";
+}
+
+const MODULES = [
+  ["llm-foundations", "LLM foundations"], ["tool-use", "Tool use"],
+  ["retrieval-context", "Retrieval & context"], ["agent-core", "Agent core"],
+  ["interop", "Interop (MCP, skills)"], ["multi-agent", "Multi-agent"],
+  ["production-ops", "Production & ops"], ["applied", "Applied"],
+];
+
+const byModule = MODULES.map(([key, label]) => ({
+  key, label,
+  concepts: concepts.filter((c) => c.module === key).map((c) => ({ ...c, status: statusOf(c) })),
+}));
+
+const counts = { mastered: 0, placed: 0, learning: 0, frontier: 0, locked: 0 } as Record<string, number>;
+for (const g of byModule) for (const c of g.concepts) counts[c.status]++;
+const done = counts.mastered + counts.placed;
+const pct = concepts.length ? Math.round((done / concepts.length) * 100) : 0;
+---
+
+<AirLayout title="Mastery map — devopsmantra" description="Agentic AI track progress." active="today">
+  <header class="head">
+    <h1 class="display">Mastery map</h1>
+    <p class="annot">Agentic AI track · {done}/{concepts.length} known ({pct}%)</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot mastered"></i>mastered {counts.mastered}</span>
+    <span><i class="dot placed"></i>placed by diagnostic {counts.placed}</span>
+    <span><i class="dot learning"></i>learning {counts.learning}</span>
+    <span><i class="dot frontier"></i>ready to learn {counts.frontier}</span>
+    <span><i class="dot locked"></i>locked {counts.locked}</span>
+  </div>
+
+  <div class="modules">
+    {byModule.map((g) => (
+      <section class="mod">
+        <h2>{g.label}</h2>
+        <div class="chips">
+          {g.concepts.map((c) => (
+            <span class={`chip ${c.status}`} title={c.id}>{c.name}</span>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <p class="annot foot">
+    <a href="/today/learn/">← back to practice</a> ·
+    <a href="/today/learn/?placement=1">retake placement</a>
+  </p>
+
+  <style>
+    .head { margin-bottom: 22px; }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
+
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 30px;
+      font-size: 12.5px; color: var(--faint); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    .dot.mastered, .chip.mastered { background: var(--signal); }
+    .dot.placed { background: transparent; border: 2px solid var(--signal); }
+    .dot.learning { background: color-mix(in srgb, var(--signal) 45%, transparent); }
+    .dot.frontier { background: transparent; border: 2px solid var(--whiteout); }
+    .dot.locked { background: var(--haze); opacity: .4; }
+
+    .modules { display: flex; flex-direction: column; gap: 26px; }
+    .mod h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--faint); margin-bottom: 10px; font-weight: 600; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { font-size: 13px; font-weight: 600; padding: 7px 13px; border-radius: var(--r-btn);
+      border: 1px solid transparent; }
+    .chip.mastered { background: var(--signal); color: #fff; }
+    .chip.placed { background: transparent; border-color: var(--signal); color: var(--signal); }
+    .chip.learning { background: color-mix(in srgb, var(--signal) 22%, transparent); color: var(--whiteout); }
+    .chip.frontier { background: transparent; border-color: var(--whiteout); color: var(--whiteout); }
+    .chip.locked { background: var(--haze); color: var(--ink-2); opacity: .45; }
+
+    .foot { margin-top: 34px; }
+    .foot a { color: var(--faint); }
+    .foot a:hover { color: var(--signal); }
+  </style>
+</AirLayout>
