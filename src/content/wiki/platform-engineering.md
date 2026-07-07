@@ -1,43 +1,69 @@
 ---
 title: "Platform Engineering"
 topic: "platform-engineering"
-draft: true
-generated: "2026-07-05"
-sources: "207 tagged links (auto-generated baseline)"
+draft: false
+generated: "2026-07-07"
+sources: "207 tagged links, curated from the 183 most recent (2023\u20132026)"
 ---
 
-**207 saved links**, 2020–2026 (peak year: 2023). Types: 113 WebPage, 71 Article, 19 YouTubeVideo, 4 Repository. Top sources: infoq.com, thenewstack.io, youtube.com, medium.com, lnkd.in.
+**207 saved links** tracking the discipline from "hot new trend" (2023) through its hype-cycle hangover to its next mutation: platforms whose primary users are agents, not developers. This is the layer-thinking topic — platform engineering is "is this the right layer?" practiced at organizational scale.
 
-> Draft page — auto-generated overview. Curated upgrade pending.
+**Related:** [DevOps](/wiki/devops/) · [SRE & Observability](/wiki/sre-and-observability/) · [Kubernetes](/wiki/kubernetes/) · [Infrastructure as Code](/wiki/infrastructure-as-code/)
 
-**Related:** [DevOps](/wiki/devops/) · [Productivity & Learning](/wiki/productivity-and-learning/) · [Kubernetes](/wiki/kubernetes/) · [Programming](/wiki/programming/)
+---
 
-## Recent saves
+## Start here
 
-- 2026-06-26 — [Developer Productivity in the Age of Generative AI: A Psychological Perspective &lt; a colleague of mine wrote](https://research.google/pubs/developer-productivity-in-the-age-of-generative-ai-a-psychological-perspective/)
-- 2026-06-10 — [Developer experience is dead. Long live agent experience. &lt; still have a great devex, but also think about](https://www.builder.io/blog/agent-experience)
-- 2026-06-05 — ["Platform Engineering End-to-End". by Luca Cavallin](https://www.lucavallin.com/blog/platform-engineering-end-to-end)
-- 2026-05-06 — [Three Pillars of Platform Engineering: a Virtuous Cycle by Pratik Agarwal, reviewed by Renato Losio](https://www.infoq.com/articles/platform-reliability-cycle/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops)
-- 2026-04-23 — [#PlatformEngineering sits at the intersection of infrastructure, developer experience &amp; product delivery.](https://www.infoq.com/presentations/platform-engineering-sociotechnical/?utm_source=twitter&utm_medium=link&utm_campaign=calendar)
-- 2026-04-03 — ["The platform engineering market didn’t outgrow the idea of Backstage. It outgrew the architecture." &lt; Back](https://newsletter.port.io/p/backstage-is-dead)
-- 2026-03-27 — [From Friction to Flow: How Great DevEx Makes Everything Awesome &lt; I'm so glad I get to work with @nicolefv](https://www.infoq.com/presentations/devex-highlights/)
-- 2025-07-13 — [Platform Engineering: Evolution, Trends, and Future Impact on Software Delivery](https://www.infoq.com/presentations/platform-engineering-trends/?utm_source=twitter&utm_medium=link&utm_campaign=calendar)
-- 2025-05-05 — [New Kube Careers report: Platform Engineering is rising while SRE roles decline The biggest surprise? Machine](https://kube.careers/state-of-kubernetes-jobs-2025-q1)
-- 2025-04-28 — [How would you differentiate DevOps, SRE, and platform engineering? Besides the amount of marketing behind each](https://www.syntasso.io/post/devops-vs-sre-vs-platform-engineering)
-- 2025-04-07 — [gitmcp.io](https://gitmcp.io/)
-- 2025-04-02 — [Agentic AI and Platform Engineering: How They Can Combine](https://thenewstack.io/agentic-ai-and-platform-engineering-how-they-can-combine/)
-- 2025-04-01 — [“LLMs thrive in environments where the data space is well-defined and structured. Platform engineering is basi](https://platformengineering.org/blog/ai-and-platform-engineering)
-- 2025-03-31 — [10 internal developer platforms help simplify workflows, boost productivity, and automate routine tasks. #DEVC](https://dev.to/microtica/10-internal-developer-platforms-to-improve-your-developer-workflow-55ee)
-- 2025-03-28 — [It seems we're getting consensus on what makes up an internal developer platform—think self-service portals, w](https://www.syntasso.io/post/taming-the-complexity-of-cloud-native-development-with-internal-developer-platforms)
-- 2025-02-10 — [Modernizing DevOps with AI, Boosting Productivity, and Redefining Developer Experience by @solidtubez, Christi](https://www.infoq.com/presentations/multi-agent-system-lessons/?utm_source=twitter&utm_medium=link&utm_campaign=calendar)
-- 2025-01-28 — [A good overview of: Platform Engineering Essentials](https://dzone.com/refcardz/getting-started-with-agentic-ai)
-- 2024-12-15 — ["What observability 2.0 means for developer experience. " The evolution of observability has brought in an exc](https://leaddev.com/technical-direction/what-observability-2-means-developer-experience)
-- 2024-12-01 — [Early Observability in Platform Engineering: Challenges and Solutions via @Lightruntech, by @ek121268 - #Platf](https://lightrun.com/early-observability-in-platform-engineering-challenges-and-solutions/?utm_source=the+new+stack&utm_medium=twitter&utm_campaign=tns+platform)
-- 2024-11-22 — [Platform Engineering Requirement Checklists](https://www.taloflow.ai/guides/requirements/platform-engineering)
-- 2024-11-21 — [How many folks are doing platform engineering, and for how long? "Most" and "not long" are some answers @jkrig](https://thenewstack.io/the-2024-state-of-platform-engineering-fledgling-at-best/)
-- 2024-11-18 — ["Platform engineering brings structure to the chaos of DevOps by creating a standardized, cohesive platform th](https://bravenewgeek.com/platform-engineering-as-a-service/)
-- 2024-11-18 — [Learn how building an internal developer platform with a golden path, lifecycle management, and integrated sec](https://www.hashicorp.com/blog/best-practices-for-avoiding-cloud-security-and-compliance-costs)
-- 2024-11-11 — [Platform engineering is the industrialization of software development](https://platformengineering.org/blog/ai-and-platform-engineering)
-- 2024-11-10 — [Gartner 2024 Hype Cycle for Emerging Technologies Highlights Developer Productivity, Total Experience, AI and](https://www.gartner.com/en/newsroom/press-releases/2024-08-21-gartner-2024-hype-cycle-for-emerging-technologies-highlights-developer-productivity-total-experience-ai-and-security)
+- [Platform Engineering 101 — Luca Galante's original explainer](https://www.infoq.com/articles/platform-engineering-primer/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops).
+- [the InfoQ Platform Engineering Guide: principles and best practices](https://www.infoq.com/minibooks/ai-assisted-development-2025/) (free eMag).
+- [Platform Engineering End-to-End](https://www.lucavallin.com/blog/platform-engineering-end-to-end) — the modern single-page tour.
+- [Three pillars of platform engineering: a virtuous cycle](https://www.infoq.com/articles/platform-reliability-cycle/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops).
+- [the CNCF Platform Engineering Maturity Model](https://tag-app-delivery.cncf.io/whitepapers/platform-eng-maturity-model/) — where are you on the curve?
+
+## The identity question
+
+- ["platform engineering is just DevOps with a product mindset"](https://stackoverflow.blog/2023/07/26/platform-engineering-is-just-devops-with-a-product-mindset/) — the most durable one-liner in the debate.
+- [Wardley: the term got wrapped up with *building your own platform*](https://blog.gardeviance.org/2023/01/why-fuss-about-conversational.html) — the strategic caution.
+- [platform engineering won't kill the DevOps star](https://thenewstack.io/platform-engineering-wont-kill-the-devops-star/) · ["platform engineering doesn't replace DevOps"](https://medium.com/defense-unicorns/5-minute-devops-platform-engineering-dosent-replace-devops-599f2d61b66).
+- [PE brings structure to the chaos of DevOps](https://bravenewgeek.com/platform-engineering-as-a-service/) · [PE vs. CloudOps](https://www.stacksense.io/p/platform-engineering-vs-cloudops).
+
+## Building the platform
+
+- Golden paths: [self-service + reduced cognitive load, hand in hand](https://thenewstack.io/getting-developer-self-service-right/) · [an IDP with golden paths, lifecycle management, and secrets](https://www.hashicorp.com/blog/best-practices-for-avoiding-cloud-security-and-compliance-costs) · [McDonald's: self-serve templates and golden pathways](https://medium.com/mcdonalds-technical-blog/simplifying-and-standardizing-software-at-scale-6b60e451e772).
+- Portals: [a guide to internal developer portals](https://www.port.io/guide) · [backstage.io](https://backstage.io/) · [Backstage walkthrough](https://www.youtube.com/watch?v=2-U-RBJwNQA) (video) · [building your developer portal with Backstage, part 1](https://medium.com/gitguardian/platform-engineering-building-your-developer-portal-with-backstage-pt-1-21d3f8de2033) · ["the market didn't outgrow the *idea* of Backstage — it outgrew the architecture"](https://newsletter.port.io/p/backstage-is-dead).
+- Anatomy: [the 7 core components of an IDP](https://mia-platform.eu/blog/10-core-components-every-idp-should-include/) · [what an IDP actually is](https://faun.pub/what-is-an-internal-developer-platform-dc89e9e1edaa) · [creating a complete IDP](https://www.youtube.com/watch?v=Rg98GoEHBd4) (video).
+- Case studies: [how Palo Alto built their IDP on Backstage](https://www.infoq.com/news/2024/03/tech-debt-software/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=culture-methods) · [planning and launching platform engineering at N26](https://blog.eriksen.com.br/en/platform-engineering-n26) · [Netflix: "we're just getting started"](https://netflixtechblog.com/neflix-platform-engineering-were-just-getting-started-267f65c4d1a7) · [platform engineering at Mercari](https://speakerdeck.com/tcnksm/platform-engineering-at-mercari).
+- On Azure: [the AKS platform-engineering reference environment](https://github.com/Azure-Samples/modern-data-warehouse-dataops/blob/main/e2e_samples/fabric_dataops_sample/README.md) · [Microsoft's platform engineering guide](https://www.buchatech.com/2023/11/platform-engineering-at-microsoft/).
+- [Platform Engineering on Kubernetes — the Manning book](https://www.salaboy.com/2023/10/25/milestone-achieved-book-published/).
+
+## Measuring it: the DevEx thread
+
+- [Fowler/Noda/Cochran: why measuring developer productivity is hard, and what to do](https://martinfowler.com/articles/structured-prompt-driven/).
+- [a new productivity measure from the creators of DORA and SPACE](https://newsletter.pragmaticengineer.com/p/developer-productivity-a-new-framework) and [the response to McKinsey's attempt](https://newsletter.pragmaticengineer.com/p/steve-yegge-on-ai-agents-and-the) — the full controversy.
+- [the DevEx framework: feedback loops, cognitive load, flow state](https://newsletter.getdx.com/p/applying-the-devex-framework) · [the DevEx white paper behind it](https://queue.acm.org/detail.cfm?id=3807961).
+- [how Google measures developer productivity internally](https://ieeexplore.ieee.org/abstract/document/10372494) · [developer productivity engineering at Netflix](https://www.isaacl.dev/eqd).
+- ["yes, you can measure it… but is that what you *want* to measure?"](https://jchyip.medium.com/yes-you-can-measure-software-developer-productivity-but-are-you-sure-thats-what-you-re-measuring-d6b081897840).
+- [is a DevEx team just a platform team in disguise?](https://newsletter.getdx.com/p/platform-vs-devex-teams) · [what is a developer experience team?](https://leaddev.com/velocity/what-developer-experience-team).
+
+## Failure modes
+
+Saved in unusual density — you clearly collect the cautionary tales.
+
+- [hard-won lessons: the failure modes of platform engineering](https://www.infoq.com/articles/platform-engineering-lessons-learned/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=Devops).
+- [how to fail at platform engineering](https://www.cncf.io/blog/2025/10/31/tool-descriptions-are-eating-up-all-your-ai-tokens-but-they-dont-have-to/) — over-complex designs, thin docs, and treating the platform as a project instead of a product.
+- [the 9 steps to platform-engineering hell](https://www.youtube.com/watch?v=_4hYd_5-MtI&feature=youtu.be) (video) · [Charity Majors: perils, pitfalls, and pratfalls](https://www.infoq.com/presentations/lessons-building-engineering-team/?utm_source=twitter&utm_medium=link&utm_campaign=calendar).
+- [the recurring traps: small teams, build-vs-buy, building the wrong thing](https://www.infoq.com/news/2026/04/junior-developer-pipeline-crisis/?utm_campaign=infoq_content&utm_source=twitter&utm_medium=feed&utm_term=development).
+- [lessons from the first hype cycle](https://www.thestack.technology/platform-engineering-hype-cycle-the-stack/) and [the 2024 state: "most, and not for long"](https://thenewstack.io/the-2024-state-of-platform-engineering-fledgling-at-best/).
+
+## The agentic turn
+
+- ["Developer experience is dead. Long live agent experience."](https://www.builder.io/blog/agent-experience) — design the platform for both audiences now.
+- ["LLMs thrive where the data space is well-defined and structured — platform engineering is their ideal playground"](https://platformengineering.org/blog/ai-and-platform-engineering).
+- [agentic AI and platform engineering, combined](https://thenewstack.io/agentic-ai-and-platform-engineering-how-they-can-combine/).
+- [developer productivity in the age of generative AI — a psychological perspective](https://research.google/pubs/developer-productivity-in-the-age-of-generative-ai-a-psychological-perspective/).
+- [AI will break the developer-productivity stagnation — if you do it right](https://cloud.google.com/blog/products/application-development/ai-assistance-kickstarts-developer-productivity-whitepaper/).
+- [Kelsey Hightower on where platforms go next](https://www.youtube.com/live/BfeRupW-lBE?si=5jZTzDD5s7IdVWwy) (video).
+
+---
 
 ## All links on this topic
