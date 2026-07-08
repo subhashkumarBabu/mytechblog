@@ -13,19 +13,25 @@ const ARC = [
     what: "Enterprise consulting for European government and industry: document management, .NET, and a thirty-application portfolio that taught me estimation the hard way.",
   },
   {
+    when: "2010",
+    what: "Team-lead years: audit reporting systems and insurance platforms. Where I learned that trust in a system is built from its reports — and that reliability was a discipline before it had a name.",
+  },
+  {
     when: "2014",
-    what: "Solutions architect for a very large UK retail estate. Nine years of teaching a legacy estate new tricks: pipelines in Azure DevOps, infrastructure written down in Terraform and Bicep instead of clicked into existence, migrations measured in millions — and technology roadmaps that occasionally survived contact with reality.",
+    what: "Solutions architect for a very large UK retail estate. Architectural governance, migrations measured in millions, technology roadmaps that occasionally survived contact with reality — and a client hackathon won with an IoT build.",
+  },
+  {
+    when: "2019",
+    what: "DevOps architect for a national-scale estate. Pipelines in Azure DevOps, infrastructure written down in Terraform instead of clicked into existence, monitoring wired into ServiceNow — the plumbing autonomous operations would later stand on.",
   },
   {
     when: "2023",
-    what: "The pivot. From keeping big systems boring — the highest compliment in SRE — to teaching them to fix themselves: large language models, agentic AI, and platforms that reason about their own operations.",
+    what: "The pivot. From keeping big systems boring — the highest compliment in SRE — to teaching them to fix themselves: LLMs and agentic AI, governed by policy, watched by telemetry.",
   },
-];
-
-const HOW = [
-  "Layers before code. Capability, semantic, orchestration, governance — get the layers right and the code almost writes itself.",
-  "Cloud-agnostic by reflex, even though Azure is home turf. Portable, configuration-driven, allergic to lock-in.",
-  "Architecture doc first, diagrams included. If it can't be drawn, it isn't understood yet.",
+  {
+    when: "2026",
+    what: "Built an adaptive learning engine in public: knowledge graphs, AI-graded recall, spaced repetition. Learning agentic engineering the way I'd architect it — systematically.",
+  },
 ];
 
 // tag = classifier name in D1; slug = wiki page; fb = fallback count if D1 unreachable
@@ -82,9 +88,11 @@ const person = {
   email: "mailto:subhashkp@hotmail.com",
   sameAs: ["https://github.com/subhashkumarBabu"],
   address: { "@type": "PostalAddress", addressLocality: "Mumbai", addressCountry: "IN" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "University of Mumbai" },
   knowsAbout: [
     "Agentic AI", "Large Language Models", "Site Reliability Engineering",
     "Microsoft Azure", "Terraform", "Solution Architecture",
+    "AI coding agents", "Developer tooling",
   ],
 };
 ---
@@ -114,14 +122,18 @@ const person = {
       Thirty years from Visual Basic to LLM agents. These days I work where
       <strong>site reliability engineering</strong> meets <strong>agentic AI</strong>:
       systems that reason, plan, call tools, remember — and still answer to
-      governance and an error budget.
+      governance and an error budget. Lately that has meant designing agentic SRE
+      systems for enterprise estates — autonomous triage, routing and recovery that
+      have to convince architects and auditors, not just a demo audience.
     </p>
+    <p class="annot q">"is this the right layer?" comes before "how do I write this code?"</p>
   </section>
 
   <section class="sect statband" aria-label="At a glance">
     <div class="stat"><span class="num">30</span><span class="lbl">years shipping</span></div>
     <div class="stat"><span class="num">{fmt(total)}</span><span class="lbl">links curated</span></div>
-    <div class="stat"><span class="num">41</span><span class="lbl">wiki topics</span></div>
+    <div class="stat"><span class="num">42</span><span class="lbl">wiki topics</span></div>
+    <div class="stat"><span class="num">2</span><span class="lbl">learning tracks</span></div>
   </section>
 
   <section class="sect">
@@ -135,19 +147,23 @@ const person = {
         </p>
       </div>
       <div class="card proj">
-        <h3>Agent tooling &amp; AI economics</h3>
+        <h3>The coding-agent craft</h3>
         <p>
-          Claude Code power user — agent harnesses, hooks, skills, and the craft of a
-          good CLAUDE.md. Equally obsessed with the bill: token economics, cache costs,
-          and picking the right model for the job.
+          Getting real work out of AI coding agents — and knowing which one to reach for.
+          Claude Code as the daily driver: harness design, hooks, skills, subagents, and
+          docs written for agents as much as humans. Benchmarked honestly against GitHub
+          Copilot and Codex. And always the bill: token economics, cache behaviour, the
+          right model for the job.
         </p>
       </div>
       <div class="card proj">
         <h3>This site — an AI mentor in training</h3>
         <p>
-          devopsmantra ingests my bookmarks, builds the <a href="/wiki/">wiki</a>, and
-          nags me with spaced repetition. {fmt(total)} links saved since 2012, classified
-          by an LLM pipeline into a searchable <a href="/library/">library</a>.
+          devopsmantra ingests my bookmarks, builds the <a href="/wiki/">wiki</a> and the
+          searchable <a href="/library/">library</a> — and now teaches me back: a
+          knowledge-graph curriculum, placement diagnostics, AI-graded recall and spaced
+          repetition, two tracks live. {fmt(total)} links in, the student became the
+          syllabus.
         </p>
       </div>
     </div>
@@ -164,17 +180,12 @@ const person = {
       ))}
       <div class="row">
         <span class="when edu">BSc</span>
-        <p class="what">Physics, University of Mumbai.</p>
+        <p class="what">
+          Physics, University of Mumbai. Microsoft-certified across three decades —
+          first in 2000, most recently on Azure. The tools change; the habit doesn't.
+        </p>
       </div>
     </div>
-  </section>
-
-  <section class="sect">
-    <h2 class="display h2">How I think</h2>
-    <ul class="how">
-      {HOW.map((h) => <li>{h}</li>)}
-    </ul>
-    <p class="annot q">"is this the right layer?" comes before "how do I write this code?"</p>
   </section>
 
   <section class="sect">
@@ -200,9 +211,15 @@ const person = {
 
   <section class="sect connect">
     <h2 class="display h2">Say hello</h2>
+    <p class="invite">
+      If you're building agentic systems that have to survive a real enterprise
+      estate — or want to compare notes on getting serious work out of coding
+      agents — I'd like to hear from you.
+    </p>
     <div class="ctas">
       <a class="btn accent" href="mailto:subhashkp@hotmail.com">subhashkp@hotmail.com</a>
       <a class="btn" href="https://github.com/subhashkumarBabu" target="_blank" rel="noopener noreferrer">GitHub — subhashkumarBabu</a>
+      <a class="btn" href="/Subhash-Kumar-Resume.pdf" download>Résumé (PDF)</a>
     </div>
     <p class="alt">
       Not ready for hello? Start with the <a href="/wiki/ai-agents/">AI-agents wiki</a>
@@ -246,9 +263,6 @@ const person = {
     .when.edu { color: var(--twilight); }
     .what { color: var(--mist); font-size: 14.5px; }
 
-    .how { list-style: none; padding: 0; max-width: 720px; display: flex; flex-direction: column; gap: 10px; }
-    .how li { color: var(--mist); font-size: 14.5px; padding-left: 18px; position: relative; }
-    .how li::before { content: "—"; position: absolute; left: 0; color: var(--signal); }
     .annot.q { margin-top: 18px; }
 
     .chips { margin-top: 14px; }
@@ -266,6 +280,7 @@ const person = {
     .fr .d { color: var(--faint); font-size: 12px; }
     .fr .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+    .connect .invite { color: var(--mist); font-size: 14.5px; max-width: 560px; margin-bottom: 14px; }
     .connect .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
     .connect .btn { display: inline-flex; align-items: center; }
     .connect .alt { margin-top: 14px; color: var(--mist); font-size: 13.5px; }
