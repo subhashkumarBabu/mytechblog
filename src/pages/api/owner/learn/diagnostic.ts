@@ -1,13 +1,14 @@
 import type { APIContext } from "astro";
-import { buildDiagnostic, grantClosure } from "../../../../lib/learning";
+import { buildDiagnostic, grantClosure, resolveTrack } from "../../../../lib/learning";
 
 export const prerender = false;
 
 // GET: the placement plan — ordered probes, deep concepts first. The client
 // walks the list, skipping probes already covered by earlier correct answers.
-export async function GET({ locals }: APIContext) {
+export async function GET({ request, locals }: APIContext) {
 	const { DB } = locals.runtime.env;
-	const probes = await buildDiagnostic(DB);
+	const track = resolveTrack(new URL(request.url).searchParams.get("track"));
+	const probes = await buildDiagnostic(DB, track);
 	const mastered = await DB.prepare(
 		"SELECT concept_id FROM mastery WHERE ladder_idx >= 2",
 	).all<{ concept_id: string }>();

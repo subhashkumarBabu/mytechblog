@@ -1,6 +1,16 @@
 // Learning system core — scheduling, grading, implicit-credit propagation.
 // Design: D:\mind\learning\DESIGN.md (Math Academy principles).
 
+export const TRACKS: Record<string, string> = {
+	"agentic-ai": "Agentic AI",
+	"agentic-engineering": "Agentic Engineering",
+};
+export const DEFAULT_TRACK = "agentic-ai";
+
+export function resolveTrack(raw: string | null | undefined): string {
+	return raw && raw in TRACKS ? raw : DEFAULT_TRACK;
+}
+
 export const INTERVALS = [1, 3, 7, 14, 30, 60, 120]; // days
 export const MASTERY_GATE = 2; // ladder_idx that unlocks dependents
 // P3b: the placement diagnostic can pre-grant deep mastery, so the unlock

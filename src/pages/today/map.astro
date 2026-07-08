@@ -1,12 +1,13 @@
 ---
 import AirLayout from "../../layouts/AirLayout.astro";
-import { UNLOCK_GATE } from "../../lib/learning";
+import { resolveTrack, TRACKS, UNLOCK_GATE } from "../../lib/learning";
 
 export const prerender = false;
 
 type C = { id: string; name: string; module: string };
 type M = { concept_id: string; ladder_idx: number; provisional: number };
 
+const track = resolveTrack(Astro.url.searchParams.get("track"));
 const env = Astro.locals.runtime?.env;
 let concepts: C[] = [];
 let prereqs = new Map<string, string[]>();
@@ -14,7 +15,7 @@ let mastery = new Map<string, M>();
 
 if (env?.DB) {
   const [cs, es, ms] = await Promise.all([
-    env.DB.prepare("SELECT id, name, module FROM concepts WHERE track = 'agentic-ai' ORDER BY rowid").all<C>(),
+    env.DB.prepare("SELECT id, name, module FROM concepts WHERE track = ? ORDER BY rowid").bind(track).all<C>(),
     env.DB.prepare("SELECT concept_id, prereq_id FROM concept_prereqs").all<{ concept_id: string; prereq_id: string }>(),
     env.DB.prepare("SELECT concept_id, ladder_idx, provisional FROM mastery").all<M>(),
   ]);
@@ -38,15 +39,12 @@ function statusOf(c: C): string {
   return ready ? "frontier" : "locked";
 }
 
-const MODULES = [
-  ["llm-foundations", "LLM foundations"], ["tool-use", "Tool use"],
-  ["retrieval-context", "Retrieval & context"], ["agent-core", "Agent core"],
-  ["interop", "Interop (MCP, skills)"], ["multi-agent", "Multi-agent"],
-  ["production-ops", "Production & ops"], ["applied", "Applied"],
-];
+// modules derive from the data, in first-seen (authored) order
+const moduleKeys = [...new Set(concepts.map((c) => c.module))];
+const label = (k: string) => k.replace(/-/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
 
-const byModule = MODULES.map(([key, label]) => ({
-  key, label,
+const byModule = moduleKeys.map((key) => ({
+  key, label: label(key),
   concepts: concepts.filter((c) => c.module === key).map((c) => ({ ...c, status: statusOf(c) })),
 }));
 
@@ -59,7 +57,12 @@ const pct = concepts.length ? Math.round((done / concepts.length) * 100) : 0;
 <AirLayout title="Mastery map — devopsmantra" description="Agentic AI track progress." active="today">
   <header class="head">
     <h1 class="display">Mastery map</h1>
-    <p class="annot">Agentic AI track · {done}/{concepts.length} known ({pct}%)</p>
+    <p class="annot tracks">
+      {Object.entries(TRACKS).map(([id, name]) => (
+        <a href={`/today/map/?track=${id}`} class:list={["tr", { on: id === track }]}>{name}</a>
+      ))}
+    </p>
+    <p class="annot">{TRACKS[track]} track · {done}/{concepts.length} known ({pct}%)</p>
   </header>
 
   <div class="legend">
@@ -84,14 +87,17 @@ const pct = concepts.length ? Math.round((done / concepts.length) * 100) : 0;
   </div>
 
   <p class="annot foot">
-    <a href="/today/learn/">← back to practice</a> ·
-    <a href="/today/learn/?placement=1">retake placement</a>
+    <a href={`/today/learn/?track=${track}`}>← back to practice</a> ·
+    <a href={`/today/learn/?track=${track}&placement=1`}>retake placement</a>
   </p>
 
   <style>
     .head { margin-bottom: 22px; }
     .head h1 { font-size: clamp(40px, 7vw, 72px); }
     .head .annot { margin-top: 8px; }
+    .tracks { display: flex; gap: 14px; }
+    .tracks .tr { color: var(--faint); font-weight: 600; font-size: 13px; }
+    .tracks .tr.on { color: var(--whiteout); border-bottom: 2px solid var(--signal); }
 
     .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 30px;
       font-size: 12.5px; color: var(--faint); }

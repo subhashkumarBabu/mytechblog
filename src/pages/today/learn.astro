@@ -1,13 +1,17 @@
 ---
 import AirLayout from "../../layouts/AirLayout.astro";
-import { buildSession } from "../../lib/learning";
+import { buildSession, resolveTrack, TRACKS } from "../../lib/learning";
 
 export const prerender = false;
 
+const track = resolveTrack(Astro.url.searchParams.get("track"));
 const env = Astro.locals.runtime?.env;
-const session = env?.DB ? await buildSession(env.DB) : { items: [], due: 0, fresh: 0 };
+const session = env?.DB ? await buildSession(env.DB, track) : { items: [], due: 0, fresh: 0 };
+// placement is offered per track: count mastery rows on this track's concepts
 const masteryCount = env?.DB
-  ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM mastery").first<{ n: number }>())?.n ?? 0)
+  ? ((await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM mastery m JOIN concepts c ON c.id = m.concept_id WHERE c.track = ?",
+    ).bind(track).first<{ n: number }>())?.n ?? 0)
   : 0;
 const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 0);
 ---
@@ -15,8 +19,13 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
 <AirLayout title="Learn — devopsmantra" description="Concept practice." active="today">
   <header class="head">
     <h1 class="display">Learn</h1>
+    <p class="annot tracks">
+      {Object.entries(TRACKS).map(([id, label]) => (
+        <a href={`/today/learn/?track=${id}`} class:list={["tr", { on: id === track }]}>{label}</a>
+      ))}
+    </p>
     <p class="annot">
-      {session.due} due · {session.fresh} new · {totalQuestions} questions · <a href="/today/map/" class="maplink">mastery map</a>
+      {session.due} due · {session.fresh} new · {totalQuestions} questions · <a href={`/today/map/?track=${track}`} class="maplink">mastery map</a>
     </p>
   </header>
 
@@ -32,13 +41,16 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
 
   <p class="note" id="note" hidden></p>
 
-  <script type="application/json" id="session-data" set:html={JSON.stringify({ ...session, mastery_count: masteryCount })} />
+  <script type="application/json" id="session-data" set:html={JSON.stringify({ ...session, mastery_count: masteryCount, track })} />
 
   <style>
     .head { margin-bottom: 20px; }
     .head h1 { font-size: clamp(40px, 7vw, 72px); }
     .head .annot { margin-top: 8px; }
     .maplink { color: var(--signal); }
+    .tracks { display: flex; gap: 14px; margin-bottom: 4px; }
+    .tracks .tr { color: var(--faint); font-weight: 600; font-size: 13px; }
+    .tracks .tr.on { color: var(--whiteout); border-bottom: 2px solid var(--signal); }
 
     .empty { text-align: center; padding: 48px 0; }
     .empty .em-head { font-size: clamp(32px, 5vw, 52px); color: var(--whiteout); }
@@ -122,7 +134,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
     type Item = { concept: { id: string; name: string; module: string; summary: string | null }; is_new: boolean; questions: SQ[] };
 
     const session = JSON.parse(document.getElementById("session-data")!.textContent!) as
-      { items: Item[]; due: number; fresh: number; mastery_count: number };
+      { items: Item[]; due: number; fresh: number; mastery_count: number; track: string };
     const stage = document.getElementById("stage")!;
 
     const flat: { item: Item; q: SQ }[] = [];
@@ -159,7 +171,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
 
     async function startDiag() {
       stage.innerHTML = `<p class="annot">building your placement…</p>`;
-      const res = await fetch("/api/owner/learn/diagnostic/");
+      const res = await fetch(`/api/owner/learn/diagnostic/?track=${session.track}`);
       if (!res.ok) { render(); return; }
       const data = await res.json();
       probes = data.probes;
@@ -175,7 +187,7 @@ const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 
           <p class="em-head">${diagGrantedTotal}</p>
           <p class="annot">concepts placed as already-known (${diagRight}/${diagAsked} probes correct).<br/>
             They'll surface as light reviews instead of lessons. Practice now starts at your frontier.</p>
-          <a class="act primary" href="/today/learn/">Start practicing</a>
+          <a class="act primary" href="/today/learn/?track=${session.track}">Start practicing</a>
         </div>`;
         return;
       }
