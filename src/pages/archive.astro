@@ -1,6 +1,6 @@
 ---
 export const prerender = true;
-import HomeLayout from "@layouts/HomeLayout.astro";
+import AirLayout from "@layouts/AirLayout.astro";
 import { getSortedPostsList } from "@utils/content-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
 
@@ -10,7 +10,6 @@ function yearOf(d: Date | string) {
   try { return new Date(d).getFullYear(); } catch { return null; }
 }
 
-// Group by year
 const byYear = posts.reduce<Record<number, typeof posts>>((acc, p) => {
   const y = yearOf(p.data.published) ?? 0;
   if (!acc[y]) acc[y] = [];
@@ -21,59 +20,62 @@ const byYear = posts.reduce<Record<number, typeof posts>>((acc, p) => {
 const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 ---
 
-<HomeLayout title="Blog — DevOps Mantra" description="Writing on SRE, AI and Cloud">
+<AirLayout title="Blog — devopsmantra" description="Writing on SRE, AI and Cloud" active="blog">
+  <header class="head">
+    <h1 class="display">Blog</h1>
+    <p class="annot">{posts.length} post{posts.length !== 1 ? "s" : ""} on SRE, AI and cloud</p>
+  </header>
 
-  <div class="min-h-screen bg-black px-6 pb-24">
-    <div class="max-w-3xl mx-auto pt-14 pb-12">
+  {posts.length === 0 && <p class="annot">No posts yet.</p>}
 
-      <h1
-        class="text-5xl md:text-7xl text-white tracking-tight leading-none mb-3"
-        style="font-family:'Instrument Serif',serif;"
-      >
-        Writing
-      </h1>
-      <p class="text-white/30 text-sm tracking-widest uppercase mb-14">
-        {posts.length} post{posts.length !== 1 ? "s" : ""}
-      </p>
+  {years.map((year) => (
+    <section class="yeargroup">
+      <h2 class="sect">{year}</h2>
+      <div class="list">
+        {byYear[year].map((post) => {
+          const date = new Date(post.data.published).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+          return (
+            <a class="post" href={getPostUrlBySlug(post.slug)}>
+              <h3>{post.data.title}</h3>
+              <span class="meta">
+                {post.data.tags?.slice(0, 3).map((tag: string) => <span class="tag">{tag}</span>)}
+                <span class="date">{date}</span>
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  ))}
 
-      {posts.length === 0 && (
-        <p class="text-white/20 text-sm">No posts yet.</p>
-      )}
+  <style>
+    .head { margin-bottom: var(--gap-section); }
+    .head h1 { font-size: clamp(40px, 7vw, 72px); }
+    .head .annot { margin-top: 8px; }
 
-      {years.map((year) => (
-        <div class="mb-12">
-          <p class="text-white/15 text-xs tracking-widest uppercase mb-5">{year}</p>
-          <div class="flex flex-col gap-3">
-            {byYear[year].map((post) => {
-              const date = new Date(post.data.published).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-              return (
-                <a
-                  href={getPostUrlBySlug(post.slug)}
-                  class="group liquid-glass rounded-2xl px-6 py-5 flex items-center justify-between gap-4 no-underline transition-all duration-200 hover:bg-white/[0.06]"
-                >
-                  <p
-                    class="text-white/80 group-hover:text-white text-base md:text-lg leading-snug transition-colors"
-                    style="font-family:'Instrument Serif',serif;"
-                  >
-                    {post.data.title}
-                  </p>
-                  <div class="flex items-center gap-4 shrink-0">
-                    {post.data.tags?.slice(0,2).map((tag: string) => (
-                      <span class="hidden sm:block text-white/20 text-[10px] tracking-wide">{tag}</span>
-                    ))}
-                    <span class="text-white/25 text-xs tabular-nums">{date}</span>
-                    <svg class="w-4 h-4 text-white/20 group-hover:text-white/50 transition-colors shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path d="M7 17 17 7M7 7h10v10"/>
-                    </svg>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-
-    </div>
-  </div>
-
-</HomeLayout>
+    .yeargroup { margin-bottom: var(--gap-section); }
+    .sect {
+      font-family: var(--display); font-weight: 400; font-size: 18px;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--twilight);
+      margin: 0 0 16px;
+    }
+    .list { display: flex; flex-direction: column; gap: 14px; }
+    .post {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 18px;
+      background: var(--haze); color: var(--ink);
+      border-radius: var(--r-card); padding: var(--pad-card);
+      text-decoration: none;
+    }
+    .post:hover h3 { text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; }
+    .post h3 { font-size: 17px; font-weight: 600; line-height: 1.35; }
+    .post .meta {
+      display: flex; align-items: baseline; gap: 12px; flex-shrink: 0;
+      color: var(--ink-2); font-size: 12.5px;
+    }
+    .post .tag { display: none; }
+    .post .date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    @media (min-width: 720px) {
+      .post .tag { display: inline; }
+    }
+  </style>
+</AirLayout>
