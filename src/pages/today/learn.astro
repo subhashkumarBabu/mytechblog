@@ -14,7 +14,9 @@ const masteryCount = env?.DB
     ).bind(track).first<{ n: number }>())?.n ?? 0)
   : 0;
 const totalQuestions = session.items.reduce((n, it) => n + it.questions.length, 0);
-const estMin = Math.max(1, Math.ceil((totalQuestions * 25) / 60)); // ~25s per question
+// estimated at ~25s per question; NOTE: division + trailing // comment on one
+// line breaks the astro compiler's frontmatter lexer (regex misparse)
+const estMin = Math.max(1, Math.ceil((totalQuestions * 25) / 60));
 ---
 
 <AirLayout title="Learn — devopsmantra" description="Concept practice." active="today">
