@@ -19,6 +19,8 @@ export const UNLOCK_GATE = 2;
 export const CREDIT_DEPTH = 3;
 export const DAILY_NEW = 3;
 export const SESSION_CAP = 15;
+export const AHEAD_CAP = 5; // bonus set when nothing is due / hyperfocus days
+export const AHEAD_DAYS = 3; // how far forward bonus practice may pull reviews
 
 export type QuestionRow = {
 	id: string; concept_id: string; kind: "mcq" | "short" | "free" | "card";
@@ -149,19 +151,29 @@ function interleave(items: SessionItem[]): SessionItem[] {
 
 type ConceptRow = { id: string; name: string; module: string; summary: string | null; ladder_idx: number };
 
-export async function buildSession(DB: D1Database, track = "agentic-ai"): Promise<{
+export async function buildSession(DB: D1Database, track = "agentic-ai", opts: { ahead?: boolean } = {}): Promise<{
 	items: SessionItem[]; due: number; fresh: number;
 }> {
 	const today = new Date().toISOString().slice(0, 10);
 
-	const due = await DB.prepare(
-		`SELECT c.id, c.name, c.module, c.summary, m.ladder_idx
-		 FROM mastery m JOIN concepts c ON c.id = m.concept_id
-		 WHERE c.track = ? AND m.next_review_at IS NOT NULL AND m.next_review_at <= ?
-		 ORDER BY m.next_review_at ASC LIMIT ?`,
-	).bind(track, today, SESSION_CAP - DAILY_NEW).all<ConceptRow>();
+	// ahead mode: nothing due (or hyperfocus day) — pull the next few upcoming
+	// reviews forward instead of turning motivation away at the door.
+	const due = opts.ahead
+		? await DB.prepare(
+			`SELECT c.id, c.name, c.module, c.summary, m.ladder_idx
+			 FROM mastery m JOIN concepts c ON c.id = m.concept_id
+			 WHERE c.track = ? AND m.next_review_at IS NOT NULL
+			   AND m.next_review_at > ? AND m.next_review_at <= ?
+			 ORDER BY m.next_review_at ASC LIMIT ?`,
+		).bind(track, today, plusDays(AHEAD_DAYS), AHEAD_CAP).all<ConceptRow>()
+		: await DB.prepare(
+			`SELECT c.id, c.name, c.module, c.summary, m.ladder_idx
+			 FROM mastery m JOIN concepts c ON c.id = m.concept_id
+			 WHERE c.track = ? AND m.next_review_at IS NOT NULL AND m.next_review_at <= ?
+			 ORDER BY m.next_review_at ASC LIMIT ?`,
+		).bind(track, today, SESSION_CAP - DAILY_NEW).all<ConceptRow>();
 
-	const frontier = await DB.prepare(
+	const frontier = opts.ahead ? null : await DB.prepare(
 		`SELECT c.id, c.name, c.module, c.summary, 0 AS ladder_idx
 		 FROM concepts c
 		 WHERE c.track = ?
@@ -175,7 +187,7 @@ export async function buildSession(DB: D1Database, track = "agentic-ai"): Promis
 	).bind(track, UNLOCK_GATE, DAILY_NEW).all<ConceptRow>();
 
 	const dueRows = due.results ?? [];
-	const freshRows = frontier.results ?? [];
+	const freshRows = frontier?.results ?? [];
 	const all = [...dueRows, ...freshRows];
 	if (!all.length) return { items: [], due: 0, fresh: 0 };
 
@@ -192,7 +204,7 @@ export async function buildSession(DB: D1Database, track = "agentic-ai"): Promis
 
 	const rates = await successRates(DB, dueRows.map((c) => c.id));
 	const newIds = new Set(freshRows.map((c) => c.id));
-	let budget = SESSION_CAP;
+	let budget = opts.ahead ? AHEAD_CAP : SESSION_CAP;
 	const items: SessionItem[] = [];
 	for (const c of all) {
 		const qs = byConcept.get(c.id) ?? [];
