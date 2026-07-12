@@ -61,11 +61,15 @@ if (env?.DB) {
     stmts.push(env.DB.prepare("SELECT COUNT(*) AS n FROM links"));
     stmts.push(env.DB.prepare("SELECT title, url, created_at FROM links ORDER BY created_at DESC LIMIT 3"));
     const res = await env.DB.batch(stmts);
-    INTERESTS.forEach((t, i) => {
-      counts[t.tag] = (res[i].results[0] as { n: number }).n;
-    });
-    total = (res[INTERESTS.length].results[0] as { n: number }).n || total;
-    recent = res[INTERESTS.length + 1].results as typeof recent;
+    const dbTotal = (res[INTERESTS.length].results[0] as { n: number }).n;
+    // a near-empty DB is local dev, not the vault — keep the baked-in numbers
+    if (dbTotal >= 1000) {
+      INTERESTS.forEach((t, i) => {
+        counts[t.tag] = (res[i].results[0] as { n: number }).n;
+      });
+      total = dbTotal;
+      recent = res[INTERESTS.length + 1].results as typeof recent;
+    }
   } catch {
     // D1 hiccup — fall back to the baked-in numbers
   }
@@ -73,6 +77,11 @@ if (env?.DB) {
 
 const fmt = (n: number) => n.toLocaleString("en-US");
 const chipN = (t: (typeof INTERESTS)[number]) => fmt(counts[t.tag] ?? t.fb);
+const dotsOf = (t: (typeof INTERESTS)[number]) =>
+  Math.max(1, Math.round((counts[t.tag] ?? t.fb) / 25));
+
+// hand-drawn arrow for the system diagram
+const arrow = `<svg viewBox="0 0 56 18" width="44" height="15" aria-hidden="true"><path d="M2 11 q13 -7 26 -3 q13 4 22 -1 M42 3 l9 4 -8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
@@ -126,7 +135,31 @@ const person = {
       systems for enterprise estates — autonomous triage, routing and recovery that
       have to convince architects and auditors, not just a demo audience.
     </p>
-    <p class="annot q">"is this the right layer?" comes before "how do I write this code?"</p>
+  </section>
+
+  <section class="sect diag-sect" aria-label="System diagram">
+    <h2 class="display h2">System diagram</h2>
+    <p class="annot">every architect draws themselves eventually · fig. 0</p>
+    <div class="diag">
+      <ul class="dcol din">
+        <li><span class="dtxt">{fmt(total)} bookmarks</span><span class="arr" set:html={arrow} /></li>
+        <li><span class="dtxt">chai, unmetered</span><span class="arr" set:html={arrow} /></li>
+        <li><span class="dtxt">production incidents (unsolicited)</span><span class="arr" set:html={arrow} /></li>
+        <li><span class="dtxt">model release notes, daily</span><span class="arr" set:html={arrow} /></li>
+      </ul>
+      <div class="dcore sketch">
+        <p class="dname">Subhash <em>v30.0</em></p>
+        <p class="dup">uptime: 30 years · unplanned restarts: 0</p>
+        <div class="dmod sketch">cache — three decades of production incidents. never expires.</div>
+        <div class="dmod sketch">legacy module — Visual Basic. deprecated 2002, still loaded.</div>
+        <div class="dmod sketch">governance — runs "is this the right layer?" before any other process.</div>
+      </div>
+      <ul class="dcol dout">
+        <li><span class="arr" set:html={arrow} /><span class="dtxt">agents that fix incidents</span></li>
+        <li><span class="arr" set:html={arrow} /><span class="dtxt">this site — wiki, library, a curriculum</span></li>
+        <li><span class="arr" set:html={arrow} /><span class="dtxt">opinions (unthrottled)</span></li>
+      </ul>
+    </div>
   </section>
 
   <section class="sect statband" aria-label="At a glance">
@@ -189,11 +222,24 @@ const person = {
   </section>
 
   <section class="sect">
-    <h2 class="display h2">What I'm into</h2>
-    <p class="annot">the obsession is documented — live counts from {fmt(total)} saved links</p>
-    <div class="rail wrap chips">
-      {INTERESTS.map((t) => (
-        <a class="chip" href={`/wiki/${t.slug}/`}>{t.label} <span class="n">{chipN(t)}</span></a>
+    <h2 class="display h2">The obsession, measured</h2>
+    <p class="annot">live from the vault · one dot = 25 saved links</p>
+    <div class="ofield">
+      {INTERESTS.map((t, i) => (
+        <a class="orow" href={`/wiki/${t.slug}/`}>
+          <span class="olabel">{t.label}</span>
+          <span class="odots">{Array.from({ length: dotsOf(t) }).map(() => <i></i>)}</span>
+          <span class="ocount">
+            {i === 0 && (
+              <svg class="oring" viewBox="0 0 96 40" aria-hidden="true">
+                <path d="M10 20 Q14 7 48 6 T90 18 Q92 32 50 34 T8 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            )}
+            {chipN(t)}
+          </span>
+          {t.tag === "llms" && <span class="onote">this is fine</span>}
+          {t.tag === "devops" && <span class="onote">the decline we don't discuss</span>}
+        </a>
       ))}
     </div>
     {recent.length > 0 && (
@@ -263,11 +309,66 @@ const person = {
     .when.edu { color: var(--twilight); }
     .what { color: var(--mist); font-size: 14.5px; }
 
-    .annot.q { margin-top: 18px; }
+    /* ── system diagram: marker-on-whiteboard ── */
+    .sketch {
+      border: 2px solid var(--whiteout);
+      border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    }
+    .diag {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px;
+      align-items: center; max-width: 860px; margin-top: 18px;
+      font-family: var(--cursive);
+    }
+    .dcol { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+    .dcol li { display: flex; align-items: center; gap: 10px; }
+    .din li { justify-content: flex-end; text-align: right; }
+    .dtxt { font-size: 19px; color: var(--mist); line-height: 1.15; }
+    .arr { color: var(--faint); flex: none; display: inline-flex; }
+    .dcore { padding: 20px 22px; max-width: 330px; transform: rotate(-.4deg); }
+    .dname { font-size: 30px; font-weight: 600; color: var(--whiteout); line-height: 1; }
+    .dname em { font-style: normal; color: var(--signal); }
+    .dup { font-size: 16px; color: var(--faint); margin: 4px 0 14px; }
+    .dmod {
+      padding: 9px 14px; font-size: 17px; line-height: 1.25; color: var(--mist);
+      border-width: 1.5px;
+      border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px;
+    }
+    .dmod + .dmod { margin-top: 10px; }
+    .dmod:nth-of-type(2) { transform: rotate(.5deg); border-radius: 225px 15px 255px 15px / 15px 255px 15px 225px; }
+    .dmod:nth-of-type(3) { transform: rotate(-.3deg); }
+    @media (max-width: 760px) {
+      .diag { grid-template-columns: 1fr; justify-items: start; }
+      .din li { justify-content: flex-start; text-align: left; }
+      .dcol { gap: 10px; }
+    }
 
-    .chips { margin-top: 14px; }
-    .rail.wrap { flex-wrap: wrap; }
-    .chip .n { opacity: .55; font-size: 12px; font-weight: 600; margin-left: 2px; }
+    /* ── the obsession, measured: unit-dot field ── */
+    .ofield { margin-top: 16px; display: flex; flex-direction: column; max-width: 860px; }
+    .orow {
+      display: grid; grid-template-columns: 150px 1fr auto max-content;
+      gap: 14px; align-items: center; padding: 9px 0;
+      border-top: 1px solid var(--hairline); color: var(--whiteout);
+    }
+    .orow:last-child { border-bottom: 1px solid var(--hairline); }
+    .olabel { font-size: 13.5px; font-weight: 500; color: var(--mist); }
+    .odots { display: flex; flex-wrap: wrap; gap: 3px; }
+    .odots i { width: 7px; height: 7px; border-radius: 50%; background: var(--twilight); }
+    .orow:hover .odots i { background: var(--signal); }
+    .orow:hover .olabel { color: var(--whiteout); }
+    .ocount {
+      position: relative; font-size: 13px; font-weight: 600;
+      font-variant-numeric: tabular-nums; padding: 2px 6px;
+    }
+    .oring {
+      position: absolute; top: -8px; left: -10px;
+      width: calc(100% + 20px); height: calc(100% + 16px);
+      color: var(--signal); overflow: visible;
+    }
+    .onote { font-family: var(--cursive); font-size: 17px; color: var(--mist); white-space: nowrap; }
+    @media (max-width: 640px) {
+      .orow { grid-template-columns: 92px 1fr auto; }
+      .onote { display: none; }
+    }
 
     .fresh { margin-top: 22px; display: flex; flex-direction: column; max-width: 720px; }
     .freshlbl { color: var(--faint); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
